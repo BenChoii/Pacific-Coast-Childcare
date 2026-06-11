@@ -15,6 +15,7 @@ import type * as billing from "../billing.js";
 import type * as children from "../children.js";
 import type * as conversations from "../conversations.js";
 import type * as educators from "../educators.js";
+import type * as extras from "../extras.js";
 import type * as facilities from "../facilities.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   children: typeof children;
   conversations: typeof conversations;
   educators: typeof educators;
+  extras: typeof extras;
   facilities: typeof facilities;
   files: typeof files;
   http: typeof http;

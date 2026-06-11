@@ -264,6 +264,49 @@ export default defineSchema({
     .index('by_facility', ['facilityId', 'createdAt'])
     .index('by_token', ['token']),
 
+  // ── Extras: what a daycare chooses to charge beyond base tuition ──────────
+  // The catalog: per-occurrence charges (late pickup, early drop-off, ad-hoc
+  // early pickup…) and monthly add-on plans (extended hours, hot lunch…).
+  extraServices: defineTable({
+    facilityId: v.id('facilities'),
+    name: v.string(),
+    emoji: v.string(),
+    kind: v.string(), // 'incident' (charged when it happens) | 'plan' (monthly add-on)
+    pricing: v.string(), // incident: 'flat' | 'per15' — plan: always 'monthly'
+    amount: v.number(), // $ flat / $ per 15 min / $ per month
+    active: v.boolean(),
+    createdAt: v.number(),
+  }).index('by_facility', ['facilityId']),
+
+  // Logged incident charges — the "don't let it slip through the cracks" record.
+  extraCharges: defineTable({
+    facilityId: v.id('facilities'),
+    serviceId: v.id('extraServices'),
+    serviceName: v.string(),
+    emoji: v.string(),
+    childId: v.optional(v.id('children')),
+    childName: v.string(),
+    minutes: v.optional(v.number()), // for per-15-min pricing
+    amount: v.number(),
+    note: v.optional(v.string()),
+    by: v.string(), // educator/director who logged it
+    status: v.string(), // 'unbilled' | 'billed' | 'waived'
+    createdAt: v.number(),
+  }).index('by_facility', ['facilityId', 'createdAt']),
+
+  // A child's active monthly add-on plans (sold on top of base tuition).
+  planSubscriptions: defineTable({
+    facilityId: v.id('facilities'),
+    serviceId: v.id('extraServices'),
+    serviceName: v.string(),
+    emoji: v.string(),
+    childId: v.id('children'),
+    childName: v.string(),
+    monthlyAmount: v.number(),
+    active: v.boolean(),
+    startedAt: v.number(),
+  }).index('by_facility', ['facilityId']),
+
   // Saved payroll runs (gross-pay prep only — no tax/remittance, no money movement).
   payRuns: defineTable({
     facilityId: v.id('facilities'),

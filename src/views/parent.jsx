@@ -9,6 +9,7 @@ import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
+import { ParentExtrasCard } from './finance.jsx'
 import { ACTIVITY_TYPES, calendarEvents } from '../data/mockData.js'
 
 // The parent's own children: those linked to their account; until they've
@@ -362,6 +363,8 @@ export function ParentBilling() {
   return (
     <div className="space-y-6">
       <SectionHeader title="Tuition & billing 💳" subtitle="Pay, review and download statements" />
+
+      <ParentExtrasCard />
 
       {due.map((inv) => (
         <motion.div

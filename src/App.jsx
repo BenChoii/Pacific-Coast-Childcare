@@ -1,7 +1,7 @@
 import {
   Home, ListChecks, Image, MessageCircle, CalendarDays, CreditCard, Baby,
   ClipboardList, BookOpen, LogIn, Users, Sprout, Wallet, DoorOpen, BarChart3, User,
-  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine,
+  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useApp } from './context/AppContext.jsx'
@@ -26,6 +26,7 @@ import { MilestoneTracker, MemoryBook } from './views/milestones.jsx'
 import { Payroll } from './views/payroll.jsx'
 import { CalmCorner } from './views/calm.jsx'
 import { IntakeDesk } from './views/intake.jsx'
+import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
 
 function Loader() {
   return (
@@ -129,6 +130,7 @@ export default function App() {
       { id: 'attendance', label: 'Attendance', icon: LogIn, render: Attendance, dock: true },
       { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null, dock: true },
       { id: 'log', label: 'Log Activity', icon: ClipboardList, render: LogActivity },
+      { id: 'extras', label: 'Extras', icon: ReceiptText, render: ExtrasLogger },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
       { id: 'milestones', label: 'Milestones', icon: Sparkles, render: MilestoneTracker },
       { id: 'calm', label: 'Calm Corner', icon: Wind, render: CalmCorner },
@@ -139,6 +141,7 @@ export default function App() {
     admin: [
       { id: 'home', label: 'Dashboard', icon: Home, render: AdminHome, dock: true },
       { id: 'account', label: 'Account', icon: Settings, render: Account, dock: true },
+      { id: 'finance', label: 'Finance', icon: PiggyBank, render: FinanceStudio },
       { id: 'profit', label: 'Profitability', icon: TrendingUp, render: Profitability },
       { id: 'families', label: 'Families', icon: UsersRound, render: Families, dock: true },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
