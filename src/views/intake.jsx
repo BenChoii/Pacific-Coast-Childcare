@@ -202,7 +202,7 @@ export function IntakeDesk() {
             Enroll {fields.childFirst.trim() || 'child'} &amp; create the family link
           </button>
           <p className="text-center text-[11px] font-semibold text-slate-400">
-            Emergency contact &amp; notes stay on this screen for your paper file — Cubby stores the child record, allergies and parent link.
+            Emergency contact &amp; notes stay on this screen for your paper file — Mitten stores the child record, allergies and parent link.
           </p>
         </Card>
       </div>

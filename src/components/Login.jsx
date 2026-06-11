@@ -35,7 +35,7 @@ export default function Login() {
   return <DefaultLanding />
 }
 
-// A parent landing on cubbycare.vercel.app/<their-daycare>
+// A parent landing on mitten.care/<their-daycare>
 function SlugLanding({ slug, token }) {
   const facility = useQuery(api.facilities.bySlug, { slug })
   const [showAuth, setShowAuth] = useState(false)

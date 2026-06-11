@@ -7,18 +7,18 @@ import Sales from './components/Sales.jsx'
 import Legal from './components/Legal.jsx'
 import EmployeeOnboarding from './components/EmployeeOnboarding.jsx'
 import { AppProvider } from './context/AppContext.jsx'
-import { isCubby, applyBrandHead } from './brand.js'
+import { isMitten, applyBrandHead } from './brand.js'
 import { SALES_ROUTES, LEGAL_ROUTES, isAppPath, currentPath, getEntry } from './routes.js'
 import './index.css'
 
 // Routing without a router. Two "products" share one deployment:
-//   • The Cubby app (the actual portal) — needs Convex. Serves the demo, owner
+//   • The Mitten app (the actual portal) — needs Convex. Serves the demo, owner
 //     self-serve signup (/signup), invited parent joins (/join, /<daycare>),
 //     and every facility's private workspace.
-//   • The Cubby whitelabel sales page — no backend.
+//   • The Mitten whitelabel sales page — no backend.
 //
 // Sales routes always show Sales; app routes always show the app. The root (/)
-// depends on the domain: the Cubby domain leads with the sales pitch; every
+// depends on the domain: the Mitten domain leads with the sales pitch; every
 // other domain leads with the portal.
 const path = currentPath()
 const entry = getEntry()
@@ -28,7 +28,7 @@ if (LEGAL_ROUTES.includes(path)) mode = 'legal'
 else if (entry.kind === 'onboard') mode = 'onboard'
 else if (SALES_ROUTES.includes(path)) mode = 'sales'
 else if (isAppPath()) mode = 'app'
-else if (isCubby) mode = 'sales'
+else if (isMitten) mode = 'sales'
 else mode = 'app'
 
 applyBrandHead(mode === 'app' ? 'app' : 'sales')

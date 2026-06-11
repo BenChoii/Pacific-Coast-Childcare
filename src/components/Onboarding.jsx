@@ -67,7 +67,7 @@ function Welcome({ facility, onNext }) {
   return (
     <div className="text-center">
       <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-400 to-grape-500 text-white shadow-md"><Sparkles size={30} /></span>
-      <p className="eyebrow">Welcome to Cubby</p>
+      <p className="eyebrow">Welcome to Mitten</p>
       <h1 className="mt-1 text-3xl text-brand-700">{facility?.name || 'Your daycare'} is live 🎉</h1>
       <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-slate-500">
         Let’s get you set up in a couple of minutes — add a child, invite your team and families,

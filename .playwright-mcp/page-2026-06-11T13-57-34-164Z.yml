@@ -1,0 +1,342 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Sunbal SALON" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Menu" [ref=e6] [cursor=pointer]:
+          - /url: /#services
+        - link "Artists" [ref=e7] [cursor=pointer]:
+          - /url: /#team
+        - link "The Salon" [ref=e8] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e9] [cursor=pointer]:
+          - /url: /#visit
+        - link "(778) 594-5559" [ref=e10] [cursor=pointer]:
+          - /url: tel:+17785945559
+          - img [ref=e11]
+          - text: (778) 594-5559
+      - link "Book now" [ref=e13] [cursor=pointer]:
+        - /url: /book
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: Beauty that shines · Downtown Kelowna
+        - heading "Sunbal S A L O N" [level=1] [ref=e18]:
+          - text: Sunbal
+          - generic [ref=e19]: S A L O N
+        - paragraph [ref=e20]: A warm, modern salon on Leon Avenue offering precision cuts, dimensional colour, balayage, braids and restorative treatments — for everyone.
+        - generic [ref=e21]:
+          - link "Book your visit" [ref=e22] [cursor=pointer]:
+            - /url: /book
+            - text: Book your visit
+            - img [ref=e23]
+          - link "The menu" [ref=e25] [cursor=pointer]:
+            - /url: "#services"
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - img [ref=e28]
+            - img [ref=e30]
+            - img [ref=e32]
+            - img [ref=e34]
+            - img [ref=e36]
+          - generic [ref=e38]: "4.9"
+          - generic [ref=e39]: 95+ happy clients
+      - link "Scroll to services" [ref=e40] [cursor=pointer]:
+        - /url: "#services"
+        - img [ref=e41]
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - text: Balayage
+        - generic [ref=e46]: ✦
+      - generic [ref=e47]:
+        - text: Precision Cuts
+        - generic [ref=e48]: ✦
+      - generic [ref=e49]:
+        - text: Keratin
+        - generic [ref=e50]: ✦
+      - generic [ref=e51]:
+        - text: Full Foils
+        - generic [ref=e52]: ✦
+      - generic [ref=e53]:
+        - text: Hot Shaves
+        - generic [ref=e54]: ✦
+      - generic [ref=e55]:
+        - text: Braids
+        - generic [ref=e56]: ✦
+      - generic [ref=e57]:
+        - text: Colour Correction
+        - generic [ref=e58]: ✦
+      - generic [ref=e59]:
+        - text: Bridal Styling
+        - generic [ref=e60]: ✦
+      - generic [ref=e61]:
+        - text: Root Melts
+        - generic [ref=e62]: ✦
+      - generic [ref=e63]:
+        - text: VIP Service
+        - generic [ref=e64]: ✦
+      - generic [ref=e65]:
+        - text: Balayage
+        - generic [ref=e66]: ✦
+      - generic [ref=e67]:
+        - text: Precision Cuts
+        - generic [ref=e68]: ✦
+      - generic [ref=e69]:
+        - text: Keratin
+        - generic [ref=e70]: ✦
+      - generic [ref=e71]:
+        - text: Full Foils
+        - generic [ref=e72]: ✦
+      - generic [ref=e73]:
+        - text: Hot Shaves
+        - generic [ref=e74]: ✦
+      - generic [ref=e75]:
+        - text: Braids
+        - generic [ref=e76]: ✦
+      - generic [ref=e77]:
+        - text: Colour Correction
+        - generic [ref=e78]: ✦
+      - generic [ref=e79]:
+        - text: Bridal Styling
+        - generic [ref=e80]: ✦
+      - generic [ref=e81]:
+        - text: Root Melts
+        - generic [ref=e82]: ✦
+      - generic [ref=e83]:
+        - text: VIP Service
+        - generic [ref=e84]: ✦
+    - generic [ref=e86]:
+      - generic [ref=e87]:
+        - paragraph [ref=e88]: The Menu
+        - heading "Every service, priced honestly" [level=2] [ref=e89]
+        - paragraph [ref=e90]: Transparent pricing, generous time, no surprises — exactly what you see when you book.
+      - generic [ref=e91]:
+        - button "Cuts & Styling" [ref=e92]
+        - button "Colour" [ref=e93]
+        - button "Balayage" [ref=e94]
+        - button "Braids" [ref=e95]
+        - button "Men & Kids" [ref=e96]
+        - button "Treatments" [ref=e97]
+      - generic [ref=e99]:
+        - paragraph [ref=e100]: Precision cutting, blowouts and styling for every length.
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - generic [ref=e103]: Women's Dry Trim
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - img [ref=e107]
+                - text: 30m
+              - generic [ref=e110]: $35
+          - generic [ref=e111]:
+            - generic [ref=e112]: Short Haircut & Style
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - img [ref=e116]
+                - text: 1h
+              - generic [ref=e119]: $100
+          - generic [ref=e120]:
+            - generic [ref=e121]: Medium Haircut & Style
+            - generic [ref=e123]:
+              - generic [ref=e124]:
+                - img [ref=e125]
+                - text: 1h 15m
+              - generic [ref=e128]: $125
+          - generic [ref=e129]:
+            - generic [ref=e130]: Long Haircut & Style
+            - generic [ref=e132]:
+              - generic [ref=e133]:
+                - img [ref=e134]
+                - text: 1h 30m
+              - generic [ref=e137]: $150
+          - generic [ref=e138]:
+            - generic [ref=e139]: Long Haircut
+            - generic [ref=e141]:
+              - generic [ref=e142]:
+                - img [ref=e143]
+                - text: 1h
+              - generic [ref=e146]: $80
+          - generic [ref=e147]:
+            - generic [ref=e148]: Bang Trim
+            - generic [ref=e150]:
+              - generic [ref=e151]:
+                - img [ref=e152]
+                - text: 50m
+              - generic [ref=e155]: $20
+          - generic [ref=e156]:
+            - generic [ref=e157]: Blowout
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - img [ref=e161]
+                - text: 30m
+              - generic [ref=e164]: $45
+          - generic [ref=e165]:
+            - generic [ref=e166]: Shampoo & Styling
+            - generic [ref=e168]:
+              - generic [ref=e169]:
+                - img [ref=e170]
+                - text: 1h
+              - generic [ref=e173]: $60
+          - generic [ref=e174]:
+            - generic [ref=e175]: Wash
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - img [ref=e179]
+                - text: 25m
+              - generic [ref=e182]: $35
+          - generic [ref=e183]:
+            - generic [ref=e184]: Flat Iron
+            - generic [ref=e186]:
+              - generic [ref=e187]:
+                - img [ref=e188]
+                - text: 40m
+              - generic [ref=e191]: $60
+      - link "Book cuts & styling" [ref=e193] [cursor=pointer]:
+        - /url: /book
+        - text: Book cuts & styling
+        - img [ref=e194]
+    - generic [ref=e197]:
+      - generic [ref=e198]:
+        - paragraph [ref=e199]: The Artists
+        - heading "Four chairs, four masters" [level=2] [ref=e200]
+        - paragraph [ref=e201]: Pick your favourite — or let us match you with the first available artist.
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - img "Tsehay Tereda" [ref=e205]
+          - generic [ref=e207]:
+            - heading "Tsehay Tereda" [level=3] [ref=e208]
+            - paragraph [ref=e209]: Owner · Master Stylist
+            - paragraph [ref=e210]: Owner, hairstylist and colourist — braids, extensions and relaxer specialist.
+            - link "Book with Tsehay" [ref=e211] [cursor=pointer]:
+              - /url: /book?stylist=tsehay
+              - text: Book with Tsehay
+              - img [ref=e212]
+        - generic [ref=e214]:
+          - img "Mabeth Lugtu" [ref=e216]
+          - generic [ref=e218]:
+            - heading "Mabeth Lugtu" [level=3] [ref=e219]
+            - paragraph [ref=e220]: Master Stylist & Colourist
+            - paragraph [ref=e221]: 26 years as a master stylist, master colourist and balayage specialist.
+            - link "Book with Mabeth" [ref=e222] [cursor=pointer]:
+              - /url: /book?stylist=mabeth
+              - text: Book with Mabeth
+              - img [ref=e223]
+        - generic [ref=e225]:
+          - img "Ian Jackson" [ref=e227]
+          - generic [ref=e229]:
+            - heading "Ian Jackson" [level=3] [ref=e230]
+            - paragraph [ref=e231]: Master Stylist & Colourist
+            - paragraph [ref=e232]: Master stylist & colourist with over three decades of hair experience.
+            - link "Book with Ian" [ref=e233] [cursor=pointer]:
+              - /url: /book?stylist=ian
+              - text: Book with Ian
+              - img [ref=e234]
+        - generic [ref=e236]:
+          - img "Mo" [ref=e238]
+          - generic [ref=e240]:
+            - heading "Mo" [level=3] [ref=e241]
+            - paragraph [ref=e242]: Barber & Men's Specialist
+            - paragraph [ref=e243]: Precision fades, beard work, hot shaves and the full VIP ritual.
+            - link "Book with Mo" [ref=e244] [cursor=pointer]:
+              - /url: /book?stylist=mo
+              - text: Book with Mo
+              - img [ref=e245]
+    - generic [ref=e249]:
+      - generic [ref=e250]:
+        - img "Styling at Sunbal Salon" [ref=e252]
+        - img "Colour work detail" [ref=e256]
+      - generic [ref=e258]:
+        - paragraph [ref=e259]: The Salon
+        - heading "Where Kelowna gets its glow" [level=2] [ref=e260]:
+          - text: Where Kelowna
+          - text: gets its glow
+        - paragraph [ref=e261]: Tucked on Leon Avenue downtown, Sunbal is the kind of salon people whisper about — kind, meticulous stylists, colour that survives the season, and a chair you won’t want to leave. Men, women and kids all welcome.
+        - generic [ref=e262]:
+          - generic [ref=e263]:
+            - generic [ref=e264]: 4.9★
+            - generic [ref=e265]: 95+ Google-rated visits
+          - generic [ref=e266]:
+            - generic [ref=e267]: 60+
+            - generic [ref=e268]: Services on the menu
+          - generic [ref=e269]:
+            - generic [ref=e270]: "6"
+            - generic [ref=e271]: Days a week, 9–6
+        - link "Reserve your chair" [ref=e272] [cursor=pointer]:
+          - /url: /book
+          - text: Reserve your chair
+          - img [ref=e273]
+    - generic [ref=e276]:
+      - generic [ref=e277]:
+        - paragraph [ref=e278]: Visit
+        - heading "Find us downtown" [level=2] [ref=e279]
+      - generic [ref=e283]:
+        - generic [ref=e284]:
+          - generic [ref=e285]:
+            - img [ref=e286]
+            - generic [ref=e289]: Address
+          - paragraph [ref=e290]: 103–532 Leon Ave, Kelowna, BC V1Y 6J6
+          - link "Open in Google Maps →" [ref=e291] [cursor=pointer]:
+            - /url: https://maps.google.com/?q=103%E2%80%93532%20Leon%20Ave%2C%20Kelowna%2C%20BC%20V1Y%206J6
+        - generic [ref=e292]:
+          - generic [ref=e293]:
+            - img [ref=e294]
+            - generic [ref=e297]: Hours
+          - list [ref=e298]:
+            - listitem [ref=e299]:
+              - generic [ref=e300]: Monday – Saturday
+              - generic [ref=e301]: 9:00 AM – 6:00 PM
+            - listitem [ref=e302]:
+              - generic [ref=e303]: Sunday
+              - generic [ref=e304]: Closed
+        - list [ref=e306]:
+          - listitem [ref=e307]:
+            - link "(778) 594-5559" [ref=e308] [cursor=pointer]:
+              - /url: tel:+17785945559
+              - img [ref=e309]
+              - text: (778) 594-5559
+          - listitem [ref=e311]:
+            - link "sunbalsalon@gmail.com" [ref=e312] [cursor=pointer]:
+              - /url: mailto:sunbalsalon@gmail.com
+              - img [ref=e313]
+              - text: sunbalsalon@gmail.com
+          - listitem [ref=e316]:
+            - link "Instagram" [ref=e317] [cursor=pointer]:
+              - /url: https://www.instagram.com/sunbal.salon
+              - img [ref=e318]
+            - link "Facebook" [ref=e321] [cursor=pointer]:
+              - /url: https://www.facebook.com/sunbal.salon
+              - img [ref=e322]
+            - generic [ref=e324]: "@sunbal.salon"
+    - generic [ref=e326]:
+      - paragraph [ref=e327]: Ready when you are
+      - heading "Your chair is waiting" [level=2] [ref=e328]
+      - paragraph [ref=e329]: Book online in under a minute — pick your service, pick your time, done.
+      - generic [ref=e330]:
+        - link "Book online" [ref=e331] [cursor=pointer]:
+          - /url: /book
+          - text: Book online
+          - img [ref=e332]
+        - link "(778) 594-5559" [ref=e334] [cursor=pointer]:
+          - /url: tel:+17785945559
+  - contentinfo [ref=e335]:
+    - generic [ref=e336]:
+      - link "Sunbal SALON" [ref=e337] [cursor=pointer]:
+        - /url: /
+      - paragraph [ref=e338]:
+        - text: 103–532 Leon Ave, Kelowna, BC V1Y 6J6 ·
+        - link "(778) 594-5559" [ref=e339] [cursor=pointer]:
+          - /url: tel:+17785945559
+      - navigation [ref=e340]:
+        - link "Menu" [ref=e341] [cursor=pointer]:
+          - /url: /#services
+        - link "The Salon" [ref=e342] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e343] [cursor=pointer]:
+          - /url: /#visit
+        - link "Book" [ref=e344] [cursor=pointer]:
+          - /url: /book
+        - link "Instagram" [ref=e345] [cursor=pointer]:
+          - /url: https://www.instagram.com/sunbal.salon
+      - paragraph [ref=e346]: © 2026 Sunbal Salon. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e352] [cursor=pointer]:
+    - img [ref=e353]

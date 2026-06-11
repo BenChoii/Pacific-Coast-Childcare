@@ -121,3 +121,18 @@
     at k.apply (https://www.googletagmanager.com/gtm.js?id=GTM-MN7KW8T:198:465)
     at r (https://www.googletagmanager.com/gtm.js?id=GTM-MN7KW8T:202:113)
     at <anonymous> (https://www.googletagmanager.com/gtm.js?id=GTM-MN7KW8T:542:81)
+[  744964ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  745030ms] [LOG] [Fast Refresh] done in 34ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  745253ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  745269ms] [LOG] [Fast Refresh] done in 117ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  830955ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  831012ms] [LOG] [Fast Refresh] done in 34ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  849261ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  849526ms] [LOG] [Fast Refresh] done in 213ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  849527ms] [WARNING] %c%s%c ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3003". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase background: #e6e6e6;background: light-dark(rgba(0,0,0,0.1), rgba(255,255,255,0.25));color: #000000;color: light-dark(#000000, #ffffff);border-radius: 2px  Server   @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  874625ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  874654ms] [LOG] [Fast Refresh] done in 29ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  892851ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  893074ms] [LOG] [Fast Refresh] done in 135ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  893182ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  893212ms] [LOG] [Fast Refresh] done in 130ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477

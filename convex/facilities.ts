@@ -37,7 +37,7 @@ export const current = query({
   },
 })
 
-// Public lookup for the join landing page (cubbycare.vercel.app/<slug>).
+// Public lookup for the join landing page (mitten.care/<slug>).
 export const bySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {

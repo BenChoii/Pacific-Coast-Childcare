@@ -136,8 +136,8 @@ function RealProfitability() {
   const revenue = childrenList.reduce((s, c) => s + (c.monthlyTuition || 0), 0)
   const enrolled = childrenList.length
   const avg = enrolled ? Math.round(revenue / enrolled) : 0
-  const cubbyCost = facility?.monthly || 0
-  const net = revenue - cubbyCost
+  const mittenCost = facility?.monthly || 0
+  const net = revenue - mittenCost
   const withT = childrenList.filter((c) => (c.monthlyTuition || 0) > 0).length
 
   return (
@@ -147,7 +147,7 @@ function RealProfitability() {
         <StatCard icon={DollarSign} label="Monthly revenue" value={money(revenue)} sub="from tuition" gradient="from-mint-400 to-mint-500" />
         <StatCard icon={Users} label="Enrolled" value={enrolled} sub={`${withT} with tuition set`} gradient="from-brand-400 to-brand-600" delay={0.05} />
         <StatCard icon={Percent} label="Avg tuition" value={money(avg)} sub="per child / mo" gradient="from-grape-400 to-grape-600" delay={0.1} />
-        <StatCard icon={CreditCard} label="Cubby plan" value={cubbyCost ? money(cubbyCost) : 'Free'} sub={cubbyCost ? 'your only platform cost' : 'under 6 children'} gradient="from-sunshine-400 to-coral-500" delay={0.15} />
+        <StatCard icon={CreditCard} label="Mitten plan" value={mittenCost ? money(mittenCost) : 'Free'} sub={mittenCost ? 'your only platform cost' : 'under 6 children'} gradient="from-sunshine-400 to-coral-500" delay={0.15} />
       </div>
 
       <Card>
@@ -174,7 +174,7 @@ function RealProfitability() {
         )}
       </Card>
       <p className="text-xs font-semibold text-slate-400">
-        Cubby tracks the revenue you enter here. Full expense/P&L tracking is coming — for now this shows tuition revenue minus your Cubby subscription.
+        Mitten tracks the revenue you enter here. Full expense/P&L tracking is coming — for now this shows tuition revenue minus your Mitten subscription.
       </p>
     </div>
   )

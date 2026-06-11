@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 
 // Whitelabel platform brand — rename here to rebrand the whole sales page.
-const BRAND = 'Cubby'
+const BRAND = 'Mitten'
 
 const fade = (d = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -148,7 +148,7 @@ function Nav() {
     <header className="sticky top-0 z-40 border-b border-line bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
         <a href="#top" className="flex items-center gap-2">
-          <img src="/brand/cubby-mark.svg" alt="Cubby" className="h-9 w-9" />
+          <img src="/brand/mitten-mark.svg" alt="Mitten" className="h-9 w-9" />
           <span className="text-2xl font-display text-brand-700">{BRAND}</span>
         </a>
         <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-500 md:flex">
@@ -655,7 +655,7 @@ function DeskProfit() {
       <div className="flex items-center justify-between rounded-xl bg-white px-2.5 py-1.5 text-[8.5px] font-bold shadow-sm">
         <span className="text-slate-500">17/18 tuition set · 94% coverage</span>
         <span className="text-slate-400">0% payment cut</span>
-        <span className="text-mint-600">Cubby cost: $52/mo</span>
+        <span className="text-mint-600">Mitten cost: $52/mo</span>
       </div>
     </div>
   )
@@ -755,7 +755,7 @@ function DeskEnroll() {
       </div>
       <div className="flex items-center gap-2 rounded-xl bg-brand-50 p-2">
         <Link2 size={11} className="shrink-0 text-brand-500" />
-        <span className="truncate font-mono text-[8.5px] font-bold text-brand-700">cubbycare.vercel.app/yourdaycare</span>
+        <span className="truncate font-mono text-[8.5px] font-bold text-brand-700">mitten.care/yourdaycare</span>
         <span className="text-[7.5px] font-semibold text-slate-400">families join themselves</span>
         <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[8px] font-bold text-brand-600 shadow-sm">Copy</span>
       </div>
@@ -853,15 +853,15 @@ function DirectorShowcase() {
                 <span className="h-2.5 w-2.5 rounded-full bg-sunshine-400" />
                 <span className="h-2.5 w-2.5 rounded-full bg-mint-400" />
                 <span className="mx-auto flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-0.5 font-mono text-[9px] font-bold text-slate-400">
-                  <Lock size={9} /> cubbycare.vercel.app/app
+                  <Lock size={9} /> mitten.care/app
                 </span>
               </div>
               <div className="flex min-h-0 flex-1">
                 {/* sidebar */}
                 <div className="hidden w-36 shrink-0 flex-col gap-1 border-r border-line bg-white p-2 sm:flex">
                   <div className="mb-1 flex items-center gap-1.5 px-1.5 py-1">
-                    <img src="/brand/cubby-mark.svg" alt="" className="h-5 w-5" />
-                    <span className="font-display text-sm text-brand-700">Cubby</span>
+                    <img src="/brand/mitten-mark.svg" alt="" className="h-5 w-5" />
+                    <span className="font-display text-sm text-brand-700">Mitten</span>
                   </div>
                   {DESK_TABS.map((t, i) => (
                     <button key={t.id} onClick={() => pick(i)}
@@ -919,7 +919,7 @@ function TrustBar() {
     </div>
   )
   return (
-    <section className="overflow-hidden border-y border-line bg-white py-5" aria-label="Cubby highlights">
+    <section className="overflow-hidden border-y border-line bg-white py-5" aria-label="Mitten highlights">
       <div className="marquee-track">{row('a')}{row('b')}</div>
     </section>
   )
@@ -1184,7 +1184,7 @@ function Impact() {
               </div>
               <div className="text-center">
                 <Bar pct={34} color="bg-gradient-to-t from-brand-500 to-mint-400" delay={0.25} />
-                <div className="mt-2 text-[11px] font-bold text-brand-600">Cubby<br />~10h/mo</div>
+                <div className="mt-2 text-[11px] font-bold text-brand-600">Mitten<br />~10h/mo</div>
               </div>
               <div className="ml-auto text-right">
                 <div className="font-display text-4xl text-mint-500"><CountUp to={20} suffix="h" /></div>
@@ -1204,7 +1204,7 @@ function Impact() {
                 <Bar pct={100} color="bg-coral-300" horizontal />
               </div>
               <div>
-                <div className="mb-1 flex justify-between text-xs font-bold text-brand-600"><span>Cubby</span><span>$88/mo</span></div>
+                <div className="mb-1 flex justify-between text-xs font-bold text-brand-600"><span>Mitten</span><span>$88/mo</span></div>
                 <Bar pct={55} color="bg-gradient-to-r from-brand-500 to-grape-500" horizontal delay={0.2} />
               </div>
             </div>
@@ -1408,10 +1408,10 @@ function Pricing() {
 
 /* ---------------- FAQ ---------------- */
 const FAQS = [
-  ['Do I need a credit card to start?', 'No. Cubby is completely free while you have 5 or fewer children enrolled — no card, no trial clock. We only ask for a card at the moment you enroll your 6th child, and you see the exact monthly price before confirming anything.'],
+  ['Do I need a credit card to start?', 'No. Mitten is completely free while you have 5 or fewer children enrolled — no card, no trial clock. We only ask for a card at the moment you enroll your 6th child, and you see the exact monthly price before confirming anything.'],
   ['How long does setup actually take?', 'Minutes, genuinely. Create your daycare, add your children, and share one link with families and staff — they join themselves. No sales call, no onboarding sessions, no CSV imports.'],
-  ['Do parents have to download an app?', 'No app store needed. Parents open your link and add Cubby to their home screen — it looks and feels like a native app, with none of the download friction.'],
-  ['Does Cubby take a cut of tuition payments?', 'Never. If you collect tuition by card through Cubby, 100% of standard processing goes to the processor and 0% to us — unlike platforms that skim 2–3% of every payment.'],
+  ['Do parents have to download an app?', 'No app store needed. Parents open your link and add Mitten to their home screen — it looks and feels like a native app, with none of the download friction.'],
+  ['Does Mitten take a cut of tuition payments?', 'Never. If you collect tuition by card through Mitten, 100% of standard processing goes to the processor and 0% to us — unlike platforms that skim 2–3% of every payment.'],
   ['What happens to our data if we ever leave?', 'It’s yours. Full export anytime, in open formats. We never sell or share your families’ information — that’s in writing in our terms.'],
   ['Can you migrate us from Brightwheel, HiMama or paper?', 'Yes — free. We move your roster and families across, and because parents join by link, the switch usually takes one afternoon.'],
 ]
@@ -1504,7 +1504,7 @@ function Footer() {
     <footer className="bg-slate-900 text-slate-300">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 py-10 text-center">
         <div className="flex items-center gap-2">
-          <img src="/brand/cubby-mark.svg" alt="Cubby" className="h-8 w-8" />
+          <img src="/brand/mitten-mark.svg" alt="Mitten" className="h-8 w-8" />
           <span className="font-display text-xl text-white">{BRAND}</span>
         </div>
         <p className="max-w-md text-sm font-medium text-slate-400">
@@ -1520,7 +1520,7 @@ function Footer() {
           <a href="#demo" className="hover:text-white">Book a demo</a>
         </div>
         <p className="max-w-md text-xs font-medium text-slate-500">
-          Cubby · 83–7947 209 St, Langley, BC V2Y 0Y6 ·{' '}
+          Mitten · 83–7947 209 St, Langley, BC V2Y 0Y6 ·{' '}
           <a href="mailto:info@oktd.ca" className="underline hover:text-white">info@oktd.ca</a>
           <br />Prefer not to hear from us? Reply STOP to any text, or email us to opt out.
         </p>

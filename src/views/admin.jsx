@@ -282,7 +282,7 @@ export function AdminBilling() {
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           <StatCard icon={Wallet} label="Monthly tuition" value={`$${revenue.toLocaleString()}`} gradient="from-mint-400 to-mint-500" />
           <StatCard icon={Users} label="Paying families" value={withT.length} sub={`of ${childrenList.length}`} gradient="from-brand-400 to-brand-600" delay={0.05} />
-          <StatCard icon={CreditCard} label="Cubby plan" value={facility.monthly ? `$${facility.monthly}` : 'Free'} gradient="from-grape-400 to-grape-600" delay={0.1} />
+          <StatCard icon={CreditCard} label="Mitten plan" value={facility.monthly ? `$${facility.monthly}` : 'Free'} gradient="from-grape-400 to-grape-600" delay={0.1} />
         </div>
         <Card className="p-0">
           <div className="border-b border-slate-100 p-4 font-extrabold text-slate-800">Per-child tuition</div>

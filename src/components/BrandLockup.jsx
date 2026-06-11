@@ -6,15 +6,15 @@ const SIZES = {
   topbar: { mark: 'h-8', text: 'text-lg', img: 'h-8' },
 }
 
-// Renders the active brand's lockup. Cubby = cub mark + "Cubby" wordmark;
+// Renders the active brand's lockup. Mitten = cub mark + "Mitten" wordmark;
 // Pacific Coast = its full logo image.
 export default function BrandLockup({ variant = 'nav', className = '' }) {
   const s = SIZES[variant]
-  if (BRAND.cubby) {
+  if (BRAND.mitten) {
     return (
       <div className={`flex items-center gap-2.5 ${className}`}>
-        <img src={BRAND.mark} alt="Cubby" className={`${s.mark} w-auto`} />
-        <span className={`font-display ${s.text} leading-none text-brand-700`}>Cubby</span>
+        <img src={BRAND.mark} alt="Mitten" className={`${s.mark} w-auto`} />
+        <span className={`font-display ${s.text} leading-none text-brand-700`}>Mitten</span>
       </div>
     )
   }

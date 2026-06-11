@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { authTables } from '@convex-dev/auth/server'
 
-// Cubby — multi-tenant childcare portal data model.
+// Mitten — multi-tenant childcare portal data model.
 //
 // Every facility (daycare) is a tenant. All user-facing collections carry a
 // `facilityId` and are queried through a `by_facility` index, so one Convex
@@ -27,7 +27,7 @@ export default defineSchema({
   // ── Tenants ──────────────────────────────────────────────────────────
   facilities: defineTable({
     name: v.string(),
-    slug: v.string(), // url segment: cubbycare.vercel.app/<slug>
+    slug: v.string(), // url segment: mitten.care/<slug>
     ownerUserId: v.optional(v.id('users')),
     plan: v.string(), // 'free' | 'active' | 'past_due' | 'canceled'
     freeLimit: v.number(), // children allowed before billing starts

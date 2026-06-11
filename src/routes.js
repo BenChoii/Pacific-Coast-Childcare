@@ -1,4 +1,4 @@
-// Lightweight, router-free entry detection. One deployment serves the Cubby
+// Lightweight, router-free entry detection. One deployment serves the Mitten
 // sales site, the live demo, owner self-serve signup, and per-facility parent
 // join links — all distinguished by pathname.
 

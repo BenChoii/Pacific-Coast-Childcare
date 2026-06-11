@@ -1,0 +1,161 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Sunbal SALON" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Menu" [ref=e6] [cursor=pointer]:
+          - /url: /#services
+        - link "Artists" [ref=e7] [cursor=pointer]:
+          - /url: /#team
+        - link "The Salon" [ref=e8] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e9] [cursor=pointer]:
+          - /url: /#visit
+        - link "(778) 594-5559" [ref=e10] [cursor=pointer]:
+          - /url: tel:+17785945559
+          - img [ref=e11]
+          - text: (778) 594-5559
+      - link "Book now" [ref=e13] [cursor=pointer]:
+        - /url: /book
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: Reserve
+        - heading "Book your visit" [level=1] [ref=e18]
+        - paragraph [ref=e19]: Service, stylist, time — three taps and your chair is reserved.
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - button "1" [ref=e25]
+              - generic [ref=e26]: Service
+            - generic [ref=e28]:
+              - button "2" [ref=e29]
+              - generic [ref=e30]: Stylist
+            - generic [ref=e32]:
+              - button "3" [ref=e33]
+              - generic [ref=e34]: Time
+            - generic [ref=e36]:
+              - button "4" [ref=e37]
+              - generic [ref=e38]: Details
+          - generic [ref=e39]:
+            - heading "Choose your service" [level=2] [ref=e40]
+            - generic [ref=e41]:
+              - button "Cuts & Styling" [ref=e42]
+              - button "Colour" [ref=e43]
+              - button "Balayage" [ref=e44]
+              - button "Braids" [ref=e45]
+              - button "Men & Kids" [ref=e46]
+              - button "Treatments" [ref=e47]
+            - generic [ref=e48]:
+              - button "Women's Dry Trim 30m $35" [ref=e49]:
+                - generic [ref=e50]: Women's Dry Trim
+                - generic [ref=e51]:
+                  - img [ref=e52]
+                  - text: 30m
+                - generic [ref=e55]: $35
+              - button "Short Haircut & Style 1h $100" [ref=e56]:
+                - generic [ref=e57]: Short Haircut & Style
+                - generic [ref=e58]:
+                  - img [ref=e59]
+                  - text: 1h
+                - generic [ref=e62]: $100
+              - button "Medium Haircut & Style 1h 15m $125" [ref=e63]:
+                - generic [ref=e64]: Medium Haircut & Style
+                - generic [ref=e65]:
+                  - img [ref=e66]
+                  - text: 1h 15m
+                - generic [ref=e69]: $125
+              - button "Long Haircut & Style 1h 30m $150" [ref=e70]:
+                - generic [ref=e71]: Long Haircut & Style
+                - generic [ref=e72]:
+                  - img [ref=e73]
+                  - text: 1h 30m
+                - generic [ref=e76]: $150
+              - button "Long Haircut 1h $80" [ref=e77]:
+                - generic [ref=e78]: Long Haircut
+                - generic [ref=e79]:
+                  - img [ref=e80]
+                  - text: 1h
+                - generic [ref=e83]: $80
+              - button "Bang Trim 50m $20" [ref=e84]:
+                - generic [ref=e85]: Bang Trim
+                - generic [ref=e86]:
+                  - img [ref=e87]
+                  - text: 50m
+                - generic [ref=e90]: $20
+              - button "Blowout 30m $45" [ref=e91]:
+                - generic [ref=e92]: Blowout
+                - generic [ref=e93]:
+                  - img [ref=e94]
+                  - text: 30m
+                - generic [ref=e97]: $45
+              - button "Shampoo & Styling 1h $60" [ref=e98]:
+                - generic [ref=e99]: Shampoo & Styling
+                - generic [ref=e100]:
+                  - img [ref=e101]
+                  - text: 1h
+                - generic [ref=e104]: $60
+              - button "Wash 25m $35" [ref=e105]:
+                - generic [ref=e106]: Wash
+                - generic [ref=e107]:
+                  - img [ref=e108]
+                  - text: 25m
+                - generic [ref=e111]: $35
+              - button "Flat Iron 40m $60" [ref=e112]:
+                - generic [ref=e113]: Flat Iron
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - text: 40m
+                - generic [ref=e118]: $60
+          - button "Continue" [disabled] [ref=e120]:
+            - text: Continue
+            - img [ref=e121]
+        - complementary [ref=e123]:
+          - paragraph [ref=e124]: Your appointment
+          - generic [ref=e125]:
+            - generic [ref=e126]:
+              - img [ref=e128]
+              - generic [ref=e131]:
+                - generic [ref=e132]: Service
+                - text: —
+            - generic [ref=e133]:
+              - img [ref=e135]
+              - generic [ref=e138]:
+                - generic [ref=e139]: Stylist
+                - text: —
+            - generic [ref=e140]:
+              - img [ref=e142]
+              - generic [ref=e145]:
+                - generic [ref=e146]: When
+                - text: —
+          - generic [ref=e147]:
+            - text: Prefer to book by phone?
+            - link "(778) 594-5559" [ref=e148] [cursor=pointer]:
+              - /url: tel:+17785945559
+              - img [ref=e149]
+              - text: (778) 594-5559
+  - contentinfo [ref=e151]:
+    - generic [ref=e152]:
+      - link "Sunbal SALON" [ref=e153] [cursor=pointer]:
+        - /url: /
+      - paragraph [ref=e154]:
+        - text: 103–532 Leon Ave, Kelowna, BC V1Y 6J6 ·
+        - link "(778) 594-5559" [ref=e155] [cursor=pointer]:
+          - /url: tel:+17785945559
+      - navigation [ref=e156]:
+        - link "Menu" [ref=e157] [cursor=pointer]:
+          - /url: /#services
+        - link "The Salon" [ref=e158] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e159] [cursor=pointer]:
+          - /url: /#visit
+        - link "Book" [ref=e160] [cursor=pointer]:
+          - /url: /book
+        - link "Instagram" [ref=e161] [cursor=pointer]:
+          - /url: https://www.instagram.com/sunbal.salon
+      - paragraph [ref=e162]: © 2026 Sunbal Salon. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e168] [cursor=pointer]:
+    - img [ref=e169]
+  - alert [ref=e172]

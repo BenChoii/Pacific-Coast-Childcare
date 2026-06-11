@@ -24,8 +24,8 @@ export async function chat(messages, maxTokens = 220) {
         headers: {
           Authorization: `Bearer ${key}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://cubbycare.vercel.app',
-          'X-Title': 'Cubby',
+          'HTTP-Referer': 'https://mitten.care',
+          'X-Title': 'Mitten',
         },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.7 }),
       })
@@ -60,8 +60,8 @@ async function visionChat(imageUrl: string, prompt: string, maxTokens = 600) {
         headers: {
           Authorization: `Bearer ${key}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://cubbycare.vercel.app',
-          'X-Title': 'Cubby',
+          'HTTP-Referer': 'https://mitten.care',
+          'X-Title': 'Mitten',
         },
         body: JSON.stringify({
           model,

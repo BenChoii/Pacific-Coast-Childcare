@@ -1,48 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cubby">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mitten">
   <defs>
-    <linearGradient id="cub" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="mitbear" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#2E8FD6"/>
       <stop offset="0.55" stop-color="#0E74C1"/>
       <stop offset="1" stop-color="#5167B0"/>
     </linearGradient>
-    <linearGradient id="nook" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0B3050"/>
-      <stop offset="1" stop-color="#155A8F"/>
+    <linearGradient id="mitknit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B4F7E"/>
+      <stop offset="1" stop-color="#0C3354"/>
     </linearGradient>
-    <clipPath id="opening">
-      <rect x="11" y="11" width="42" height="42" rx="10"/>
-    </clipPath>
   </defs>
-  <!-- cubby frame -->
-  <rect x="3" y="3" width="58" height="58" rx="16" fill="url(#cub)"/>
-  <!-- nook interior -->
-  <rect x="11" y="11" width="42" height="42" rx="10" fill="url(#nook)"/>
-  <!-- bear peeking out of the nook -->
-  <g clip-path="url(#opening)">
-    <!-- ears -->
-    <circle cx="21" cy="29" r="6.6" fill="url(#cub)"/>
-    <circle cx="43" cy="29" r="6.6" fill="url(#cub)"/>
-    <circle cx="21" cy="29" r="2.9" fill="#BFD8E6"/>
-    <circle cx="43" cy="29" r="2.9" fill="#BFD8E6"/>
-    <!-- head -->
-    <circle cx="32" cy="42" r="15.5" fill="url(#cub)"/>
-    <!-- cheeks -->
-    <circle cx="23.5" cy="45.5" r="3" fill="#F2C6CC" opacity="0.85"/>
-    <circle cx="40.5" cy="45.5" r="3" fill="#F2C6CC" opacity="0.85"/>
-    <!-- muzzle -->
-    <ellipse cx="32" cy="46.5" rx="8.8" ry="7" fill="#FFFFFF"/>
-    <!-- eyes -->
-    <circle cx="26.8" cy="39.8" r="2.1" fill="#0F4068"/>
-    <circle cx="37.2" cy="39.8" r="2.1" fill="#0F4068"/>
-    <circle cx="27.5" cy="39.1" r="0.7" fill="#FFFFFF"/>
-    <circle cx="37.9" cy="39.1" r="0.7" fill="#FFFFFF"/>
-    <!-- nose + smile -->
-    <ellipse cx="32" cy="44.4" rx="2.5" ry="1.9" fill="#0F4068"/>
-    <path d="M28.2 48 Q32 51.4 35.8 48" fill="none" stroke="#0F4068" stroke-width="1.9" stroke-linecap="round"/>
+  <!-- bear peeking over the mitten -->
+  <g>
+    <circle cx="21" cy="15" r="6" fill="url(#mitbear)"/>
+    <circle cx="43" cy="15" r="6" fill="url(#mitbear)"/>
+    <circle cx="21" cy="15" r="2.6" fill="#BFD8E6"/>
+    <circle cx="43" cy="15" r="2.6" fill="#BFD8E6"/>
+    <circle cx="32" cy="26" r="14" fill="url(#mitbear)"/>
+    <!-- eyes just above the mitten edge -->
+    <circle cx="26.5" cy="25.5" r="2.3" fill="#0F4068"/>
+    <circle cx="37.5" cy="25.5" r="2.3" fill="#0F4068"/>
+    <circle cx="27.3" cy="24.7" r="0.8" fill="#FFFFFF"/>
+    <circle cx="38.3" cy="24.7" r="0.8" fill="#FFFFFF"/>
   </g>
-  <!-- paws gripping the nook's bottom edge -->
-  <g fill="url(#cub)" stroke="#0B3050" stroke-width="1">
-    <ellipse cx="22.5" cy="53" rx="4.6" ry="3.4"/>
-    <ellipse cx="41.5" cy="53" rx="4.6" ry="3.4"/>
+  <!-- mitten: thumb, hand, ribbed cuff -->
+  <ellipse cx="50" cy="43" rx="5.8" ry="8" transform="rotate(-26 50 43)" fill="url(#mitknit)" stroke="#08243C" stroke-width="1.4"/>
+  <path d="M13 49 V40 Q13 30 23 30 H41 Q51 30 51 40 V49 Z" fill="url(#mitknit)" stroke="#08243C" stroke-width="1.4"/>
+  <!-- paws gripping the edge -->
+  <ellipse cx="23" cy="31" rx="4.2" ry="2.9" fill="url(#mitbear)" stroke="#08243C" stroke-width="1.1"/>
+  <ellipse cx="41" cy="31" rx="4.2" ry="2.9" fill="url(#mitbear)" stroke="#08243C" stroke-width="1.1"/>
+  <!-- heart on the palm -->
+  <path d="M32 41.8 c-2.0 -2.5 -5.6 -2.1 -5.6 0.9 c0 2.3 3.2 4.4 5.6 6.0 c2.4 -1.6 5.6 -3.7 5.6 -6.0 c0 -3.0 -3.6 -3.4 -5.6 -0.9 Z" fill="#FFFFFF" opacity="0.95"/>
+  <!-- ribbed cuff -->
+  <rect x="11" y="49" width="42" height="11" rx="4" fill="#EAF3FA" stroke="#08243C" stroke-width="1.4"/>
+  <g stroke="#BFD8E6" stroke-width="2" stroke-linecap="round">
+    <line x1="18" y1="51.5" x2="18" y2="57.5"/>
+    <line x1="25" y1="51.5" x2="25" y2="57.5"/>
+    <line x1="32" y1="51.5" x2="32" y2="57.5"/>
+    <line x1="39" y1="51.5" x2="39" y2="57.5"/>
+    <line x1="46" y1="51.5" x2="46" y2="57.5"/>
   </g>
 </svg>

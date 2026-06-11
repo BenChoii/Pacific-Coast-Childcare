@@ -181,7 +181,7 @@ export default function EmployeeOnboarding({ token }) {
         <button type="submit" disabled={busy} className="btn-primary w-full py-3 text-base disabled:opacity-50">
           {busy ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />} Submit securely
         </button>
-        <p className="text-center text-[11px] font-semibold text-slate-400">🔒 Sent over an encrypted connection to {info.facilityName} on Cubby.</p>
+        <p className="text-center text-[11px] font-semibold text-slate-400">🔒 Sent over an encrypted connection to {info.facilityName} on Mitten.</p>
       </form>
     </Shell>
   )
@@ -205,11 +205,11 @@ function Shell({ children, facility }) {
     <div className="aurora min-h-screen px-5 py-10">
       <div className="mx-auto max-w-lg">
         <div className="mb-5 flex items-center justify-center gap-2">
-          <img src="/brand/cubby-mark.svg" alt="Cubby" className="h-8 w-8" />
+          <img src="/brand/mitten-mark.svg" alt="Mitten" className="h-8 w-8" />
           {facility ? (
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500"><Building2 size={14} /> {facility} · powered by Cubby</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500"><Building2 size={14} /> {facility} · powered by Mitten</span>
           ) : (
-            <span className="font-display text-xl text-brand-700">Cubby</span>
+            <span className="font-display text-xl text-brand-700">Mitten</span>
           )}
         </div>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="card p-6 sm:p-8">

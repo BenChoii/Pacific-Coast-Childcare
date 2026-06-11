@@ -66,7 +66,7 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
   }
 
   const heading = isOwner
-    ? isSignUp ? 'Start your daycare on Cubby' : 'Welcome back'
+    ? isSignUp ? 'Start your daycare on Mitten' : 'Welcome back'
     : isJoin
       ? `Join ${inviteInfo?.facilityName || 'your daycare'}`
       : isSignUp ? 'Create your account' : 'Sign in to your portal'
@@ -91,8 +91,8 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
           <div className="blob blob-b bottom-[-4rem] left-[-3rem] h-64 w-64 bg-sky-300/30" />
           <div className="relative">
             <div className="flex items-center gap-2.5">
-              <img src="/brand/cubby-mark.svg" alt="" className="h-10 w-10 rounded-2xl bg-white/90 p-1.5" />
-              <span className="font-display text-3xl">Cubby</span>
+              <img src="/brand/mitten-mark.svg" alt="" className="h-10 w-10 rounded-2xl bg-white/90 p-1.5" />
+              <span className="font-display text-3xl">Mitten</span>
             </div>
             <h2 className="mt-8 font-display text-4xl leading-[1.1]">
               {isJoin ? <>Your daycare is<br />waiting for you.</> : <>Your whole daycare,<br />in one calm app.</>}

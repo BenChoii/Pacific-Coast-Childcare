@@ -45,7 +45,7 @@ function Disclaimer() {
     <div className="flex gap-2.5 rounded-2xl border border-sunshine-400/40 bg-sunshine-400/10 p-3.5 text-sm">
       <AlertTriangle size={18} className="mt-0.5 shrink-0 text-sunshine-600" />
       <p className="font-medium leading-relaxed text-slate-600">
-        These are <strong>gross</strong> amounts. Cubby doesn't calculate or remit CPP, EI or income tax — you're
+        These are <strong>gross</strong> amounts. Mitten doesn't calculate or remit CPP, EI or income tax — you're
         responsible for source deductions &amp; CRA remittance, or hand these stubs to your payroll provider.
       </p>
     </div>

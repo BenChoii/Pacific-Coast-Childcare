@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = join(ROOT, 'dist')
-const DOMAIN = 'https://cubbycare.vercel.app' // ← swap to the custom domain later (also update public/robots.txt)
+const DOMAIN = 'https://mitten.care' // custom domain (keep in sync with public/robots.txt)
 const CONVEX_SITE = 'https://glad-rooster-439.convex.site' // prod Convex HTTP actions (AI tool endpoint)
 const TODAY = new Date().toISOString().slice(0, 10)
 
@@ -96,9 +96,9 @@ function layout({ path, title, desc, h1, sub, tag, body, jsonld = [], wide = fal
 <link rel="canonical" href="${url}" />
 <meta property="og:type" content="article" /><meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(desc)}" /><meta property="og:url" content="${url}" />
-<meta property="og:site_name" content="Cubby" /><meta name="twitter:card" content="summary" />
+<meta property="og:site_name" content="Mitten" /><meta name="twitter:card" content="summary" />
 <meta name="theme-color" content="#F4F8FB" />
-<link rel="icon" type="image/svg+xml" href="/brand/cubby-mark.svg" />
+<link rel="icon" type="image/svg+xml" href="/brand/mitten-mark.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 <style>${CSS}</style>
@@ -106,7 +106,7 @@ ${ld}
 </head>
 <body>
 <nav class="top"><div class="in">
-<a class="logo" href="/"><img src="/brand/cubby-mark.svg" alt="Cubby" />Cubby</a>
+<a class="logo" href="/"><img src="/brand/mitten-mark.svg" alt="Mitten" />Mitten</a>
 <a href="/resources">Resources</a><a href="/resources#tools">Free tools</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a>
 <a class="btn btn-primary" href="/signup">Start free</a>
 </div></nav>
@@ -119,21 +119,21 @@ ${sub ? `<p class="sub">${sub}</p>` : ''}
 ${body}
 </article></main>
 <footer class="site"><div class="wrap-wide">
-<p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Cubby</strong> — the childcare app built in BC. Free for your first 5 children.</p>
+<p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Mitten</strong> — the childcare app built in BC. Free for your first 5 children.</p>
 <p><a href="/">Home</a><a href="/resources">Resources</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
-<p>Cubby · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
+<p>Mitten · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
 </div></footer>
 </body></html>`
 }
 
-const cta = (line = 'Cubby does everything in this guide — daily reports, photos, messaging, billing, even payroll prep — free for your first 5 children, then just $20/mo + $2 per child.') => `
-<div class="cta"><h3>Run your daycare on Cubby — free to start</h3>
+const cta = (line = 'Mitten does everything in this guide — daily reports, photos, messaging, billing, even payroll prep — free for your first 5 children, then just $20/mo + $2 per child.') => `
+<div class="cta"><h3>Run your daycare on Mitten — free to start</h3>
 <p>${line}</p>
 <a class="btn" href="/signup">Start free — no card needed →</a>&nbsp;&nbsp;<a class="btn" style="background:rgba(255,255,255,.18);color:#fff!important" href="/app">See the live demo</a></div>`
 
 const compareTable = (name, priceNote) => `
-<h2>${esc(name)} vs Cubby at a glance</h2>
-<table><tr><th></th><th>${esc(name)}</th><th>Cubby</th></tr>
+<h2>${esc(name)} vs Mitten at a glance</h2>
+<table><tr><th></th><th>${esc(name)}</th><th>Mitten</th></tr>
 <tr><td><strong>Price</strong></td><td>${priceNote} <em>(verify with the vendor — pricing changes)</em></td><td>Free ≤5 children, then <strong>$20/mo + $2/child</strong> (e.g. 20 kids ≈ $48/mo)</td></tr>
 <tr><td><strong>Setup</strong></td><td>Sales call / demo, onboarding sessions</td><td>Self-serve — live in minutes, no call required</td></tr>
 <tr><td><strong>Tuition payments</strong></td><td>Often takes a processing cut</td><td>0% platform cut</td></tr>
@@ -153,7 +153,7 @@ const faqLd = (faqs) => ({
 const articleLd = (path, title, desc) => ({
   '@context': 'https://schema.org', '@type': 'Article', headline: title, description: desc,
   datePublished: TODAY, dateModified: TODAY, url: `${DOMAIN}${path}`,
-  author: { '@type': 'Organization', name: 'Cubby' }, publisher: { '@type': 'Organization', name: 'Cubby', url: DOMAIN },
+  author: { '@type': 'Organization', name: 'Mitten' }, publisher: { '@type': 'Organization', name: 'Mitten', url: DOMAIN },
 })
 
 /* ───────────────────────────── guides ───────────────────────────── */
@@ -185,7 +185,7 @@ const GUIDES = [
 <h2>GST/HST: usually exempt</h2>
 <p>Childcare for children 14 and under is generally <strong>GST/HST-exempt</strong>. You don't charge tax on tuition, you don't register for GST for the childcare itself, and you can't claim input tax credits on daycare purchases. If you sell something separate (e.g., renting your space out), different rules can apply.</p>
 <h2>If you have employees: payroll obligations</h2>
-<p>You must withhold income tax, CPP and EI from staff pay, remit them to CRA on schedule, pay the employer share, issue T4s each February, and (in BC) register with WorkSafeBC. See our full <a href="/guides/daycare-payroll-guide-canada">daycare payroll guide</a> — and note Cubby turns your staff's tracked hours into gross pay and pay stubs automatically.</p>
+<p>You must withhold income tax, CPP and EI from staff pay, remit them to CRA on schedule, pay the employer share, issue T4s each February, and (in BC) register with WorkSafeBC. See our full <a href="/guides/daycare-payroll-guide-canada">daycare payroll guide</a> — and note Mitten turns your staff's tracked hours into gross pay and pay stubs automatically.</p>
 <h2>Records CRA expects</h2>
 <ul><li>Receipts for every expense (photos are fine; keep 6 years)</li><li>Attendance records — they support your income figures <em>and</em> your business-use-of-home hours</li><li>Receipts issued to parents</li><li>A separate bank account makes everything cleaner</li></ul>
 <p>Digital attendance and billing records make tax season dramatically easier — one export instead of a shoebox of paper.</p>`,
@@ -260,7 +260,7 @@ const GUIDES = [
     faqs: [
       ['What should a daycare lesson plan include?', 'A learning goal, 3–5 activity blocks with times and materials, which developmental domains each activity touches (motor, language, social-emotional, cognitive), and a note on how you’ll observe or document learning.'],
       ['How far ahead should I plan?', 'A weekly rhythm with a monthly theme works for most programs — structured enough for licensing and parents, loose enough to follow children’s interests (emergent curriculum).'],
-      ['Is there a free AI lesson plan generator for daycares?', 'Yes — Cubby’s free AI lesson plan generator drafts a multi-day, play-based plan from your age group, theme and learning goals. No signup required.'],
+      ['Is there a free AI lesson plan generator for daycares?', 'Yes — Mitten’s free AI lesson plan generator drafts a multi-day, play-based plan from your age group, theme and learning goals. No signup required.'],
     ],
     body: `
 <p>Good lesson plans aren't about paperwork — they're about intention. Here's a system that takes ~30 minutes a week and satisfies parents, licensing, and your own sanity. Or skip ahead and let the <a href="/tools/ai-lesson-plan-generator">free AI generator</a> draft one in 20 seconds.</p>
@@ -280,7 +280,7 @@ const GUIDES = [
 <h2>Make it emergent, not rigid</h2>
 <p>Licensing wants to see intention; children want to follow their curiosity. The fix: plan the blocks, hold the activities loosely. If the sink/float bin turns into 40 minutes of pouring practice — that <em>is</em> fine motor development; write down what happened instead.</p>
 <h2>Stop rewriting from scratch</h2>
-<p>The painful part is the blank page. Two fixes: keep a library of past plans you can remix seasonally, and use AI for the first draft. Our <a href="/tools/ai-lesson-plan-generator">free generator</a> produces a multi-day, play-based plan from your age group + theme — edit 20%, keep 80%. (Inside Cubby, directors author plans once and educators run them live, hour by hour, with per-child participation tracking.)</p>`,
+<p>The painful part is the blank page. Two fixes: keep a library of past plans you can remix seasonally, and use AI for the first draft. Our <a href="/tools/ai-lesson-plan-generator">free generator</a> produces a multi-day, play-based plan from your age group + theme — edit 20%, keep 80%. (Inside Mitten, directors author plans once and educators run them live, hour by hour, with per-child participation tracking.)</p>`,
   },
   {
     slug: 'daycare-daily-reports-guide',
@@ -309,7 +309,7 @@ const GUIDES = [
 <tr><td>Photos</td><td>None</td><td>Attached to the moment</td></tr>
 <tr><td>Parent experience</td><td>Crumpled sheet at pickup</td><td>Live feed during the day</td></tr>
 <tr><td>Records for licensing</td><td>Boxes of paper</td><td>Searchable history</td></tr></table>
-<p>And if writing the note is the bottleneck: Cubby's educators tap an activity and AI drafts the warm parent-ready sentence for them — included free. Parents even get an AI "day in a glance" recap. That's the report writing itself.</p>`,
+<p>And if writing the note is the bottleneck: Mitten's educators tap an activity and AI drafts the warm parent-ready sentence for them — included free. Parents even get an AI "day in a glance" recap. That's the report writing itself.</p>`,
   },
   {
     slug: 'daycare-tuition-pricing-guide',
@@ -356,10 +356,10 @@ const GUIDES = [
 <li><strong>Wage stability over churn</strong> — replacing an ECE costs months of disruption and recruiting. Paying slightly above market is usually cheaper than turnover.</li>
 <li><strong>Collections</strong> — automated billing, cards on file, and a real late policy. 2–3% of revenue quietly leaks here at most centres.</li>
 <li><strong>Funding programs</strong> — in BC, CCOF/CCFRI/wage enhancement materially change the equation. Make sure you're capturing everything you qualify for.</li>
-<li><strong>Overhead per child</strong> — your software stack is the easy win: many centres pay $150–$400/mo for childcare software alone. Cubby is free up to 5 children, then $20/mo + $2/child — for a 30-child centre that's <strong>$68/mo vs $200+</strong>, every month, forever.</li>
+<li><strong>Overhead per child</strong> — your software stack is the easy win: many centres pay $150–$400/mo for childcare software alone. Mitten is free up to 5 children, then $20/mo + $2/child — for a 30-child centre that's <strong>$68/mo vs $200+</strong>, every month, forever.</li>
 </ol>
 <h2>Know your number weekly, not yearly</h2>
-<p>Margins die quietly between annual accountant visits. A live dashboard — revenue, occupancy, payroll hours — turns "we should look into that" into a Tuesday-morning fix. That's exactly what Cubby's director profitability view is for.</p>`,
+<p>Margins die quietly between annual accountant visits. A live dashboard — revenue, occupancy, payroll hours — turns "we should look into that" into a Tuesday-morning fix. That's exactly what Mitten's director profitability view is for.</p>`,
   },
   {
     slug: 'daycare-payroll-guide-canada',
@@ -386,7 +386,7 @@ const GUIDES = [
 <li><strong>Stat holidays:</strong> eligibility rules (30 days + 15 of last 30 worked) mean part-timers often qualify — check, don't assume.</li>
 <li><strong>ECE Wage Enhancement:</strong> if you receive it, it flows through payroll and must show correctly on pay.</li></ul>
 <h2>The workflow that saves hours</h2>
-<p>The painful part isn't the math — it's assembling hours from paper timesheets. If your educators clock in/out digitally, payroll prep becomes: review hours → confirm → generate. Cubby does exactly this: staff hours tracked in the app become <strong>gross pay, overtime, stat pay and vacation accrual with printable stubs and a CSV</strong> for your accountant or payroll provider. (Cubby preps gross pay; CRA deductions and remittance stay with you or a licensed payroll provider.) New-hire setup is self-serve too — staff submit their details, banking and SIN through an encrypted onboarding link instead of a paper folder.</p>`,
+<p>The painful part isn't the math — it's assembling hours from paper timesheets. If your educators clock in/out digitally, payroll prep becomes: review hours → confirm → generate. Mitten does exactly this: staff hours tracked in the app become <strong>gross pay, overtime, stat pay and vacation accrual with printable stubs and a CSV</strong> for your accountant or payroll provider. (Mitten preps gross pay; CRA deductions and remittance stay with you or a licensed payroll provider.) New-hire setup is self-serve too — staff submit their details, banking and SIN through an encrypted onboarding link instead of a paper folder.</p>`,
   },
   {
     slug: 'daycare-parent-communication-guide',
@@ -436,7 +436,7 @@ const GUIDES = [
 <li><strong>Reviews are the algorithm and the persuasion</strong> — ask happy parents at delight moments (right after a great photo update). Reply to every review.</li>
 <li>Get listed on your municipal childcare registry, the BC childcare map, and local parent groups' resource lists.</li></ul>
 <h2>2. A website that doesn't embarrass you</h2>
-<p>Parents will judge — fairly or not — your program's care by your website's care. You need: real photos, programs & ages, your philosophy in 100 words, fees or a range, and an obvious "book a tour" button. (This is what we do at OKTD — Cubby founding centres get a professional site rebuilt free.)</p>
+<p>Parents will judge — fairly or not — your program's care by your website's care. You need: real photos, programs & ages, your philosophy in 100 words, fees or a range, and an obvious "book a tour" button. (This is what we do at OKTD — Mitten founding centres get a professional site rebuilt free.)</p>
 <h2>3. Build the referral engine</h2>
 <p>Referrals convert at ~10× cold inquiries. Engineer them: a simple thank-you (a month's discount or a gift card), and — more powerful — <strong>give parents something shareable</strong>. Daily photos and milestone updates get shown to grandparents, coworkers, playground friends. Your daily report is quietly your best ad.</p>
 <h2>4. Tours that convert</h2>
@@ -537,14 +537,14 @@ const COMPETITORS = [
 const ROUNDUP = {
   slug: 'best-brightwheel-alternatives',
   title: 'The 6 Best Brightwheel Alternatives in 2026 (Honest Comparison)',
-  desc: 'Looking for a Brightwheel alternative? An honest comparison of Cubby, Lillio (HiMama), Procare, Famly, Kangarootime and Daily Connect — pricing, strengths, and who each fits.',
+  desc: 'Looking for a Brightwheel alternative? An honest comparison of Mitten, Lillio (HiMama), Procare, Famly, Kangarootime and Daily Connect — pricing, strengths, and who each fits.',
   h1: 'The best Brightwheel alternatives in 2026',
   sub: 'An honest comparison for owner-operated daycares — including our own app, clearly labelled.',
   body: `
-<p>Brightwheel is a capable platform — but quote-gated pricing that commonly lands at <strong>$150–$400+/month</strong>, payment-processing cuts, and big-customer support queues send plenty of owners looking. Here are the six alternatives worth your time. <em>Full disclosure: Cubby (#1) is our product — we've kept the comparison honest anyway.</em></p>
+<p>Brightwheel is a capable platform — but quote-gated pricing that commonly lands at <strong>$150–$400+/month</strong>, payment-processing cuts, and big-customer support queues send plenty of owners looking. Here are the six alternatives worth your time. <em>Full disclosure: Mitten (#1) is our product — we've kept the comparison honest anyway.</em></p>
 
-<h2>1. Cubby — best for owner-operated daycares (that's us)</h2>
-<p><strong>Free for your first 5 children, then $20/mo + $2 per child</strong> (a 20-child program pays ~$48/mo — published right here, no sales call). Daily photo feeds with per-family privacy, AI-drafted notes and parent recaps included free, milestones & memory books, messaging, attendance, lesson plans, profitability analytics, <strong>payroll prep from tracked hours</strong>, and encrypted employee onboarding. Canadian-built; your data is never sold and exports anytime; parents need no app-store download. Where we're honest about fit: Cubby is built for single-site, owner-operated programs — large multi-site chains needing subsidy-agency administration are better on Procare or Kangarootime. <a href="/signup">Start free →</a> or <a href="/app">poke the live demo</a> (no signup).</p>
+<h2>1. Mitten — best for owner-operated daycares (that's us)</h2>
+<p><strong>Free for your first 5 children, then $20/mo + $2 per child</strong> (a 20-child program pays ~$48/mo — published right here, no sales call). Daily photo feeds with per-family privacy, AI-drafted notes and parent recaps included free, milestones & memory books, messaging, attendance, lesson plans, profitability analytics, <strong>payroll prep from tracked hours</strong>, and encrypted employee onboarding. Canadian-built; your data is never sold and exports anytime; parents need no app-store download. Where we're honest about fit: Mitten is built for single-site, owner-operated programs — large multi-site chains needing subsidy-agency administration are better on Procare or Kangarootime. <a href="/signup">Start free →</a> or <a href="/app">poke the live demo</a> (no signup).</p>
 
 <h2>2. Lillio (HiMama) — best for documentation-led programs</h2>
 <p>Canadian roots and the deepest child-development documentation culture. Commonly ~$100–$300+/mo by quote. Pick it if learning stories are the centre of your practice and budget isn't tight. <a href="/guides/himama-lillio-pricing-and-setup-guide">Full Lillio guide →</a></p>
@@ -563,7 +563,7 @@ const ROUNDUP = {
 
 <h2>Quick comparison</h2>
 <table><tr><th>Platform</th><th>Typical cost (verify!)</th><th>Best for</th><th>Watch out for</th></tr>
-<tr><td><strong>Cubby</strong></td><td>Free ≤5 kids; $20 + $2/child</td><td>Owner-operated programs</td><td>Not built for multi-site chains</td></tr>
+<tr><td><strong>Mitten</strong></td><td>Free ≤5 kids; $20 + $2/child</td><td>Owner-operated programs</td><td>Not built for multi-site chains</td></tr>
 <tr><td>Brightwheel</td><td>~$150–$400+/mo</td><td>Feature breadth</td><td>Quotes, processing cuts</td></tr>
 <tr><td>Lillio</td><td>~$100–$300+/mo</td><td>Documentation depth</td><td>Cost at small scale</td></tr>
 <tr><td>Procare</td><td>~$100–several hundred</td><td>Enterprise admin</td><td>Complexity</td></tr>
@@ -571,8 +571,8 @@ const ROUNDUP = {
 <tr><td>Kangarootime</td><td>~$2–4/child + modules</td><td>Multi-site</td><td>Overkill single-site</td></tr>
 <tr><td>Daily Connect</td><td>~$1–2/child</td><td>Just logging</td><td>You'll outgrow it</td></tr></table>`,
   faqs: [
-    ['What is the cheapest Brightwheel alternative?', 'For very small programs, Cubby is free up to 5 children; beyond that it’s $20/mo + $2 per child — typically a fraction of Brightwheel’s commonly reported $150–$400+/mo. Daily Connect is also inexpensive if you only need daily logging.'],
-    ['Can I switch from Brightwheel mid-year?', 'Yes — the practical path is to run both for one week while families move over. Cubby migrates your roster free, and parents join via a link with no app-store download, which makes the switch week dramatically easier.'],
+    ['What is the cheapest Brightwheel alternative?', 'For very small programs, Mitten is free up to 5 children; beyond that it’s $20/mo + $2 per child — typically a fraction of Brightwheel’s commonly reported $150–$400+/mo. Daily Connect is also inexpensive if you only need daily logging.'],
+    ['Can I switch from Brightwheel mid-year?', 'Yes — the practical path is to run both for one week while families move over. Mitten migrates your roster free, and parents join via a link with no app-store download, which makes the switch week dramatically easier.'],
   ],
 }
 
@@ -631,7 +631,7 @@ const TOOL_AI = {
   title: 'Free AI Lesson Plan Generator for Daycares & Preschools (No Signup)',
   desc: 'Generate a play-based, multi-day daycare lesson plan in seconds with free AI — age group, theme, developmental domains. No signup, unlimited use.',
   h1: 'AI lesson plan generator for daycares',
-  sub: 'A play-based, multi-day plan in ~20 seconds. Free, no signup — built by the Cubby team.',
+  sub: 'A play-based, multi-day plan in ~20 seconds. Free, no signup — built by the Mitten team.',
   body: `
 <div class="card">
 <div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))">
@@ -647,7 +647,7 @@ const TOOL_AI = {
 </div>
 <h2>How it works</h2>
 <p>Describe your group and theme; the generator drafts a realistic, play-based plan — daily learning goals, timed activity blocks with cheap common materials, and an observation prompt for your educators. Edit 20%, keep 80%. For the thinking behind a great plan, read <a href="/guides/how-to-write-daycare-lesson-plans">our lesson-planning guide</a>.</p>
-<p class="note">Inside <a href="/">Cubby</a>, this goes further: directors author plans once, educators run them hour-by-hour in class with per-child participation — and AI drafts the parent-facing notes too. Free up to 5 children.</p>
+<p class="note">Inside <a href="/">Mitten</a>, this goes further: directors author plans once, educators run them hour-by-hour in class with per-child participation — and AI drafts the parent-facing notes too. Free up to 5 children.</p>
 <script>
 const $=id=>document.getElementById(id);
 $('gen').addEventListener('click',async()=>{
@@ -720,12 +720,12 @@ function hubPage() {
   const comps = [...COMPETITORS.map((c) => `<a class="tile" href="/guides/${c.slug}"><span class="tag">Software guide</span><h3>${esc(c.name)}: pricing & setup</h3><p>${esc(c.desc.slice(0, 110))}…</p></a>`), `<a class="tile" href="/guides/${ROUNDUP.slug}"><span class="tag">Comparison</span><h3>Best Brightwheel alternatives</h3><p>${esc(ROUNDUP.desc.slice(0, 110))}…</p></a>`].join('')
   return layout({
     path: '/resources', wide: true,
-    title: 'Free Daycare Tools & Guides — Cubby Resources',
+    title: 'Free Daycare Tools & Guides — Mitten Resources',
     desc: 'Free tools and practical guides for daycare owners: profitability calculator, AI lesson plan generator, BC ratio calculator, tax & payroll guides, and honest software comparisons.',
     h1: 'Free tools & guides for daycare owners',
-    sub: 'Built by the team behind Cubby — free to use, no signup. The same care we put in the app.',
-    tag: 'Cubby resources',
-    jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Cubby Resources', url: `${DOMAIN}/resources` }],
+    sub: 'Built by the team behind Mitten — free to use, no signup. The same care we put in the app.',
+    tag: 'Mitten resources',
+    jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mitten Resources', url: `${DOMAIN}/resources` }],
     body: `
 <h2 id="tools">Free tools</h2><div class="grid">${tools}</div>
 <h2>Guides for daycare owners</h2><div class="grid">${guides}</div>
@@ -761,8 +761,8 @@ for (const c of COMPETITORS) {
   const path = `/guides/${c.slug}`
   urls.push(path)
   const faqs = [
-    [`How much does ${c.name} cost?`, `${c.price}. Pricing is quote-based and changes — always confirm with the vendor. For comparison, Cubby publishes its pricing: free up to 5 children, then $20/mo + $2 per child.`],
-    [`Is there a cheaper alternative to ${c.name}?`, `Cubby is typically a fraction of the cost — free for your first 5 children, then $20/mo + $2/child, with payroll prep and AI notes included and no payment-processing cut on tuition.`],
+    [`How much does ${c.name} cost?`, `${c.price}. Pricing is quote-based and changes — always confirm with the vendor. For comparison, Mitten publishes its pricing: free up to 5 children, then $20/mo + $2 per child.`],
+    [`Is there a cheaper alternative to ${c.name}?`, `Mitten is typically a fraction of the cost — free for your first 5 children, then $20/mo + $2/child, with payroll prep and AI notes included and no payment-processing cut on tuition.`],
   ]
   write(`guides/${c.slug}.html`, layout({
     path, title: c.title, desc: c.desc, h1: c.h1, tag: 'Software guide',
@@ -778,7 +778,7 @@ for (const c of COMPETITORS) {
   write(`guides/${ROUNDUP.slug}.html`, layout({
     path, title: ROUNDUP.title, desc: ROUNDUP.desc, h1: ROUNDUP.h1, sub: ROUNDUP.sub, tag: 'Comparison',
     jsonld: [articleLd(path, ROUNDUP.title, ROUNDUP.desc), faqLd(ROUNDUP.faqs)],
-    body: ROUNDUP.body + cta('See why owner-operated daycares pick Cubby — free up to 5 children, live in minutes, no sales call.') + faqBlock(ROUNDUP.faqs),
+    body: ROUNDUP.body + cta('See why owner-operated daycares pick Mitten — free up to 5 children, live in minutes, no sales call.') + faqBlock(ROUNDUP.faqs),
   }))
 }
 
@@ -788,7 +788,7 @@ for (const t of TOOLS) {
   write(`tools/${t.slug}.html`, layout({
     path, title: t.title, desc: t.desc, h1: t.h1, sub: t.sub, tag: 'Free tool',
     jsonld: [
-      { '@context': 'https://schema.org', '@type': 'WebApplication', name: t.h1, url: `${DOMAIN}${path}`, applicationCategory: 'BusinessApplication', offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' }, publisher: { '@type': 'Organization', name: 'Cubby' } },
+      { '@context': 'https://schema.org', '@type': 'WebApplication', name: t.h1, url: `${DOMAIN}${path}`, applicationCategory: 'BusinessApplication', offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' }, publisher: { '@type': 'Organization', name: 'Mitten' } },
       faqLd(t.faqs),
     ],
     body: t.body + cta() + faqBlock(t.faqs),

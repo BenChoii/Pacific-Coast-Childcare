@@ -1,20 +1,20 @@
-// The product is Cubby — the app always wears Cubby branding (logo, wordmark,
-// title, favicon). "Pacific Coast Childcare Academy" survives only as the demo
-// facility's *name* (facility.name), shown in the workspace header, never as
-// the app logo. (Was hostname-gated; forced on so logged-in users always see
-// the Cubby mark regardless of which vercel URL they open.)
-export const isCubby = true
+// The product is Mitten (mitten.care) — the app always wears Mitten branding
+// (logo, wordmark, title, favicon). "Pacific Coast Childcare Academy" survives
+// only as the demo facility's *name* (facility.name), shown in the workspace
+// header, never as the app logo. (Was hostname-gated; forced on so logged-in
+// users always see the Mitten mark regardless of which URL they open.)
+export const isMitten = true
 
-export const BRAND = isCubby
+export const BRAND = isMitten
   ? {
-      cubby: true,
-      name: 'Cubby',
-      short: 'Cubby',
-      tagline: 'Childcare, beautifully connected',
-      mark: '/brand/cubby-mark.svg',
+      mitten: true,
+      name: 'Mitten',
+      short: 'Mitten',
+      tagline: 'Childcare, warmly handled',
+      mark: '/brand/mitten-mark.svg',
     }
   : {
-      cubby: false,
+      mitten: false,
       name: 'Pacific Coast Childcare Academy',
       short: 'Pacific Coast',
       tagline: 'A world of learning, closer to home',
@@ -23,11 +23,11 @@ export const BRAND = isCubby
 
 // Set the tab title + favicon for the current context ('app' | 'sales').
 export function applyBrandHead(context) {
-  if (!BRAND.cubby) return
+  if (!BRAND.mitten) return
   document.title =
     context === 'sales'
-      ? 'Cubby · Private, whitelabel childcare apps'
-      : 'Cubby · Family & Educator Portal'
+      ? 'Mitten · Private, whitelabel childcare apps'
+      : 'Mitten · Family & Educator Portal'
   let link = document.querySelector("link[rel~='icon']")
   if (!link) {
     link = document.createElement('link')

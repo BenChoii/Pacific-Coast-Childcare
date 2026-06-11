@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# ⚠️ Do not send until mitten.care DNS resolves (A 76.76.21.21 at registrar). Until then links 404 —
+# cubbycare.vercel.app remains live as a fallback and now serves the Mitten brand.
 """
-Send Cubby outreach emails via Gmail SMTP using an app password.
+Send Mitten outreach emails via Gmail SMTP using an app password.
 
 Setup:
   1. Enable 2FA on info@oktd.ca if not already.
@@ -51,9 +53,9 @@ BODY_TEMPLATE = """Hi {greeting},
 
 I came across {daycare} {found}, and wanted to pass along some free tools my studio built for BC daycares — a profitability calculator, an AI lesson-plan generator, and a BC staff-ratio calculator. Free to use, no signup, all in one place:
 
-https://cubbycare.vercel.app/resources#tools
+https://mitten.care/resources#tools
 
-And when you have five minutes, Cubby itself is free to get started — no card, no sales call:
+And when you have five minutes, Mitten itself is free to get started — no card, no sales call:
 
 • Parent accounts your families join with one link — daily photos, reports & messaging
 • AI-drafted daily notes and end-of-day recaps for your educators
