@@ -1,0 +1,13 @@
+[     179ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[     697ms] [LOG] [HMR] connected @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[     836ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[     882ms] [LOG] [Fast Refresh] done in 145ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[    1183ms] [WARNING] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  105437ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  105467ms] [LOG] [Fast Refresh] done in 42ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  108730ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  108757ms] [LOG] [Fast Refresh] done in 26ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  126741ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  126769ms] [LOG] [Fast Refresh] done in 62ms @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  126879ms] [WARNING] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477
+[  127319ms] [LOG] THREE.WebGLRenderer: Context Lost. @ http://localhost:3003/_next/static/chunks/0ag3_next_dist_0_q--91._.js:2477

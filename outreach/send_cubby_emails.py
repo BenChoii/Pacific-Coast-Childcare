@@ -45,25 +45,24 @@ if not PASSWORD:
     raise SystemExit("OKTD_GMAIL_APP_PASSWORD not set in .env")
 
 
-SUBJECT_TEMPLATE = "what I learned building apps for Vancouver daycares"
+SUBJECT_TEMPLATE = "a free profitability calculator for {daycare}"
 
 BODY_TEMPLATE = """Hi {greeting},
 
-I'm Ben — I run a small software studio in Langley (OKTD), and I've built websites for childcare companies around Vancouver, including Swan Childcare and Maple Montessori.
+I build software for BC daycares (I've done web work for Swan Childcare and Maple Montessori), and we just released three free tools owners kept asking for — no signup, no catch:
 
-Working with them, the same thing kept coming up: they were paying a small fortune every month for parent apps that were clunky, slow, and clearly not built by anyone who actually understood daycares. So I decided to build a better one.
+• Daycare profitability calculator — margins, break-even, per-child profit:
+  https://cubbycare.vercel.app/tools/daycare-profitability-calculator
+• AI lesson plan generator — a play-based, multi-day plan in ~20 seconds:
+  https://cubbycare.vercel.app/tools/ai-lesson-plan-generator
+• BC staff ratio calculator:
+  https://cubbycare.vercel.app/tools/daycare-staff-ratio-calculator-bc
 
-It's called Cubby — everything the big platforms do, done properly:
-• Daily photos, reports, meals, naps & milestones parents look forward to
-• Two-way messaging, attendance, and check-in/out
-• Works right in any browser — no App Store or Play Store download; it just lives on parents' home screens
-• Your data stays yours — never sold, never shared
+They're part of Cubby, the daycare app I built after seeing what the big platforms charge: daily photo reports parents love, messaging, milestones, payroll prep from your staff's tracked hours, even AI that reads your paper intake forms and creates the family's account. Free up to 5 children, then $20/mo + $2 per child — Brightwheel-class platforms run $150+ and take a cut of tuition; we take 0%.
 
-And it's a fraction of the cost: free under 6 children, then just $20/mo + $2 per child — versus $150+/mo for Brightwheel or HiMama, with no cut of your tuition.
+I'm signing my first 10 BC daycares as founding centres: pricing locked for life, plus my studio rebuilds your website free while you're with us.
 
-Here's the part I'm most excited about: I'm taking on my first 10 daycares as founding customers, and as a thank-you, I'll design and build you a brand-new website, free, for as long as you're with Cubby (real websites are what my studio does — not a template).
-
-Worth a 2-minute look? https://cubbycare.vercel.app — or just call/text me at 778-887-5216 and I'll walk you through it.
+Use the tools either way — they're yours. And if the app looks interesting: https://cubbycare.vercel.app or call/text me at 778-887-5216.
 
 Ben
 OKTD · Langley BC
@@ -74,25 +73,29 @@ OKTD · Langley BC
 
 
 # (to_address, greeting_name, daycare_name)
-# BATCH C — Variation C (credibility/story-led; names Swan Childcare + Maple Montessori).
-# The final 8 remaining verified emails (approved 2026-06-09). Sends exactly these.
+# BATCH D — Variation D (value-led: free tools first), 10 freshly researched
+# North Shore / Tri-Cities / New West / White Rock centres (2026-06-11).
+# All emails are conspicuously published business addresses (CASL implied consent).
 EMAILS = [
-    ("jeafleetwood@gmail.com", "team", "Junior Einstein's"),
-    ("jeagateway@gmail.com", "team", "Junior Einstein's"),
-    ("brightangels.langley@gmail.com", "team", "Bright Angels"),
-    ("bluebirdschildcareinc@gmail.com", "team", "Bluebirds Early Learning"),
-    ("abmdaycare@gmail.com", "team", "ABM Childcare"),
-    ("kidstownmission@gmail.com", "team", "Kidstown Childcare"),
-    ("silverdale@imaginationstationchildcare.ca", "team", "Imagination Station"),
-    ("promontoryhummingbird@gmail.com", "team", "Promontory Hummingbird"),
+    ("bluebird_daycare@yahoo.ca", "team", "Bluebird Daycare"),                 # North Vancouver
+    ("info@pvchildcare.com", "team", "Parkway Village Childcare"),            # North Vancouver
+    ("info@rainforestlearningcentre.ca", "team", "Rainforest Learning Centre"), # Metro Van (indie multi-site)
+    ("friendship.care@live.ca", "team", "Friendship Corner"),                 # Coquitlam (Montessori, non-profit)
+    ("rockypointdaycare@gmail.com", "team", "Rocky Point Montessori"),        # Port Moody
+    ("Mona-abass@hotmail.com", "Mona", "Sweet Smile Montessori"),             # Port Coquitlam (owner: Mona)
+    ("admin@canyonspringsmontessori.com", "team", "Canyon Springs Montessori"), # Coquitlam
+    ("info@lfpacademy.com", "team", "Little Footprints Academy"),             # White Rock / Delta / Surrey
+    ("admin@wcass.com", "team", "WCASS"),                                     # New Westminster (after-school care)
+    ("chairperson@coquitlammontessori.ca", "team", "Coquitlam Montessori"),   # Coquitlam (parent-board society)
 ]
 
 # Sent so far:
-#   Batch A (Variation A "Quick idea for…"): ABC Childcare, The Open Door, Kamloops Kidz,
+#   Batch A (Var A "Quick idea for…"): ABC Childcare, The Open Door, Kamloops Kidz,
 #     Okanagan Montessori, Junior Einstein's (Whalley).
-#   Batch B (Variation B "quick question…"): Bright Angels Surrey, Everyday Sunshine,
+#   Batch B (Var B "quick question…"): Bright Angels Surrey, Everyday Sunshine,
 #     Sunshine Children's Centre, Bloom Childcare, New Leaf.
-# After Batch C the 18-email list is exhausted — research more addresses to continue.
+#   Batch C (Var C credibility story): JE Fleetwood + Gateway, Bright Angels Langley,
+#     Bluebirds (Maple Ridge), ABM, Kidstown, Imagination Station, Promontory Hummingbird.
 REMAINING = []
 
 

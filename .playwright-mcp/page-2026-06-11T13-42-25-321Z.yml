@@ -1,0 +1,460 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Sunbal SALON" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Menu" [ref=e6] [cursor=pointer]:
+          - /url: /#services
+        - link "The Salon" [ref=e7] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e8] [cursor=pointer]:
+          - /url: /#visit
+        - link "(778) 594-5559" [ref=e9] [cursor=pointer]:
+          - /url: tel:+17785945559
+          - img [ref=e10]
+          - text: (778) 594-5559
+      - link "Book now" [ref=e12] [cursor=pointer]:
+        - /url: /book
+  - main [ref=e13]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: Reserve
+        - heading "Book your visit" [level=1] [ref=e17]
+        - paragraph [ref=e18]:
+          - text: Pick a service and a time below — confirmation is instant. Prefer to talk?
+          - link "(778) 594-5559" [ref=e19] [cursor=pointer]:
+            - /url: tel:+17785945559
+            - img [ref=e20]
+            - text: (778) 594-5559
+        - link "Open booking in a new tab" [ref=e22] [cursor=pointer]:
+          - /url: https://sunbalsalon.setmore.com/
+          - text: Open booking in a new tab
+          - img [ref=e23]
+      - iframe [ref=e29]:
+        - generic [active] [ref=f1e1]:
+          - generic [ref=f1e3]:
+            - generic [ref=f1e4]:
+              - banner [ref=f1e6]:
+                - generic [ref=f1e8]:
+                  - list [ref=f1e12]:
+                    - listitem [ref=f1e13]:
+                      - link "Services" [ref=f1e14] [cursor=pointer]:
+                        - /url: "#services"
+                    - listitem [ref=f1e15]:
+                      - link "Team" [ref=f1e16] [cursor=pointer]:
+                        - /url: "#our-team"
+                    - listitem [ref=f1e17]:
+                      - link "About" [ref=f1e18] [cursor=pointer]:
+                        - /url: "#about"
+                    - listitem [ref=f1e19]:
+                      - link "Gallery" [ref=f1e20] [cursor=pointer]:
+                        - /url: "#gallery"
+                    - listitem [ref=f1e21]:
+                      - link "Reviews" [ref=f1e22] [cursor=pointer]:
+                        - /url: "#reviews"
+                    - listitem [ref=f1e23]:
+                      - link "Address" [ref=f1e24] [cursor=pointer]:
+                        - /url: "#address"
+                  - generic [ref=f1e28]:
+                    - img [ref=f1e29]
+                    - generic [ref=f1e31]: Call us
+                    - link "Call us (778) 594-5559" [ref=f1e32] [cursor=pointer]:
+                      - /url: tel:7785945559
+                      - text: (778) 594-5559
+              - region "Book" [ref=f1e33]:
+                - link "Book" [ref=f1e34] [cursor=pointer]:
+                  - /url: https://sunbalsalon.setmore.com/book
+                  - generic [ref=f1e36]: Book
+              - main [ref=f1e37]:
+                - generic [ref=f1e38]:
+                  - generic [ref=f1e39]:
+                    - button "Share this page" [ref=f1e41] [cursor=pointer]:
+                      - img
+                    - button "Login" [ref=f1e43] [cursor=pointer]:
+                      - img
+                  - generic [ref=f1e45]:
+                    - link "Show all photos" [ref=f1e46] [cursor=pointer]:
+                      - /url: https://sunbalsalon.setmore.com/gallery
+                      - list [ref=f1e48]:
+                        - listitem [ref=f1e49]
+                    - link "Show all photos" [ref=f1e52] [cursor=pointer]:
+                      - /url: https://sunbalsalon.setmore.com/gallery
+                      - generic [ref=f1e54]: Show all photos
+                - generic [ref=f1e59]:
+                  - heading "Sunbal Salon" [level=1] [ref=f1e60]
+                  - generic [ref=f1e62]:
+                    - generic [ref=f1e63]:
+                      - img "Sunbal Salon logo" [ref=f1e64]
+                      - generic [ref=f1e65]:
+                        - heading "Sunbal Salon" [level=1] [ref=f1e66]
+                        - generic [ref=f1e68]:
+                          - generic [ref=f1e71]: "4.9"
+                          - img [ref=f1e74]:
+                            - img [ref=f1e75]
+                            - img [ref=f1e77]
+                            - img [ref=f1e79]
+                            - img [ref=f1e81]
+                            - img [ref=f1e83]
+                          - link "95 reviews" [ref=f1e88] [cursor=pointer]:
+                            - /url: https://sunbalsalon.setmore.com/reviews?sortBy=highestRated
+                            - generic [ref=f1e89]: 95 reviews
+                    - generic [ref=f1e90]:
+                      - generic [ref=f1e93]:
+                        - heading "Opening hours" [level=2] [ref=f1e94]
+                        - button "Show working hours" [ref=f1e95] [cursor=pointer]:
+                          - img [ref=f1e96]
+                          - generic [ref=f1e100]:
+                            - generic [ref=f1e101]:
+                              - text: Closed · Opens 9
+                              - generic [ref=f1e102]: AM
+                              - text: Thu
+                            - img [ref=f1e103]
+                      - link "532 Leon Ave Kelowna, British Columbia V1Y 6J6 (Opens in a new window)" [ref=f1e105] [cursor=pointer]:
+                        - /url: https://www.google.com/maps/search/?api=1&query=532+Leon+Ave%2C+Kelowna%2C+British+Columbia%2C+V1Y+6J6
+                        - generic [ref=f1e106]:
+                          - img [ref=f1e109]
+                          - generic [ref=f1e113]:
+                            - text: 532 Leon Ave
+                            - text: Kelowna, British Columbia V1Y 6J6
+                  - generic [ref=f1e114]:
+                    - generic [ref=f1e115]:
+                      - generic [ref=f1e116]:
+                        - generic [ref=f1e117]: Our Booking Policy
+                        - generic [ref=f1e118]: 103-532 Leon ave Kelowna
+                      - button "Okay" [ref=f1e120] [cursor=pointer]:
+                        - generic:
+                          - generic: Okay
+                    - generic [ref=f1e122]:
+                      - heading "Services" [level=2] [ref=f1e123]
+                      - generic [ref=f1e124]:
+                        - generic "Men’s Haircut" [ref=f1e125]:
+                          - button "Men’s Haircut" [ref=f1e127] [cursor=pointer]:
+                            - heading "Men’s Haircut" [level=3] [ref=f1e129]
+                            - img [ref=f1e131]
+                        - generic "Men’s Hair Colour" [ref=f1e134]:
+                          - button "Men’s Hair Colour" [ref=f1e136] [cursor=pointer]:
+                            - heading "Men’s Hair Colour" [level=3] [ref=f1e138]
+                            - img [ref=f1e140]
+                        - generic "Women’s Haircut" [ref=f1e143]:
+                          - button "Women’s Haircut" [ref=f1e145] [cursor=pointer]:
+                            - heading "Women’s Haircut" [level=3] [ref=f1e147]
+                            - img [ref=f1e149]
+                        - generic "Women’s Hair Colour" [ref=f1e152]:
+                          - button "Women’s Hair Colour" [ref=f1e154] [cursor=pointer]:
+                            - heading "Women’s Hair Colour" [level=3] [ref=f1e156]
+                            - img [ref=f1e158]
+                        - generic "Braids" [ref=f1e161]:
+                          - button "Braids" [ref=f1e163] [cursor=pointer]:
+                            - heading "Braids" [level=3] [ref=f1e165]
+                            - img [ref=f1e167]
+                        - generic "Men's Braids" [ref=f1e170]:
+                          - button "Men's Braids" [ref=f1e172] [cursor=pointer]:
+                            - heading "Men's Braids" [level=3] [ref=f1e174]
+                            - img [ref=f1e176]
+                        - generic "Highlights" [ref=f1e179]:
+                          - button "Highlights" [ref=f1e181] [cursor=pointer]:
+                            - heading "Highlights" [level=3] [ref=f1e183]
+                            - img [ref=f1e185]
+                        - generic "Balayage" [ref=f1e188]:
+                          - button "Balayage" [ref=f1e190] [cursor=pointer]:
+                            - heading "Balayage" [level=3] [ref=f1e192]
+                            - img [ref=f1e194]
+                        - generic "Other" [ref=f1e197]:
+                          - button "Other" [ref=f1e199] [cursor=pointer]:
+                            - heading "Other" [level=3] [ref=f1e201]
+                            - img [ref=f1e203]
+                    - generic [ref=f1e208]:
+                      - heading "Team" [level=2] [ref=f1e209]
+                      - list [ref=f1e211]:
+                        - listitem [ref=f1e212]:
+                          - generic [ref=f1e213]:
+                            - generic [ref=f1e214]:
+                              - link "Book with Tsehay Tereda" [ref=f1e215] [cursor=pointer]:
+                                - /url: https://sunbalsalon.setmore.com/team/8a168518-a53b-4ce5-92bc-ba2e0a164211
+                              - generic [ref=f1e216]:
+                                - heading "Tsehay Tereda" [level=3] [ref=f1e221]
+                                - generic [ref=f1e222]: Owner/Hairstylist/Colourist/Braids/ Extensions and Relaxer Specialist
+                            - img [ref=f1e224]
+                        - listitem [ref=f1e226]:
+                          - generic [ref=f1e227]:
+                            - generic [ref=f1e228]:
+                              - link "Book with Mabeth Lugtu" [ref=f1e229] [cursor=pointer]:
+                                - /url: https://sunbalsalon.setmore.com/team/68VMcoRu2ijurzYAWGXSBEwUq4YM9jsc
+                              - generic [ref=f1e230]:
+                                - heading "Mabeth Lugtu" [level=3] [ref=f1e235]
+                                - generic [ref=f1e236]: 26 years as a Master Stylist, Master Colourist, Balayage specialist
+                            - img [ref=f1e238]
+                        - listitem [ref=f1e240]:
+                          - generic [ref=f1e241]:
+                            - generic [ref=f1e242]:
+                              - link "Book with Mo" [ref=f1e243] [cursor=pointer]:
+                                - /url: https://sunbalsalon.setmore.com/team/RB2gG4O9GWUK8nkhR65u4LnqD5YxAKdW
+                              - heading "Mo" [level=3] [ref=f1e249]
+                            - img [ref=f1e251]
+                    - generic [ref=f1e256]:
+                      - heading "About" [level=2] [ref=f1e257]
+                      - generic [ref=f1e258]:
+                        - paragraph [ref=f1e260]: 70+ 5 Star reviews!
+                        - generic [ref=f1e261]:
+                          - generic [ref=f1e262]:
+                            - generic [ref=f1e263]: Contact us
+                            - generic [ref=f1e264]:
+                              - generic [ref=f1e265]:
+                                - img [ref=f1e266]
+                                - link "(778) 594-5559" [ref=f1e268] [cursor=pointer]:
+                                  - /url: tel:7785945559
+                              - generic [ref=f1e269]:
+                                - img [ref=f1e270]
+                                - link "sunbalsalon@gmail.com" [ref=f1e272] [cursor=pointer]:
+                                  - /url: mailto:sunbalsalon@gmail.com
+                          - generic [ref=f1e273]:
+                            - generic [ref=f1e274]: Good to know
+                            - generic [ref=f1e276]:
+                              - img [ref=f1e277]
+                              - link "Booking policy" [ref=f1e279] [cursor=pointer]:
+                                - /url: /#
+                          - generic [ref=f1e280]:
+                            - generic [ref=f1e281]: Social media
+                            - list [ref=f1e282]:
+                              - listitem [ref=f1e283]:
+                                - link "Instagram (Opens in a new window)" [ref=f1e284] [cursor=pointer]:
+                                  - /url: https://www.instagram.com/sunbal.salon/
+                                  - img [ref=f1e285]
+                              - listitem [ref=f1e287]:
+                                - link "Facebook (Opens in a new window)" [ref=f1e288] [cursor=pointer]:
+                                  - /url: https://www.facebook.com/sunbal.salon/
+                                  - img [ref=f1e289]
+                    - generic [ref=f1e294]:
+                      - heading "Gallery" [level=2] [ref=f1e295]
+                      - generic [ref=f1e297]:
+                        - link "Show all photos" [ref=f1e298] [cursor=pointer]:
+                          - /url: https://sunbalsalon.setmore.com/gallery
+                          - list [ref=f1e300]:
+                            - listitem [ref=f1e301]
+                            - listitem [ref=f1e304]
+                        - link "Show all photos" [ref=f1e307] [cursor=pointer]:
+                          - /url: https://sunbalsalon.setmore.com/gallery
+                          - generic [ref=f1e309]: Show all photos
+                    - generic [ref=f1e314]:
+                      - generic [ref=f1e315]:
+                        - heading "Reviews" [level=2] [ref=f1e316]
+                        - generic [ref=f1e317]:
+                          - generic [ref=f1e318]: Sort
+                          - generic [ref=f1e320]:
+                            - generic [ref=f1e321]: ", Highest rated"
+                            - button "Sort , Highest rated" [ref=f1e322] [cursor=pointer]:
+                              - generic:
+                                - generic:
+                                  - generic: "Sort by:"
+                                - generic: Highest rated
+                                - generic:
+                                  - img
+                      - generic [ref=f1e323]:
+                        - generic [ref=f1e324]:
+                          - generic [ref=f1e325]:
+                            - img "5 stars out of 5" [ref=f1e327]:
+                              - img [ref=f1e328]
+                              - img [ref=f1e330]
+                              - img [ref=f1e332]
+                              - img [ref=f1e334]
+                              - img [ref=f1e336]
+                            - generic [ref=f1e342]: "92"
+                          - generic [ref=f1e343]:
+                            - img "4 stars out of 5" [ref=f1e345]:
+                              - img [ref=f1e346]
+                              - img [ref=f1e348]
+                              - img [ref=f1e350]
+                              - img [ref=f1e352]
+                              - img [ref=f1e354]
+                            - generic [ref=f1e360]: "1"
+                          - generic [ref=f1e361]:
+                            - img "3 stars out of 5" [ref=f1e363]:
+                              - img [ref=f1e364]
+                              - img [ref=f1e366]
+                              - img [ref=f1e368]
+                              - img [ref=f1e370]
+                              - img [ref=f1e372]
+                            - generic [ref=f1e377]: "0"
+                          - generic [ref=f1e378]:
+                            - img "2 stars out of 5" [ref=f1e380]:
+                              - img [ref=f1e381]
+                              - img [ref=f1e383]
+                              - img [ref=f1e385]
+                              - img [ref=f1e387]
+                              - img [ref=f1e389]
+                            - generic [ref=f1e395]: "1"
+                          - generic [ref=f1e396]:
+                            - img "1 star out of 5" [ref=f1e398]:
+                              - img [ref=f1e399]
+                              - img [ref=f1e401]
+                              - img [ref=f1e403]
+                              - img [ref=f1e405]
+                              - img [ref=f1e407]
+                            - generic [ref=f1e413]: "1"
+                        - generic [ref=f1e414]:
+                          - generic [ref=f1e415]:
+                            - img [ref=f1e416]
+                            - generic [ref=f1e425]:
+                              - generic [ref=f1e426]:
+                                - generic [ref=f1e427]: "4.9"
+                                - img "4.92 stars out of 5" [ref=f1e428]:
+                                  - img [ref=f1e429]
+                                  - img [ref=f1e431]
+                                  - img [ref=f1e433]
+                                  - img [ref=f1e435]
+                                  - img [ref=f1e437]
+                              - generic [ref=f1e439]: 95 reviews
+                            - img [ref=f1e440]
+                          - button "Write a review" [ref=f1e449] [cursor=pointer]:
+                            - generic:
+                              - generic: Write a review
+                      - list [ref=f1e450]:
+                        - listitem "5 star review by Jake Nelson" [ref=f1e451]:
+                          - generic [ref=f1e452]:
+                            - generic [ref=f1e453]: Jake Nelson
+                            - generic [ref=f1e454]:
+                              - img "5 stars out of 5" [ref=f1e455]:
+                                - img [ref=f1e456]
+                                - img [ref=f1e458]
+                                - img [ref=f1e460]
+                                - img [ref=f1e462]
+                                - img [ref=f1e464]
+                              - text: ·
+                              - generic [ref=f1e466]: 2 months ago
+                              - text: ·
+                              - generic [ref=f1e467]: from Google
+                            - paragraph [ref=f1e469]: The staff were kind and amazing and give an even better haircut
+                        - listitem "5 star review by Tj Dhaliwal" [ref=f1e470]:
+                          - generic [ref=f1e471]:
+                            - generic [ref=f1e472]: Tj Dhaliwal
+                            - generic [ref=f1e473]:
+                              - img "5 stars out of 5" [ref=f1e474]:
+                                - img [ref=f1e475]
+                                - img [ref=f1e477]
+                                - img [ref=f1e479]
+                                - img [ref=f1e481]
+                                - img [ref=f1e483]
+                              - text: ·
+                              - generic [ref=f1e485]: 2 months ago
+                              - text: ·
+                              - generic [ref=f1e486]: from Google
+                            - generic:
+                              - paragraph
+                        - listitem "5 star review by Mohamed Ali Issa" [ref=f1e487]:
+                          - generic [ref=f1e488]:
+                            - generic [ref=f1e489]: Mohamed Ali Issa
+                            - generic [ref=f1e490]:
+                              - img "5 stars out of 5" [ref=f1e491]:
+                                - img [ref=f1e492]
+                                - img [ref=f1e494]
+                                - img [ref=f1e496]
+                                - img [ref=f1e498]
+                                - img [ref=f1e500]
+                              - text: ·
+                              - generic [ref=f1e502]: 2 months ago
+                              - text: ·
+                              - generic [ref=f1e503]: from Google
+                            - paragraph [ref=f1e505]: Sun, I’m very happy with my dreadlocks! You did an excellent job—very neat, clean, and professional. You paid attention to every detail and made sure my hair was healthy and well maintained. The service was friendly, and the environment was welcoming. If anyone is looking for quality dreadlock services, I highly recommend Sun!
+                        - listitem "5 star review by Kaleb Berhane" [ref=f1e506]:
+                          - generic [ref=f1e507]:
+                            - generic [ref=f1e508]: Kaleb Berhane
+                            - generic [ref=f1e509]:
+                              - img "5 stars out of 5" [ref=f1e510]:
+                                - img [ref=f1e511]
+                                - img [ref=f1e513]
+                                - img [ref=f1e515]
+                                - img [ref=f1e517]
+                                - img [ref=f1e519]
+                              - text: ·
+                              - generic [ref=f1e521]: 2 months ago
+                              - text: ·
+                              - generic [ref=f1e522]: from Google
+                            - generic:
+                              - paragraph
+                        - listitem "5 star review by sun sun" [ref=f1e523]:
+                          - generic [ref=f1e524]:
+                            - generic [ref=f1e525]: sun sun
+                            - generic [ref=f1e526]:
+                              - img "5 stars out of 5" [ref=f1e527]:
+                                - img [ref=f1e528]
+                                - img [ref=f1e530]
+                                - img [ref=f1e532]
+                                - img [ref=f1e534]
+                                - img [ref=f1e536]
+                              - text: ·
+                              - generic [ref=f1e538]: 3 months ago
+                              - text: ·
+                              - generic [ref=f1e539]: from Google
+                            - generic:
+                              - paragraph
+                        - listitem "5 star review by Maikol Roa" [ref=f1e540]:
+                          - generic [ref=f1e541]:
+                            - generic [ref=f1e542]: Maikol Roa
+                            - generic [ref=f1e543]:
+                              - img "5 stars out of 5" [ref=f1e544]:
+                                - img [ref=f1e545]
+                                - img [ref=f1e547]
+                                - img [ref=f1e549]
+                                - img [ref=f1e551]
+                                - img [ref=f1e553]
+                              - text: ·
+                              - generic [ref=f1e555]: 3 months ago
+                              - text: ·
+                              - generic [ref=f1e556]: from Google
+                            - generic:
+                              - paragraph
+                      - link "Show all reviews" [ref=f1e557] [cursor=pointer]:
+                        - /url: https://sunbalsalon.setmore.com/reviews?sortBy=highestRated
+                        - button "Show all reviews" [ref=f1e558]:
+                          - generic:
+                            - generic: Show all reviews
+                    - generic [ref=f1e562]:
+                      - heading "Address" [level=2] [ref=f1e563]
+                      - link "Sunbal Salon. 532 Leon Ave Kelowna, British Columbia V1Y 6J6 (Opens in a new window)" [ref=f1e566] [cursor=pointer]:
+                        - /url: https://www.google.com/maps/search/?api=1&query=532+Leon+Ave%2C+Kelowna%2C+British+Columbia%2C+V1Y+6J6
+                        - img [ref=f1e568]
+                        - generic [ref=f1e571]: 532 Leon Ave Kelowna, British Columbia V1Y 6J6
+            - contentinfo [ref=f1e573]:
+              - generic [ref=f1e574]:
+                - link "Setmore logo" [ref=f1e576] [cursor=pointer]:
+                  - /url: https://www.setmore.com/?utm_source=completebookingpage&utm_medium=footerlogo
+                  - img [ref=f1e577]
+                - generic [ref=f1e587]:
+                  - generic [ref=f1e588]:
+                    - heading "Let's grow together" [level=1] [ref=f1e589]
+                    - paragraph [ref=f1e590]: Get more customers 24/7 with your free branded Booking Page.
+                  - generic [ref=f1e591]:
+                    - generic [ref=f1e592]:
+                      - generic [ref=f1e593]: Email
+                      - textbox "Email" [ref=f1e596]:
+                        - /placeholder: Enter your email
+                    - button "Get your Booking Page" [ref=f1e597] [cursor=pointer]:
+                      - generic:
+                        - generic: Get your Booking Page
+              - generic:
+                - img
+          - alert [ref=f1e598]
+  - contentinfo [ref=e30]:
+    - generic [ref=e31]:
+      - link "Sunbal SALON" [ref=e32] [cursor=pointer]:
+        - /url: /
+      - paragraph [ref=e33]:
+        - text: 103–532 Leon Ave, Kelowna, BC V1Y 6J6 ·
+        - link "(778) 594-5559" [ref=e34] [cursor=pointer]:
+          - /url: tel:+17785945559
+      - navigation [ref=e35]:
+        - link "Menu" [ref=e36] [cursor=pointer]:
+          - /url: /#services
+        - link "The Salon" [ref=e37] [cursor=pointer]:
+          - /url: /#experience
+        - link "Visit" [ref=e38] [cursor=pointer]:
+          - /url: /#visit
+        - link "Book" [ref=e39] [cursor=pointer]:
+          - /url: /book
+        - link "Instagram" [ref=e40] [cursor=pointer]:
+          - /url: https://www.instagram.com/sunbal.salon
+      - paragraph [ref=e41]: © 2026 Sunbal Salon. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e47] [cursor=pointer]:
+    - img [ref=e48]
+  - alert [ref=e51]
