@@ -843,10 +843,10 @@ function DirectorShowcase() {
           ))}
         </motion.div>
 
-        {/* Laptop */}
-        <motion.div {...fade(0.12)} className="mx-auto mt-8 max-w-4xl">
+        {/* Laptop — true MacBook 16:10 screen ratio */}
+        <motion.div {...fade(0.12)} className="mx-auto mt-8 max-w-3xl">
           <div className="rounded-t-2xl border-[10px] border-b-0 border-slate-900 bg-slate-900 shadow-2xl">
-            <div className="overflow-hidden rounded-t-lg bg-tint">
+            <div className="flex aspect-[16/10] flex-col overflow-hidden rounded-t-lg bg-tint">
               {/* window chrome */}
               <div className="flex items-center gap-2 border-b border-line bg-white px-3 py-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-coral-400" />
@@ -856,7 +856,7 @@ function DirectorShowcase() {
                   <Lock size={9} /> cubbycare.vercel.app/app
                 </span>
               </div>
-              <div className="flex">
+              <div className="flex min-h-0 flex-1">
                 {/* sidebar */}
                 <div className="hidden w-36 shrink-0 flex-col gap-1 border-r border-line bg-white p-2 sm:flex">
                   <div className="mb-1 flex items-center gap-1.5 px-1.5 py-1">
@@ -872,7 +872,7 @@ function DirectorShowcase() {
                   <div className="mt-auto rounded-lg bg-slate-50 px-2 py-1.5 text-[9px] font-bold text-slate-400">🏫 Sam · Director</div>
                 </div>
                 {/* content — keyed remount (no AnimatePresence: mode="wait" deadlocks under StrictMode) */}
-                <div className="min-h-[330px] flex-1 p-3.5">
+                <div className="min-w-0 flex-1 overflow-hidden p-3.5">
                   <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                     <div className="mb-2.5 flex items-center justify-between">
                       <h3 className="font-display text-lg text-slate-800">{active.label}</h3>
