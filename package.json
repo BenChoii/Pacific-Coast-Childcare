@@ -1,0 +1,29 @@
+{
+  "name": "pacific-care",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Pacific Care — colorful childcare management for parents, caregivers & directors",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/build-content.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.0",
+    "@convex-dev/auth": "^0.0.93",
+    "convex": "^1.40.0",
+    "framer-motion": "^11.11.17",
+    "lucide-react": "^0.460.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "vite": "^5.4.11"
+  }
+}

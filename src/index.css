@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* iOS-native feel: no blue tap flash, no rubber-band past the app chrome */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-tint text-slate-700 font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-weight: 400;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+  }
+
+  /* Chrome elements shouldn't select like a document (native-app feel) */
+  button, [role='button'], nav, header {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Instrument Serif is a single-weight display face — editorial headings */
+  h1, h2, h3, h4 {
+    @apply font-display;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: #F2C6CC;
+    color: #ffffff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/60;
+  }
+
+  /* iOS-style chrome bars: heavy blur + saturation, hairline edge */
+  .glass-bar {
+    background: rgba(255, 255, 255, 0.64);
+    -webkit-backdrop-filter: blur(22px) saturate(1.7);
+    backdrop-filter: blur(22px) saturate(1.7);
+  }
+  .hairline-b { box-shadow: inset 0 -0.5px 0 rgba(15, 23, 42, 0.12); }
+  .hairline-t { box-shadow: inset 0 0.5px 0 rgba(15, 23, 42, 0.12); }
+
+  /* Press feedback for cards/rows — subtle scale like native list cells */
+  .pressable {
+    @apply transition-transform duration-150 active:scale-[0.98];
+  }
+
+  .card {
+    @apply bg-white rounded-3xl border border-line shadow-card;
+  }
+
+  /* Mono uppercase eyebrow / category label — the site's signature detail */
+  .eyebrow {
+    @apply font-mono text-[10.5px] font-medium uppercase tracking-[0.18em] text-slate-400;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  /* Mono pill, matching the marketing site's chips */
+  .pill-mono {
+    @apply inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-brand-500;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold tracking-tight transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Solid ink button → soft baby-blue on hover (site behaviour) */
+  .btn-primary {
+    @apply btn bg-brand-600 text-white hover:bg-sky-300 hover:text-brand-700 hover:-translate-y-0.5;
+  }
+
+  .btn-grape {
+    @apply btn bg-brand-700 text-white hover:bg-sky-300 hover:text-brand-700 hover:-translate-y-0.5;
+  }
+
+  .btn-ghost {
+    @apply btn border border-line bg-white text-brand-700 hover:bg-brand-50 hover:border-brand-200;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-cream px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-100 placeholder:font-normal placeholder:text-slate-400;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-500 transition-all duration-200 hover:bg-white hover:text-brand-700;
+  }
+  .nav-item-active {
+    @apply bg-white text-brand-700 shadow-card border border-line;
+  }
+}
+
+/* Soft pastel mesh background — pink + baby-blue, calmer than before */
+.aurora {
+  background:
+    radial-gradient(55rem 55rem at 12% -8%, rgba(191, 216, 230, 0.55), transparent 55%),
+    radial-gradient(48rem 48rem at 100% 4%, rgba(242, 198, 204, 0.5), transparent 55%),
+    radial-gradient(46rem 46rem at 50% 118%, rgba(174, 213, 240, 0.4), transparent 55%),
+    linear-gradient(180deg, #ffffff, #F4F8FB);
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-brand-600 via-brand-500 to-sky-500 bg-clip-text text-transparent;
+}
+
+/* ── Living hero: slow-drifting pastel blobs ── */
+@keyframes drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-25px, 20px) scale(0.95); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40% { transform: translate(-35px, 25px) scale(1.1); }
+  70% { transform: translate(20px, -20px) scale(0.92); }
+}
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.55;
+}
+.blob-a { animation: drift-a 18s ease-in-out infinite; }
+.blob-b { animation: drift-b 22s ease-in-out infinite; }
+
+/* ── Shimmering gradient headline accent ── */
+@keyframes shimmer-x {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #0E74C1, #7c5cbf, #e8604c, #0E74C1);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-x 6s linear infinite;
+}
+
+/* ── Infinite marquee (trust bar) ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ── Feature card hover glow ── */
+.feature-glow { position: relative; }
+.feature-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(14, 116, 193, 0.5), rgba(124, 92, 191, 0.5), rgba(242, 198, 204, 0.6));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.feature-glow:hover::after { opacity: 1; }
+
+/* ── Indeterminate loading sweep ── */
+@keyframes sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+.sweep-bar { animation: sweep 1.3s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+
+/* ── Gentle float for hero phones ── */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.bob-slow { animation: bob 5s ease-in-out infinite; }
+.bob-slower { animation: bob 6.5s ease-in-out 0.8s infinite; }
+
+/* Serif numerals look elegant for big editorial stats */
+.serif-num {
+  @apply font-display;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}

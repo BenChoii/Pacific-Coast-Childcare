@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Free Daycare Profitability Calculator (2026) — Margin, Break-Even &amp; Per-Child Profit</title>
+<meta name="description" content="Free interactive daycare profitability calculator: enter enrolment, tuition, wages and costs to see monthly profit, margin, per-child profit and your break-even point." />
+<link rel="canonical" href="https://cubbycare.vercel.app/tools/daycare-profitability-calculator" />
+<meta property="og:type" content="article" /><meta property="og:title" content="Free Daycare Profitability Calculator (2026) — Margin, Break-Even &amp; Per-Child Profit" />
+<meta property="og:description" content="Free interactive daycare profitability calculator: enter enrolment, tuition, wages and costs to see monthly profit, margin, per-child profit and your break-even point." /><meta property="og:url" content="https://cubbycare.vercel.app/tools/daycare-profitability-calculator" />
+<meta property="og:site_name" content="Cubby" /><meta name="twitter:card" content="summary" />
+<meta name="theme-color" content="#F4F8FB" />
+<link rel="icon" type="image/svg+xml" href="/brand/cubby-mark.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+:root{--ink:#0E4E80;--brand:#0E74C1;--brand-50:#EAF4FB;--slate:#334155;--slate-4:#94a3b8;--slate-5:#64748b;--line:#e2e8f0;--mint:#2eb88a;--coral:#e8604c;--tint:#F4F8FB;--grape:#7c5cbf}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Geist',ui-sans-serif,system-ui,-apple-system,sans-serif;color:var(--slate);background:#fff;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:-.01em;color:var(--ink);line-height:1.15}
+h1{font-size:clamp(2rem,5vw,3rem);margin:.4em 0 .3em}
+h2{font-size:clamp(1.5rem,3.4vw,2rem);margin:1.6em 0 .4em}
+h3{font-size:1.25rem;margin:1.3em 0 .3em}
+p,li{font-size:1.02rem}
+a{color:var(--brand)}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate-4);font-weight:500}
+.aurora{background:radial-gradient(55rem 55rem at 12% -8%,rgba(191,216,230,.55),transparent 55%),radial-gradient(48rem 48rem at 100% 4%,rgba(242,198,204,.5),transparent 55%),linear-gradient(180deg,#fff,#F4F8FB)}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem}
+.wrap-wide{max-width:64rem;margin:0 auto;padding:0 1.25rem}
+nav.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);box-shadow:inset 0 -.5px 0 rgba(15,23,42,.12)}
+nav.top .in{max-width:64rem;margin:0 auto;display:flex;align-items:center;gap:1.2rem;padding:.7rem 1.25rem}
+nav.top a{font-size:.88rem;font-weight:600;color:var(--slate-5);text-decoration:none}
+nav.top a:hover{color:var(--brand)}
+nav.top .logo{display:flex;align-items:center;gap:.5rem;font-family:'Instrument Serif',serif;font-size:1.35rem;color:var(--ink);margin-right:auto}
+nav.top img{height:30px;width:30px}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.6rem 1.3rem;font-size:.9rem;font-weight:600;text-decoration:none;transition:.2s}
+.btn-primary{background:var(--brand);color:#fff!important}
+.btn-primary:hover{background:#8ec8ed;color:var(--ink)!important;transform:translateY(-2px)}
+.btn-ghost{border:1px solid var(--line);background:#fff;color:var(--ink)!important}
+.hero{padding:3.5rem 0 2.5rem;text-align:center}
+.hero p.sub{max-width:38rem;margin:0 auto;color:var(--slate-5);font-size:1.08rem}
+article{padding:1rem 0 3rem}
+article ul,article ol{padding-left:1.3rem}
+article li{margin:.35rem 0}
+table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:.6rem .75rem;text-align:left;vertical-align:top}
+th{background:var(--tint);font-weight:700;color:var(--ink)}
+.card{background:#fff;border:1px solid var(--line);border-radius:1.4rem;box-shadow:0 10px 30px -18px rgba(14,78,128,.25);padding:1.4rem}
+.cta{background:linear-gradient(135deg,#0E74C1,#7c5cbf);color:#fff;border-radius:1.6rem;padding:1.8rem;margin:2.2rem 0}
+.cta h3{color:#fff;margin-top:0}
+.cta p{color:rgba(255,255,255,.92)}
+.cta a.btn{background:#fff;color:var(--ink)!important}
+.note{background:#FFF8E7;border:1px solid #F4D88A;border-radius:1rem;padding:.9rem 1.1rem;font-size:.92rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))}
+.tile{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:1.3rem;padding:1.2rem;background:#fff;transition:.18s;box-shadow:0 8px 24px -18px rgba(14,78,128,.25)}
+.tile:hover{transform:translateY(-3px);border-color:#bcd9ee}
+.tile h3{margin:.2rem 0 .3rem;font-size:1.15rem}
+.tile p{font-size:.88rem;color:var(--slate-5);margin:0}
+.tag{display:inline-block;border-radius:999px;background:var(--brand-50);color:var(--brand);font-size:.7rem;font-weight:700;padding:.18rem .65rem;margin-bottom:.4rem}
+footer.site{background:#0f172a;color:#94a3b8;margin-top:3rem;padding:2.5rem 0;text-align:center;font-size:.85rem}
+footer.site a{color:#cbd5e1;text-decoration:none;margin:0 .6rem}
+footer.site a:hover{color:#fff}
+.faq dt{font-weight:700;color:var(--ink);margin-top:1rem}
+.faq dd{margin:0.3rem 0 0}
+label.f{display:block;font-family:'Geist Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--slate-4);margin:.9rem 0 .25rem}
+input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);background:var(--tint);border-radius:.8rem;padding:.7rem .9rem;font:inherit;font-size:.95rem;color:var(--slate)}
+input.f:focus,select.f:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(14,116,193,.12)}
+.result{background:var(--tint);border-radius:1.2rem;padding:1.2rem;margin-top:1.2rem}
+.big{font-family:'Instrument Serif',serif;font-size:2.2rem;color:var(--brand)}
+.bar{height:.7rem;border-radius:999px;background:#e2e8f0;overflow:hidden;margin:.3rem 0 .8rem}
+.bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0E74C1,#7c5cbf);transition:width .6s ease}
+.mono{font-family:'Geist Mono',monospace;font-size:.8rem}
+.plan-output{white-space:pre-wrap;background:var(--tint);border-radius:1.2rem;padding:1.3rem;font-size:.95rem;display:none}
+.spin{display:inline-block;width:1rem;height:1rem;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media print{nav.top,footer.site,.cta{display:none}}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Daycare profitability calculator","url":"https://cubbycare.vercel.app/tools/daycare-profitability-calculator","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"publisher":{"@type":"Organization","name":"Cubby"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I calculate daycare profitability?","acceptedAnswer":{"@type":"Answer","text":"Monthly revenue (children × average tuition) minus monthly costs (staffing including ~12% employer payroll burden, rent, food, supplies, insurance, admin). Divide profit by revenue for your margin; divide fixed costs by tuition for your break-even enrolment."}},{"@type":"Question","name":"What profit margin should a daycare aim for?","acceptedAnswer":{"@type":"Answer","text":"A commonly cited healthy range is 10–20% for owner-operated centres. Under 5% means one vacancy or one repair can put you underwater."}}]}</script>
+</head>
+<body>
+<nav class="top"><div class="in">
+<a class="logo" href="/"><img src="/brand/cubby-mark.svg" alt="Cubby" />Cubby</a>
+<a href="/resources">Resources</a><a href="/resources#tools">Free tools</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a>
+<a class="btn btn-primary" href="/signup">Start free</a>
+</div></nav>
+<div class="aurora"><div class="wrap hero">
+<span class="eyebrow">Free tool</span>
+<h1>Daycare profitability calculator</h1>
+<p class="sub">Enter your numbers — see monthly profit, margin, per-child profit and break-even. Free, no signup.</p>
+</div></div>
+<main class="wrap"><article>
+
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))">
+<div><label class="f" for="kids">Enrolled children</label><input class="f" id="kids" type="number" value="20" min="1" /></div>
+<div><label class="f" for="fee">Average monthly tuition ($/child)</label><input class="f" id="fee" type="number" value="1100" min="0" /></div>
+<div><label class="f" for="staff">Staff (FTE)</label><input class="f" id="staff" type="number" value="3" min="0" step="0.5" /></div>
+<div><label class="f" for="wage">Average wage ($/hour)</label><input class="f" id="wage" type="number" value="24" min="0" step="0.5" /></div>
+<div><label class="f" for="rent">Rent / mortgage ($/mo)</label><input class="f" id="rent" type="number" value="3500" min="0" /></div>
+<div><label class="f" for="other">Food, supplies, insurance & other ($/mo)</label><input class="f" id="other" type="number" value="2200" min="0" /></div>
+</div>
+<div class="result" id="out"></div>
+</div>
+<p class="note" style="margin-top:1rem">Estimates only — payroll burden is approximated at +12% for employer CPP/EI/WorkSafeBC, staff at 160 hours/FTE/month. Model funding (CCOF/CCFRI) as higher effective tuition.</p>
+<h2>How to read your numbers</h2>
+<ul>
+<li><strong>Margin under 5%?</strong> You're one vacancy from losing money — see the <a href="/guides/daycare-profit-margin-guide">margin levers guide</a>.</li>
+<li><strong>Break-even close to your enrolment?</strong> Occupancy is your problem — see <a href="/guides/daycare-marketing-guide">filling spots</a>.</li>
+<li><strong>Wages above 70% of revenue?</strong> Check your <a href="/guides/bc-daycare-staff-ratios">room composition against BC ratios</a>.</li>
+</ul>
+<script>
+const $=id=>document.getElementById(id);const fmt=n=>'$'+Math.round(n).toLocaleString();
+function calc(){const k=+$('kids').value||0,f=+$('fee').value||0,s=+$('staff').value||0,w=+$('wage').value||0,r=+$('rent').value||0,o=+$('other').value||0;
+const rev=k*f;const pay=s*w*160*1.12;const cost=pay+r+o;const profit=rev-cost;const margin=rev>0?profit/rev*100:0;
+const fixed=pay+r+o;const be=f>0?Math.ceil(fixed/f):0;const pc=k>0?profit/k:0;
+$('out').innerHTML='<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))">'
++'<div><div class="eyebrow">Monthly revenue</div><div class="big">'+fmt(rev)+'</div></div>'
++'<div><div class="eyebrow">Monthly costs</div><div class="big" style="color:#e8604c">'+fmt(cost)+'</div></div>'
++'<div><div class="eyebrow">Monthly profit</div><div class="big" style="color:'+(profit>=0?'#2eb88a':'#e8604c')+'">'+fmt(profit)+'</div></div>'
++'<div><div class="eyebrow">Margin</div><div class="big">'+margin.toFixed(1)+'%</div></div></div>'
++'<div style="margin-top:1rem"><div class="eyebrow">Cost breakdown</div>'
++'<div class="mono">Staffing '+fmt(pay)+' ('+(cost>0?(pay/cost*100).toFixed(0):0)+'%)</div><div class="bar"><span style="width:'+(cost>0?pay/cost*100:0)+'%"></span></div>'
++'<div class="mono">Rent '+fmt(r)+'</div><div class="bar"><span style="width:'+(cost>0?r/cost*100:0)+'%"></span></div>'
++'<div class="mono">Other '+fmt(o)+'</div><div class="bar"><span style="width:'+(cost>0?o/cost*100:0)+'%"></span></div></div>'
++'<p style="margin:0.6rem 0 0"><strong>Break-even: '+be+' children</strong> · per-child profit '+fmt(pc)+'/mo</p>';}
+['kids','fee','staff','wage','rent','other'].forEach(id=>$(id).addEventListener('input',calc));calc();
+</script>
+<div class="cta"><h3>Run your daycare on Cubby — free to start</h3>
+<p>Cubby does everything in this guide — daily reports, photos, messaging, billing, even payroll prep — free for your first 5 children, then just $20/mo + $2 per child.</p>
+<a class="btn" href="/signup">Start free — no card needed →</a>&nbsp;&nbsp;<a class="btn" style="background:rgba(255,255,255,.18);color:#fff!important" href="/app">See the live demo</a></div>
+<h2>Frequently asked questions</h2><dl class="faq">
+<dt>How do I calculate daycare profitability?</dt><dd>Monthly revenue (children × average tuition) minus monthly costs (staffing including ~12% employer payroll burden, rent, food, supplies, insurance, admin). Divide profit by revenue for your margin; divide fixed costs by tuition for your break-even enrolment.</dd>
+<dt>What profit margin should a daycare aim for?</dt><dd>A commonly cited healthy range is 10–20% for owner-operated centres. Under 5% means one vacancy or one repair can put you underwater.</dd></dl>
+</article></main>
+<footer class="site"><div class="wrap-wide">
+<p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Cubby</strong> — the childcare app built in BC. Free for your first 5 children.</p>
+<p><a href="/">Home</a><a href="/resources">Resources</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
+<p>Cubby · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
+</div></footer>
+</body></html>

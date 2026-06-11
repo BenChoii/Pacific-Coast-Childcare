@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pacific-care",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "pcca-lovable",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/benchoi/pacific-coast-childcare-8fe506a9", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
