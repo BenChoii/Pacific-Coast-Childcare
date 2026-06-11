@@ -514,142 +514,295 @@ function AllFeatures() {
 
 /* ---------------- Director showcase (interactive desktop) ---------------- */
 const DESK_TABS = [
-  { id: 'dash', label: 'Dashboard', icon: Home, blurb: 'Everything happening right now — children in, staff on the floor, messages and money.' },
-  { id: 'profit', label: 'Profitability', icon: TrendingUp, blurb: 'Revenue vs cost per room, tuition coverage and your Cubby cost — live, not a month-old spreadsheet.' },
-  { id: 'payroll', label: 'Payroll', icon: Banknote, blurb: 'Tracked hours become gross pay, overtime and vacation accrual — stubs and CSV in two clicks.' },
-  { id: 'enroll', label: 'Enrollment', icon: Users, blurb: 'Room capacity, waitlists and family links — fill spots without the phone tag.' },
+  { id: 'dash', label: 'Dashboard', icon: Home, blurb: 'Everything happening right now — children in, ratios, the live feed, money and messages.' },
+  { id: 'profit', label: 'Profitability', icon: TrendingUp, blurb: 'Revenue vs cost per room, six-month trend, margin and extras — live, not a month-old spreadsheet.' },
+  { id: 'payroll', label: 'Payroll', icon: Banknote, blurb: 'Tracked hours become regular, overtime, vacation accrual and gross — stubs and CSV in two clicks.' },
+  { id: 'enroll', label: 'Enrollment', icon: Users, blurb: 'Inquiry funnel, room capacity and an actionable waitlist — fill spots without the phone tag.' },
+  { id: 'families', label: 'Families', icon: Heart, blurb: 'Every child, allergy, tuition and parent link in one roster — with today’s last update at a glance.' },
 ]
 
-function DeskStat({ label, value, tone }) {
+function DeskStat({ label, value, delta, up = true, tone }) {
   return (
-    <div className="rounded-xl bg-white p-2.5 shadow-sm">
-      <div className={`text-lg font-extrabold leading-none ${tone}`}>{value}</div>
-      <div className="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
+    <div className="rounded-xl bg-white p-2 shadow-sm">
+      <div className="flex items-baseline gap-1">
+        <span className={`text-[15px] font-extrabold leading-none ${tone}`}>{value}</span>
+        {delta && <span className={`text-[8px] font-extrabold ${up ? 'text-mint-500' : 'text-coral-500'}`}>{up ? '▲' : '▼'}{delta}</span>}
+      </div>
+      <div className="mt-0.5 text-[8px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
     </div>
   )
 }
-function DeskBar({ label, pct, money: m, color, delay = 0 }) {
+function DeskBar({ label, pct, money: m, color, delay = 0, thin = false }) {
   return (
     <div>
-      <div className="mb-1 flex justify-between text-[10px] font-bold text-slate-500"><span>{label}</span><span>{m}</span></div>
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-0.5 flex justify-between text-[9.5px] font-bold text-slate-500"><span>{label}</span><span>{m}</span></div>
+      <div className={`${thin ? 'h-1.5' : 'h-2'} w-full overflow-hidden rounded-full bg-slate-100`}>
         <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, delay, ease: 'easeOut' }} className={`h-full rounded-full ${color}`} />
       </div>
     </div>
   )
 }
+const ROOM_CHIP = 'rounded-full px-1.5 py-px text-[7.5px] font-extrabold'
 
 function DeskDash() {
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-4 gap-2">
-        <DeskStat label="Children in" value="18/22" tone="text-mint-500" />
-        <DeskStat label="Staff on floor" value="4" tone="text-brand-600" />
-        <DeskStat label="Revenue MTD" value="$19.2k" tone="text-grape-600" />
-        <DeskStat label="Unread" value="3" tone="text-coral-500" />
-      </div>
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Rooms right now</div>
-        <div className="space-y-2">
-          <DeskBar label="Sunbeams · 8/8 in" pct={100} money="ratio ✓" color="bg-gradient-to-r from-mint-400 to-mint-500" />
-          <DeskBar label="Explorers · 6/8 in" pct={75} money="ratio ✓" color="bg-gradient-to-r from-brand-400 to-brand-500" delay={0.1} />
-          <DeskBar label="Navigators · 4/6 in" pct={67} money="ratio ✓" color="bg-gradient-to-r from-grape-400 to-grape-500" delay={0.2} />
-        </div>
-      </div>
-      <div className="flex items-center gap-2 rounded-xl bg-white p-2.5 shadow-sm">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blush-300/30 text-sm">📸</span>
-        <span className="text-[11px] font-bold text-slate-600">Ms. Dana posted 4 photos to Sunbeams</span>
-        <span className="ml-auto text-[9px] font-bold text-slate-300">just now</span>
-      </div>
-    </div>
-  )
-}
-function DeskProfit() {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-end justify-between rounded-xl bg-white p-3 shadow-sm">
-        <div>
-          <div className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Monthly revenue</div>
-          <div className="font-display text-3xl text-brand-700"><CountUp to={19240} prefix="$" /></div>
-        </div>
-        <div className="text-right">
-          <div className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Cubby cost</div>
-          <div className="text-lg font-extrabold text-mint-500">$52/mo</div>
-        </div>
-      </div>
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Revenue by room</div>
-        <div className="space-y-2">
-          <DeskBar label="Sunbeams" pct={92} money="$8,400" color="bg-gradient-to-r from-brand-400 to-brand-600" />
-          <DeskBar label="Explorers" pct={70} money="$6,440" color="bg-gradient-to-r from-grape-400 to-grape-600" delay={0.1} />
-          <DeskBar label="Navigators" pct={48} money="$4,400" color="bg-gradient-to-r from-coral-400 to-blush-500" delay={0.2} />
-        </div>
-      </div>
-      <div className="rounded-xl bg-mint-400/10 p-2.5 text-center text-[11px] font-bold text-mint-600">
-        17 of 18 families have tuition set · 94% coverage
-      </div>
-    </div>
-  )
-}
-function DeskPayroll() {
-  const rows = [
-    ['Marcus Lee', '80h + 4 OT', '$2,064.00'],
-    ['Priya Sharma', '75h', '$1,500.00'],
-    ['Dana Whitfield', '80h', '$1,840.00'],
+  const feed = [
+    { img: PX(8422142, 80), t: 'Ms. Dana posted 4 photos to Sunbeams', s: 'circle time 🌟', time: 'now' },
+    { emoji: '🍎', t: 'Lunch logged · Explorers — 7 of 7 ate well', s: 'Mr. Theo', time: '12:05' },
+    { img: PX(7605825, 80), t: 'Mia R. checked in by grandma (authorized)', s: 'Sunbeams · 8:42 arrival', time: '8:42' },
+    { emoji: '⏰', t: 'Late pickup logged · Liam B. · 20 min · $30', s: 'auto-added to extras ledger', time: 'Mon' },
   ]
   return (
-    <div className="space-y-3">
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Pay run · May 28 → Jun 10</span>
-          <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[9px] font-bold text-brand-700">Bi-weekly</span>
+    <div className="grid grid-cols-5 gap-2">
+      <div className="col-span-3 space-y-2">
+        <div className="grid grid-cols-3 gap-1.5">
+          <DeskStat label="Children in" value="18/22" delta="2" tone="text-mint-500" />
+          <DeskStat label="Staff on floor" value="4" delta="ratio ✓" tone="text-brand-600" />
+          <DeskStat label="Unread" value="3" tone="text-coral-500" />
         </div>
-        {rows.map(([n, h, g], i) => (
-          <motion.div key={n} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.12 }}
-            className="flex items-center gap-2 border-b border-line py-1.5 last:border-0">
-            <span className="text-sm">🧑‍🏫</span>
-            <span className="text-[11px] font-extrabold text-slate-700">{n}</span>
-            <span className="text-[10px] font-bold text-slate-400">{h}</span>
-            <span className="ml-auto text-[11px] font-extrabold text-slate-800">{g}</span>
-          </motion.div>
-        ))}
-      </div>
-      <div className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm">
-        <div>
-          <div className="text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Total gross</div>
-          <div className="font-display text-2xl text-brand-700"><CountUp to={5404} prefix="$" /></div>
+        <div className="rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">Rooms right now</span>
+            <span className="text-[8px] font-bold text-mint-500">all ratios ✓</span>
+          </div>
+          <div className="space-y-1.5">
+            {[['Sunbeams', '8/8', 100, '2 staff', 'from-mint-400 to-mint-500'], ['Explorers', '6/8', 75, '1 staff', 'from-brand-400 to-brand-500'], ['Navigators', '4/6', 67, '1 staff', 'from-grape-400 to-grape-500']].map(([n, c, p, s, g], i) => (
+              <div key={n}>
+                <div className="mb-0.5 flex items-center justify-between text-[9px] font-bold text-slate-500">
+                  <span>{n} · {c} in</span>
+                  <span className={`${ROOM_CHIP} bg-slate-100 text-slate-400`}>{s}</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${p}%` }} transition={{ duration: 0.7, delay: i * 0.08 }} className={`h-full rounded-full bg-gradient-to-r ${g}`} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <span className="rounded-full bg-brand-600 px-3 py-1.5 text-[10px] font-bold text-white">Generate stubs ↓</span>
-      </div>
-      <div className="rounded-xl bg-grape-500/10 p-2.5 text-center text-[11px] font-bold text-grape-600">
-        🔒 New-hire onboarding: banking & SIN collected encrypted, by link
-      </div>
-    </div>
-  )
-}
-function DeskEnroll() {
-  return (
-    <div className="space-y-3">
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Capacity</div>
-        <div className="space-y-2">
-          <DeskBar label="Sunbeams (infant/toddler)" pct={100} money="8/8 full" color="bg-gradient-to-r from-mint-400 to-mint-500" />
-          <DeskBar label="Explorers (3–5)" pct={88} money="7/8" color="bg-gradient-to-r from-brand-400 to-brand-500" delay={0.1} />
-          <DeskBar label="Navigators (OSC)" pct={67} money="4/6" color="bg-gradient-to-r from-sunshine-400 to-coral-500" delay={0.2} />
+        <div className="rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1 text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">Today</div>
+          <div className="flex flex-wrap gap-1">
+            {['9:00 Circle', '10:30 Outdoor', '12:00 Lunch', '1:00 Nap', '3:15 Calm Corner 🫧'].map((b) => (
+              <span key={b} className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[8px] font-bold text-brand-700">{b}</span>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-1.5 text-[10px] font-extrabold uppercase tracking-wide text-slate-400">Waitlist</div>
-        <div className="flex flex-wrap gap-1.5">
-          {['Theo M. · 14mo', 'Aria K. · 3yr', 'Jun P. · 4yr'].map((w) => (
-            <span key={w} className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">{w}</span>
+      <div className="col-span-2 rounded-xl bg-white p-2.5 shadow-sm">
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">Live feed</span>
+          <span className="flex items-center gap-1 text-[8px] font-bold text-mint-500"><span className="h-1 w-1 animate-pulse rounded-full bg-mint-400" />live</span>
+        </div>
+        <div className="space-y-1.5">
+          {feed.map((f, i) => (
+            <motion.div key={i} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.1 }} className="flex items-start gap-1.5">
+              {f.img ? <img src={f.img} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded-md object-cover" /> : <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-slate-100 text-[10px]">{f.emoji}</span>}
+              <div className="min-w-0">
+                <div className="truncate text-[8.5px] font-extrabold leading-tight text-slate-700">{f.t}</div>
+                <div className="truncate text-[7.5px] font-semibold text-slate-400">{f.s} · {f.time}</div>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-2 rounded-xl bg-brand-50 p-2.5">
-        <Link2 size={13} className="text-brand-500" />
-        <span className="truncate font-mono text-[10px] font-bold text-brand-700">cubbycare.vercel.app/yourdaycare</span>
-        <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[9px] font-bold text-brand-600 shadow-sm">Copy</span>
+    </div>
+  )
+}
+
+function DeskProfit() {
+  const trend = [62, 68, 64, 73, 81, 88]
+  const rooms = [
+    ['Sunbeams', 8400, 5460, 'from-brand-400 to-brand-600'],
+    ['Explorers', 6440, 4180, 'from-grape-400 to-grape-600'],
+    ['Navigators', 4400, 3120, 'from-coral-400 to-blush-500'],
+  ]
+  return (
+    <div className="space-y-2">
+      <div className="grid grid-cols-4 gap-1.5">
+        <DeskStat label="Revenue" value="$19,240" delta="8%" tone="text-brand-700" />
+        <DeskStat label="Costs" value="$13,860" delta="2%" up={false} tone="text-slate-700" />
+        <DeskStat label="Profit" value="$5,380" delta="14%" tone="text-mint-500" />
+        <DeskStat label="Margin" value="28%" tone="text-grape-600" />
+      </div>
+      <div className="grid grid-cols-5 gap-2">
+        <div className="col-span-3 rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1.5 flex justify-between text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400"><span>Revenue vs cost by room</span><span className="normal-case text-slate-300">rev / cost</span></div>
+          <div className="space-y-2">
+            {rooms.map(([n, rev, cost, g], i) => (
+              <div key={n}>
+                <div className="mb-0.5 flex justify-between text-[9px] font-bold text-slate-500"><span>{n}</span><span>${rev.toLocaleString()} / <span className="text-slate-400">${cost.toLocaleString()}</span></span></div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${(rev / 9000) * 100}%` }} transition={{ duration: 0.7, delay: i * 0.08 }} className={`h-full rounded-full bg-gradient-to-r ${g}`} />
+                </div>
+                <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-slate-100">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${(cost / 9000) * 100}%` }} transition={{ duration: 0.7, delay: 0.1 + i * 0.08 }} className="h-full rounded-full bg-slate-300" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-span-2 rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1.5 text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">6-month profit trend</div>
+          <div className="flex h-16 items-end gap-1">
+            {trend.map((h, i) => (
+              <motion.div key={i} initial={{ height: 0 }} animate={{ height: `${h}%` }} transition={{ duration: 0.5, delay: i * 0.07 }}
+                className={`flex-1 rounded-t ${i === trend.length - 1 ? 'bg-gradient-to-t from-brand-500 to-grape-400' : 'bg-brand-100'}`} />
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between font-mono text-[7px] font-bold text-slate-300"><span>Jan</span><span>Jun</span></div>
+          <div className="mt-1.5 rounded-lg bg-mint-400/10 px-1.5 py-1 text-center text-[8px] font-extrabold text-mint-600">extras + plans: $480/mo ▲</div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between rounded-xl bg-white px-2.5 py-1.5 text-[8.5px] font-bold shadow-sm">
+        <span className="text-slate-500">17/18 tuition set · 94% coverage</span>
+        <span className="text-slate-400">0% payment cut</span>
+        <span className="text-mint-600">Cubby cost: $52/mo</span>
+      </div>
+    </div>
+  )
+}
+
+function DeskPayroll() {
+  const rows = [
+    ['Marcus Lee', 'Lead Educator', '🧑‍🏫', 80, 4, '$82.56', '$2,064.00'],
+    ['Priya Sharma', 'ECE Assistant', '👩‍🏫', 75, 0, '$90.00', '$1,500.00'],
+    ['Dana Whitfield', 'ECE', '🧑‍🎨', 80, 0, '$73.60', '$1,840.00'],
+    ['Sam Ortiz', 'OSC Leader', '🧗', 64, 2, '$59.52', '$1,488.00'],
+  ]
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5">
+        {['Apr 30 – May 13 ✓', 'May 14 – 27 ✓', 'May 28 – Jun 10'].map((p, i) => (
+          <span key={p} className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${i === 2 ? 'bg-brand-600 text-white' : 'bg-white text-slate-400 shadow-sm'}`}>{p}</span>
+        ))}
+        <span className="ml-auto rounded-full bg-brand-50 px-2 py-0.5 text-[8px] font-bold text-brand-700">Bi-weekly</span>
+      </div>
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="grid grid-cols-[1fr_repeat(4,auto)] gap-x-3 border-b border-line bg-slate-50/60 px-2.5 py-1 text-[7.5px] font-extrabold uppercase tracking-wide text-slate-400">
+          <span>Educator</span><span>Reg</span><span>OT</span><span>Vac accr.</span><span>Gross</span>
+        </div>
+        {rows.map(([n, role, em, reg, ot, vac, g], i) => (
+          <motion.div key={n} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
+            className="grid grid-cols-[1fr_repeat(4,auto)] items-center gap-x-3 border-b border-line/60 px-2.5 py-1.5 last:border-0">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-brand-400 to-grape-500 text-[10px]">{em}</span>
+              <span className="min-w-0">
+                <span className="block truncate text-[9px] font-extrabold leading-tight text-slate-700">{n}</span>
+                <span className="block text-[7px] font-bold text-slate-400">{role}</span>
+              </span>
+            </span>
+            <span className="text-[9px] font-bold text-slate-600">{reg}h</span>
+            <span className={`text-[9px] font-bold ${ot ? 'text-sunshine-600' : 'text-slate-300'}`}>{ot ? `${ot}h` : '—'}</span>
+            <span className="text-[9px] font-bold text-mint-600">{vac}</span>
+            <span className="text-[9.5px] font-extrabold text-slate-800">{g}</span>
+          </motion.div>
+        ))}
+        <div className="flex items-center justify-between bg-slate-50/60 px-2.5 py-1.5">
+          <span className="text-[8px] font-extrabold uppercase tracking-wide text-slate-400">Totals · 4 educators</span>
+          <span className="flex items-center gap-2">
+            <span className="text-[8.5px] font-bold text-mint-600">$305.68 vac</span>
+            <span className="font-display text-sm text-brand-700"><CountUp to={6892} prefix="$" /></span>
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="rounded-full bg-brand-600 px-2.5 py-1 text-[8.5px] font-bold text-white">Generate stubs</span>
+        <span className="rounded-full bg-white px-2.5 py-1 text-[8.5px] font-bold text-slate-500 shadow-sm">CSV ↓</span>
+        <span className="ml-auto truncate text-[8px] font-bold text-grape-600">🔒 new-hire onboarding: SIN & banking encrypted, by link</span>
+      </div>
+    </div>
+  )
+}
+
+function DeskEnroll() {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-1.5 rounded-xl bg-white p-2 shadow-sm">
+        {[['Inquiries', 9], ['Tours booked', 5], ['Offers out', 2], ['Enrolled', 3]].map(([l, n], i, a) => (
+          <span key={l} className="flex items-center gap-1.5">
+            <span className="rounded-lg bg-slate-50 px-2 py-1 text-center">
+              <span className="block text-[13px] font-extrabold leading-none text-brand-700">{n}</span>
+              <span className="block text-[6.5px] font-bold uppercase tracking-wide text-slate-400">{l}</span>
+            </span>
+            {i < a.length - 1 && <span className="text-[10px] text-slate-300">→</span>}
+          </span>
+        ))}
+        <span className="ml-auto rounded-full bg-mint-400/15 px-2 py-1 text-[8px] font-extrabold text-mint-600">this month</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1.5 text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">Capacity</div>
+          <div className="space-y-1.5">
+            <DeskBar thin label="Sunbeams (0–3)" pct={100} money="8/8 full" color="bg-gradient-to-r from-mint-400 to-mint-500" />
+            <DeskBar thin label="Explorers (3–5)" pct={88} money="7/8 · 1 spot" color="bg-gradient-to-r from-brand-400 to-brand-500" delay={0.08} />
+            <DeskBar thin label="Navigators (OSC)" pct={67} money="4/6 · 2 spots" color="bg-gradient-to-r from-sunshine-400 to-coral-500" delay={0.16} />
+          </div>
+          <div className="mt-1.5 rounded-lg bg-sunshine-400/10 px-1.5 py-1 text-[7.5px] font-bold text-sunshine-700">3 open spots ≈ $3,300/mo unfilled revenue</div>
+        </div>
+        <div className="rounded-xl bg-white p-2.5 shadow-sm">
+          <div className="mb-1.5 text-[8.5px] font-extrabold uppercase tracking-wide text-slate-400">Waitlist · 6</div>
+          <div className="space-y-1">
+            {[['Theo M.', '14 mo', 'fits Sunbeams in Jan'], ['Aria K.', '3 yr', 'fits Explorers now'], ['Jun P.', '4 yr', 'fits Explorers now']].map(([n, a, fit]) => (
+              <div key={n} className="flex items-center gap-1.5">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[9px] font-extrabold leading-tight text-slate-700">{n} <span className="font-bold text-slate-400">· {a}</span></span>
+                  <span className="block truncate text-[7px] font-bold text-mint-600">{fit}</span>
+                </span>
+                <span className="rounded-full bg-brand-50 px-1.5 py-0.5 text-[7.5px] font-extrabold text-brand-600">Offer spot</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 rounded-xl bg-brand-50 p-2">
+        <Link2 size={11} className="shrink-0 text-brand-500" />
+        <span className="truncate font-mono text-[8.5px] font-bold text-brand-700">cubbycare.vercel.app/yourdaycare</span>
+        <span className="text-[7.5px] font-semibold text-slate-400">families join themselves</span>
+        <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[8px] font-bold text-brand-600 shadow-sm">Copy</span>
+      </div>
+    </div>
+  )
+}
+
+function DeskFamilies() {
+  const kids = [
+    { img: PX(7605825, 80), n: 'Mia Rodriguez', r: 'Sunbeams', al: 'peanuts', t: '$1,250', last: '2:10 PM · nap 1h 20m' },
+    { img: PX(8364641, 80), n: 'Noah Patel', r: 'Explorers', al: null, t: '$1,100', last: '1:45 PM · 3 photos' },
+    { img: PX(8363102, 80), n: 'Liam Brooks', r: 'Navigators', al: 'dairy', t: '$640 + plan', last: '12:05 PM · lunch' },
+    { img: PX(8613089, 80), n: 'Nora Wilson', r: 'Explorers', al: null, t: '$1,100', last: '11:30 AM · milestone ⭐' },
+  ]
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-1.5">
+        {[['18', 'families'], ['94%', 'tuition set'], ['3', 'allergies tracked'], ['100%', 'parents linked']].map(([v, l]) => (
+          <span key={l} className="flex-1 rounded-xl bg-white px-2 py-1.5 text-center shadow-sm">
+            <span className="block text-[13px] font-extrabold leading-none text-brand-700">{v}</span>
+            <span className="block text-[6.5px] font-bold uppercase tracking-wide text-slate-400">{l}</span>
+          </span>
+        ))}
+      </div>
+      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 border-b border-line bg-slate-50/60 px-2.5 py-1 text-[7.5px] font-extrabold uppercase tracking-wide text-slate-400">
+          <span>Child</span><span>Allergies</span><span>Tuition</span><span>Last update</span>
+        </div>
+        {kids.map((k, i) => (
+          <motion.div key={k.n} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}
+            className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-3 border-b border-line/60 px-2.5 py-1.5 last:border-0">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <img src={k.img} alt="" loading="lazy" className="h-5 w-5 shrink-0 rounded-md object-cover" />
+              <span className="min-w-0">
+                <span className="block truncate text-[9px] font-extrabold leading-tight text-slate-700">{k.n}</span>
+                <span className="block text-[7px] font-bold text-slate-400">{k.r} · parent linked ✓</span>
+              </span>
+            </span>
+            <span>{k.al ? <span className="rounded-full bg-coral-400/15 px-1.5 py-px text-[7.5px] font-extrabold text-coral-600">{k.al}</span> : <span className="text-[8px] text-slate-300">—</span>}</span>
+            <span className="text-[9px] font-extrabold text-slate-700">{k.t}</span>
+            <span className="text-[7.5px] font-bold text-slate-400">{k.last}</span>
+          </motion.div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between rounded-xl bg-grape-500/10 px-2.5 py-1.5 text-[8.5px] font-bold text-grape-600">
+        <span>📋 Intake desk: paper form → AI fills this roster + creates the parent login</span>
+        <span className="rounded-full bg-white px-2 py-0.5 text-[8px] font-extrabold shadow-sm">Scan a form</span>
       </div>
     </div>
   )
@@ -666,7 +819,7 @@ function DirectorShowcase() {
   }, [])
   const pick = (i) => { manualAt.current = Date.now(); setTab(i) }
   const active = DESK_TABS[tab]
-  const Pane = [DeskDash, DeskProfit, DeskPayroll, DeskEnroll][tab]
+  const Pane = [DeskDash, DeskProfit, DeskPayroll, DeskEnroll, DeskFamilies][tab]
 
   return (
     <section id="directors" className="bg-tint">
@@ -691,7 +844,7 @@ function DirectorShowcase() {
         </motion.div>
 
         {/* Laptop */}
-        <motion.div {...fade(0.12)} className="mx-auto mt-8 max-w-3xl">
+        <motion.div {...fade(0.12)} className="mx-auto mt-8 max-w-4xl">
           <div className="rounded-t-2xl border-[10px] border-b-0 border-slate-900 bg-slate-900 shadow-2xl">
             <div className="overflow-hidden rounded-t-lg bg-tint">
               {/* window chrome */}
@@ -719,7 +872,7 @@ function DirectorShowcase() {
                   <div className="mt-auto rounded-lg bg-slate-50 px-2 py-1.5 text-[9px] font-bold text-slate-400">🏫 Sam · Director</div>
                 </div>
                 {/* content — keyed remount (no AnimatePresence: mode="wait" deadlocks under StrictMode) */}
-                <div className="min-h-[300px] flex-1 p-3.5">
+                <div className="min-h-[330px] flex-1 p-3.5">
                   <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                     <div className="mb-2.5 flex items-center justify-between">
                       <h3 className="font-display text-lg text-slate-800">{active.label}</h3>
