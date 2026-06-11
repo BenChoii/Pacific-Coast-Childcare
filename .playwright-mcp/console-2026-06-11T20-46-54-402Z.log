@@ -1,0 +1,114 @@
+[     943ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/chunk-R6S4VRB5.js?v=dba4ec80:21550
+[    1081ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781210791684:93
+[    1107ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[    1447ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=dba4ec80:4392
+[    1447ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=dba4ec80:4392
+[    1465ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[    1472ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[    1473ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[    1592ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[    1593ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[    1593ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[    1593ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[    1593ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[    1594ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[    1594ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[    1597ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[    1597ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324
+[  323222ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781211137281:93
+[  323247ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[  323278ms] TypeError: Cannot read properties of null (reading 'useProgram')
+    at e.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:35:5)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:90:8
+    at Map.forEach (<anonymous>)
+    at i.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:89:40)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:92:15
+[  323283ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[  323286ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[  323288ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[  323303ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  323303ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  323303ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  323303ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  323303ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  323304ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[  323304ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[  323304ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[  323304ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324
+[  698274ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781211511281:93
+[  698385ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[  698506ms] TypeError: Cannot read properties of null (reading 'useProgram')
+    at e.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:35:5)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:90:8
+    at Map.forEach (<anonymous>)
+    at i.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:89:40)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:92:15
+[  698558ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[  698592ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[  698605ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[  698612ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  698612ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  698612ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  698612ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  698612ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  698613ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[  698614ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[  698615ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[  698615ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324
+[  799519ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781211613652:93
+[  799540ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[  799561ms] TypeError: Cannot read properties of null (reading 'useProgram')
+    at e.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:35:5)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:90:8
+    at Map.forEach (<anonymous>)
+    at i.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:89:40)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:92:15
+[  799570ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[  799573ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[  799574ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[  799578ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  799578ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  799578ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  799578ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  799578ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[  799579ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[  799580ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[  799583ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[  799583ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324
+[ 1091052ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781211905309:93
+[ 1091055ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[ 1091063ms] TypeError: Cannot read properties of null (reading 'useProgram')
+    at e.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:35:5)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:90:8
+    at Map.forEach (<anonymous>)
+    at i.render (http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:89:40)
+    at http://localhost:3000/node_modules/.vite/deps/phenomenon.js?v=dba4ec80:92:15
+[ 1091065ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[ 1091068ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[ 1091069ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[ 1091073ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1091073ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1091073ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1091073ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1091073ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1091074ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[ 1091074ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[ 1091083ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[ 1091083ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324
+[ 1113562ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:3000/node_modules/.vite/deps/chunk-R6S4VRB5.js?v=dba4ec80:21550
+[ 1113705ms] [LOG] initGlobe: canvas offsetWidth = 490 passed w = 490 devicePixelRatio = 1 dpr = 1 @ http://localhost:3000/src/pages/Index.tsx?t=1781211905309:93
+[ 1113709ms] [LOG] LOCAL COBE: Captured active program during setup: null @ http://localhost:3000/src/lib/cobe.js:88
+[ 1113714ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=dba4ec80:4392
+[ 1113714ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=dba4ec80:4392
+[ 1113760ms] [LOG] LOCAL COBE: Map texture image onload triggered successfully! Dimensions: 256 x 128 @ http://localhost:3000/src/lib/cobe.js:105
+[ 1113785ms] [LOG] LOCAL COBE: Image decoded successfully! @ http://localhost:3000/src/lib/cobe.js:107
+[ 1113785ms] [LOG] LOCAL COBE: Image drawn to temporary 2D canvas successfully. @ http://localhost:3000/src/lib/cobe.js:116
+[ 1113788ms] [LOG] LOCAL COBE: Pixel at index 0 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1113788ms] [LOG] LOCAL COBE: Pixel at index 1 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1113788ms] [LOG] LOCAL COBE: Pixel at index 2 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1113788ms] [LOG] LOCAL COBE: Pixel at index 3 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1113788ms] [LOG] LOCAL COBE: Pixel at index 4 RGBA = [255, 255, 255, 255] @ http://localhost:3000/src/lib/cobe.js:125
+[ 1113789ms] [LOG] LOCAL COBE: Non-zero pixels count = 32768 out of 32768 @ http://localhost:3000/src/lib/cobe.js:130
+[ 1113789ms] [LOG] LOCAL COBE: Texture loaded flag set to true. @ http://localhost:3000/src/lib/cobe.js:141
+[ 1113790ms] [LOG] LOCAL COBE: setting J uniform location synchronously inside onRender... @ http://localhost:3000/src/lib/cobe.js:322
+[ 1113790ms] [LOG] LOCAL COBE: location of J = WebGLUniformLocation @ http://localhost:3000/src/lib/cobe.js:324

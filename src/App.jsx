@@ -27,6 +27,7 @@ import { Payroll } from './views/payroll.jsx'
 import { CalmCorner } from './views/calm.jsx'
 import { IntakeDesk } from './views/intake.jsx'
 import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
+import { InvoicingStudio } from './views/invoicing.jsx'
 
 function Loader() {
   return (
@@ -142,6 +143,7 @@ export default function App() {
       { id: 'home', label: 'Dashboard', icon: Home, render: AdminHome, dock: true },
       { id: 'account', label: 'Account', icon: Settings, render: Account, dock: true },
       { id: 'finance', label: 'Finance', icon: PiggyBank, render: FinanceStudio },
+      { id: 'invoices', label: 'Invoices', icon: ReceiptText, render: InvoicingStudio },
       { id: 'profit', label: 'Profitability', icon: TrendingUp, render: Profitability },
       { id: 'families', label: 'Families', icon: UsersRound, render: Families, dock: true },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },

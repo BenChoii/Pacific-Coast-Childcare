@@ -37,6 +37,17 @@ export default defineSchema({
     onboardedAt: v.optional(v.number()), // null until owner finishes the wizard
     isDemo: v.optional(v.boolean()),
     payPeriod: v.optional(v.string()), // payroll: 'weekly' | 'biweekly' | 'semimonthly'
+    // ── Invoicing & payments business profile (set in Account → Invoicing) ──
+    logoId: v.optional(v.id('_storage')), // daycare's own logo, shown on invoices
+    address: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    billingEmail: v.optional(v.string()),
+    etransferEmail: v.optional(v.string()), // Interac e-Transfer deposit address; enables the e-transfer rail
+    gstNumber: v.optional(v.string()),
+    invoiceFooter: v.optional(v.string()), // free-text note printed on every invoice
+    autoInvoice: v.optional(v.boolean()), // cron generates tuition invoices on the 1st
+    stripeAccountId: v.optional(v.string()), // Stripe Connect (Express) — card payments land in THEIR account
+    stripeAccountReady: v.optional(v.boolean()), // charges_enabled after Connect onboarding
     createdAt: v.number(),
   })
     .index('by_slug', ['slug'])
@@ -126,14 +137,24 @@ export default defineSchema({
     invId: v.string(),
     period: v.string(),
     amount: v.number(),
-    status: v.string(), // 'due' | 'paid'
+    status: v.string(), // 'due' | 'processing' (e-transfer sent, awaiting confirm) | 'paid' | 'void'
     due: v.string(),
     paidOn: v.optional(v.string()),
     items: v.optional(v.array(v.object({ label: v.string(), amt: v.number() }))),
     order: v.number(),
+    // ── Real-facility invoicing (demo seed rows leave these unset) ──
+    parentUserId: v.optional(v.id('users')), // bill-to family; parents only see their own
+    billTo: v.optional(v.string()), // display name for the family on the document
+    childName: v.optional(v.string()),
+    method: v.optional(v.string()), // how it was (or is being) paid: 'card' | 'etransfer' | 'manual'
+    etransferRef: v.optional(v.string()), // reference the parent supplies after sending
+    stripeSessionId: v.optional(v.string()), // Checkout session (on the connected account if any)
+    stripeAccountId: v.optional(v.string()), // connected account the session was created on
+    notes: v.optional(v.string()),
   })
     .index('by_facility', ['facilityId', 'order'])
-    .index('by_invId', ['invId']),
+    .index('by_invId', ['invId'])
+    .index('by_parent', ['facilityId', 'parentUserId']),
 
   photos: defineTable({
     facilityId: v.id('facilities'),

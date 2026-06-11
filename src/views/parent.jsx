@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useAction } from 'convex/react'
+import { useAction, useMutation } from 'convex/react'
 import {
   Smile, Moon, Apple, Camera, MessageCircle, CalendarDays, CreditCard,
-  Clock, ChevronRight, CheckCircle2, ShieldCheck, FileText, Phone, AlertTriangle, Download, Heart, Loader2, Sparkles,
+  Clock, ChevronRight, CheckCircle2, ShieldCheck, FileText, Phone, AlertTriangle, Download, Heart, Loader2, Sparkles, Send,
 } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
+import { openInvoicePrint } from '../lib/invoiceDoc.js'
 import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { ParentExtrasCard } from './finance.jsx'
@@ -332,7 +333,9 @@ export function ParentCalendar() {
 
 /* ---------------- Parent Billing ---------------- */
 export function ParentBilling() {
-  const { invoices, payInvoice, pushToast } = useApp()
+  const { invoices, payInvoice, pushToast, facility } = useApp()
+  const markEtransfer = useMutation(api.invoices.markEtransferSent)
+  const [etOpen, setEtOpen] = useState(null) // invoice id with e-transfer panel open
   const createCheckout = useAction(api.payments.createCheckoutSession)
   const [paying, setPaying] = useState(null)
   const due = invoices.filter((i) => i.status === 'due')
@@ -382,9 +385,19 @@ export function ParentBilling() {
                 <Clock size={14} /> Due {inv.due}
               </p>
             </div>
-            <button onClick={() => handlePay(inv)} disabled={paying === inv.id} className="btn bg-white text-brand-700 shadow-lg hover:-translate-y-0.5">
-              {paying === inv.id ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />} Pay now
-            </button>
+            <div className="flex flex-col items-stretch gap-2">
+              <button onClick={() => handlePay(inv)} disabled={paying === inv.id} className="btn bg-white text-brand-700 shadow-lg hover:-translate-y-0.5">
+                {paying === inv.id ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />} Pay by card
+              </button>
+              {facility?.etransferEmail && (
+                <button onClick={() => setEtOpen(etOpen === inv.id ? null : inv.id)} className="btn bg-white/20 text-white backdrop-blur hover:bg-white/30">
+                  <Send size={16} /> Pay by e-Transfer
+                </button>
+              )}
+              <button onClick={() => openInvoicePrint(inv, facility)} className="btn bg-white/20 text-white backdrop-blur hover:bg-white/30">
+                <Download size={16} /> Invoice PDF
+              </button>
+            </div>
           </div>
           {inv.items && (
             <div className="mt-5 space-y-2 border-t border-white/20 pt-4">
@@ -396,7 +409,33 @@ export function ParentBilling() {
               ))}
             </div>
           )}
+          {etOpen === inv.id && facility?.etransferEmail && (
+            <div className="mt-5 rounded-2xl bg-white/15 p-4 text-sm font-semibold backdrop-blur">
+              <p>Send <b>${inv.amount.toLocaleString()}</b> by Interac e-Transfer to <b>{facility.etransferEmail}</b> and put <b>{inv.id}</b> in the message.</p>
+              <button
+                onClick={async () => {
+                  await markEtransfer({ id: inv.id })
+                  setEtOpen(null)
+                  pushToast('Thanks! We marked your e-Transfer as sent — your daycare will confirm receipt.', { emoji: '📨', tone: 'mint' })
+                }}
+                className="btn mt-3 bg-white text-brand-700"
+              >
+                <CheckCircle2 size={16} /> I've sent it
+              </button>
+            </div>
+          )}
         </motion.div>
+      ))}
+
+      {invoices.filter((i) => i.status === 'processing').map((inv) => (
+        <Card key={inv.id} className="flex items-center gap-4 bg-sunshine-400/10">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sunshine-400/20 text-sunshine-600"><Clock /></span>
+          <div className="flex-1">
+            <div className="font-extrabold text-slate-800">e-Transfer on its way · ${inv.amount.toLocaleString()}</div>
+            <div className="text-sm font-semibold text-slate-400">{inv.period} · {inv.id} — your daycare will confirm once it arrives.</div>
+          </div>
+          <button onClick={() => openInvoicePrint(inv, facility)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100"><Download size={18} /></button>
+        </Card>
       ))}
 
       {due.length === 0 && (
@@ -420,7 +459,7 @@ export function ParentBilling() {
                 <div className="text-xs font-bold text-slate-400">Paid {inv.paidOn} · {inv.id}</div>
               </div>
               <span className="font-extrabold text-slate-700">${inv.amount.toLocaleString()}</span>
-              <button className="rounded-xl p-2 text-slate-400 hover:bg-slate-100"><Download size={18} /></button>
+              <button onClick={() => openInvoicePrint(inv, facility)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100"><Download size={18} /></button>
             </div>
           ))}
         </Card>

@@ -32,8 +32,51 @@ export const current = query({
       onboarded: !!f.onboardedAt,
       hasCard: !!f.hasCard,
       isOwner: !!uid && f.ownerUserId === uid,
+      // invoicing & payments profile
+      logoUrl: f.logoId ? await ctx.storage.getUrl(f.logoId) : null,
+      address: f.address,
+      phone: f.phone,
+      billingEmail: f.billingEmail,
+      etransferEmail: f.etransferEmail,
+      gstNumber: f.gstNumber,
+      invoiceFooter: f.invoiceFooter,
+      autoInvoice: !!f.autoInvoice,
+      connectReady: !!f.stripeAccountReady,
+      connectStarted: !!f.stripeAccountId,
       ...billingSummary(kids.length, f.freeLimit ?? FREE_LIMIT),
     }
+  },
+})
+
+// Director edits the invoicing business profile (Account → Invoicing & payments).
+export const updateBillingProfile = mutation({
+  args: {
+    address: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    billingEmail: v.optional(v.string()),
+    etransferEmail: v.optional(v.string()),
+    gstNumber: v.optional(v.string()),
+    invoiceFooter: v.optional(v.string()),
+    autoInvoice: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const { user, facilityId } = await requireFacility(ctx)
+    if (user.role !== 'admin') throw new Error('Directors only.')
+    const patch: any = {}
+    for (const k of ['address', 'phone', 'billingEmail', 'etransferEmail', 'gstNumber', 'invoiceFooter', 'autoInvoice'] as const) {
+      if (args[k] !== undefined) patch[k] = args[k]
+    }
+    await ctx.db.patch(facilityId, patch)
+  },
+})
+
+// Director uploads the daycare's logo (storage id from files.generateUploadUrl).
+export const setLogo = mutation({
+  args: { storageId: v.id('_storage') },
+  handler: async (ctx, { storageId }) => {
+    const { user, facilityId } = await requireFacility(ctx)
+    if (user.role !== 'admin') throw new Error('Directors only.')
+    await ctx.db.patch(facilityId, { logoId: storageId })
   },
 })
 

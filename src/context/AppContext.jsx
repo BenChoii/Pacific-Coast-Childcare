@@ -129,7 +129,7 @@ export function AppProvider({ children }) {
     if (stripe === 'success') {
       const sessionId = params.get('session_id')
       if (sessionId) {
-        confirmCheckout({ sessionId })
+        confirmCheckout({ sessionId, invId: params.get('inv') || undefined })
           .then((r) => {
             if (r?.ok) pushToast('Payment received — thank you! 💙', { emoji: '✅', tone: 'mint', duration: 5000 })
           })
