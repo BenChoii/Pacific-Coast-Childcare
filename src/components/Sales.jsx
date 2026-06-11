@@ -992,41 +992,127 @@ function WhySwitch() {
   )
 }
 
-/* ---------------- Whitelabel ---------------- */
+/* ---------------- Whitelabel (live re-branding phone) ---------------- */
+const WL_BRANDS = [
+  { name: 'Sunshine Kids', mark: '🌞', domain: 'sunshinekids.app', g: 'from-sunshine-400 to-coral-500', soft: 'bg-sunshine-400/15', ink: 'text-coral-600', ring: 'ring-coral-300' },
+  { name: 'Little Pines', mark: '🌲', domain: 'littlepines.app', g: 'from-mint-400 to-brand-500', soft: 'bg-mint-400/15', ink: 'text-mint-600', ring: 'ring-mint-400' },
+  { name: 'Pacific Coast', mark: '🌊', domain: 'pacificcoast.app', g: 'from-brand-400 to-grape-500', soft: 'bg-brand-50', ink: 'text-brand-600', ring: 'ring-sky-300' },
+  { name: 'Your Academy', mark: '✨', domain: 'youracademy.app', g: 'from-blush-400 to-grape-500', soft: 'bg-blush-300/20', ink: 'text-grape-600', ring: 'ring-blush-300' },
+]
+
+function BrandedScreen({ b }) {
+  return (
+    <div className="relative h-full bg-tint">
+      <ScreenTop title="" />
+      {/* brand header */}
+      <div className="flex items-center gap-1.5 px-3 pb-2">
+        <motion.span key={`mark-${b.name}`} initial={{ scale: 0.4, rotate: -20, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 16 }}
+          className={`flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br ${b.g} text-sm shadow-md`}>{b.mark}</motion.span>
+        <motion.div key={`nm-${b.name}`} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="min-w-0">
+          <div className="truncate font-display text-[13px] leading-none text-slate-800">{b.name}</div>
+          <div className={`font-mono text-[6.5px] font-bold uppercase tracking-wider ${b.ink}`}>{b.domain}</div>
+        </motion.div>
+        <span className="ml-auto h-5 w-5 rounded-full bg-white shadow-sm" />
+      </div>
+      {/* hero card — gradient crossfades between brands */}
+      <div className="relative mx-2.5 h-[88px] overflow-hidden rounded-2xl shadow-sm">
+        <motion.div key={`hero-${b.name}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7 }} className={`absolute inset-0 bg-gradient-to-br ${b.g}`} />
+        <div className="relative p-2.5 text-white">
+          <div className="font-mono text-[7px] uppercase tracking-wider text-white/80">Good afternoon 👋</div>
+          <div className="mt-0.5 font-display text-[15px] leading-tight">Nora is having<br />a great day!</div>
+          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-white/20 px-1.5 py-0.5 text-[7px] font-bold backdrop-blur"><Camera size={7} /> 4 new photos</span>
+        </div>
+      </div>
+      {/* avatar row with brand ring */}
+      <div className="mt-2 flex gap-1.5 px-3">
+        {FEED_AVATARS.slice(0, 4).map((src, k) => (
+          <div key={k} className={`h-8 w-8 shrink-0 rounded-full p-[1.5px] ring-2 transition-all duration-700 ${b.ring}`}>
+            <img src={src} alt="" loading="lazy" className="h-full w-full rounded-full object-cover" />
+          </div>
+        ))}
+        <motion.span key={`plus-${b.name}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-extrabold ${b.soft} ${b.ink}`}>+14</motion.span>
+      </div>
+      {/* feed card */}
+      <div className="mx-2.5 mt-2 overflow-hidden rounded-2xl bg-white shadow-sm">
+        <img src={PX(8364641, 320)} alt="" loading="lazy" className="h-[68px] w-full object-cover" />
+        <div className="flex items-center gap-1 p-1.5 text-[7.5px] font-bold text-slate-500">
+          Painting masterpieces 🎨
+          <motion.span key={`like-${b.name}`} initial={{ scale: 0.5 }} animate={{ scale: 1 }} className={`ml-auto flex items-center gap-0.5 ${b.ink}`}><Heart size={8} className="fill-current" /> 6</motion.span>
+        </div>
+      </div>
+      {/* dock with brand-tinted active tab */}
+      <div className="absolute inset-x-2 bottom-2 flex items-stretch rounded-2xl border border-line bg-white/90 px-1 py-1 shadow-md backdrop-blur-md">
+        {DOCK_ITEMS.map(({ id, Icon }, i) => (
+          <div key={id} className={`flex flex-1 flex-col items-center gap-[1px] text-[7px] font-bold ${i === 0 ? b.ink : 'text-slate-400'}`}>
+            <span className={`flex h-5 w-8 items-center justify-center rounded-[10px] transition-colors duration-500 ${i === 0 ? b.soft : ''}`}>
+              <Icon size={12} strokeWidth={i === 0 ? 2.6 : 2} />
+            </span>
+            {id}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Whitelabel() {
   const bullets = ['Your logo, colors & academy name', 'Your own web address', 'Installs to the home screen — no app store', 'Families only ever see your brand, never ours']
+  const [bi, setBi] = useState(0)
+  const manualAt = useRef(0)
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (Date.now() - manualAt.current > 8000) setBi((p) => (p + 1) % WL_BRANDS.length)
+    }, 2800)
+    return () => clearInterval(t)
+  }, [])
+  const b = WL_BRANDS[bi]
   return (
-    <section className="bg-tint">
-      <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-20 md:grid-cols-2">
+    <section className="overflow-hidden bg-tint">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2">
         <motion.div {...fade()}>
           <p className="eyebrow flex items-center gap-2"><Palette size={13} /> Whitelabel</p>
           <h2 className="mt-2 text-4xl text-brand-700 sm:text-5xl">It’s your app. We just build &amp; run it.</h2>
           <p className="mt-4 text-lg font-medium text-slate-500">
-            {BRAND} is invisible. Parents download <em>your</em> academy’s app, open <em>your</em> brand, and trust <em>you</em> with their child’s day.
+            {BRAND} is invisible. Parents open <em>your</em> academy’s app, see <em>your</em> brand, and trust <em>you</em> with their child’s day.
+            Watch the same app wear four different daycares <ArrowRight size={15} className="inline text-brand-400" />
           </p>
           <ul className="mt-6 space-y-3">
-            {bullets.map((b) => (
-              <li key={b} className="flex items-center gap-3 font-semibold text-slate-600">
+            {bullets.map((bl) => (
+              <li key={bl} className="flex items-center gap-3 font-semibold text-slate-600">
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mint-400/20 text-mint-500"><Check size={14} /></span>
-                {b}
+                {bl}
               </li>
             ))}
           </ul>
         </motion.div>
-        <motion.div {...fade(0.1)} className="flex items-center justify-center gap-4">
-          <div className="rounded-3xl border border-line bg-white p-6 text-center shadow-card">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-grape-500 text-2xl text-white">🌊</div>
-            <div className="font-display text-lg text-brand-700">Pacific Coast</div>
-            <div className="text-xs font-bold text-slate-400">yourname.app</div>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-mint-400/15 px-2.5 py-1 text-[10px] font-bold text-mint-500"><Globe size={11} /> No app store</div>
+
+        <motion.div {...fade(0.1)} className="flex flex-col items-center">
+          <div className="relative">
+            {/* brand-tinted glow behind the phone */}
+            <motion.div key={`glow-${b.name}`} initial={{ opacity: 0 }} animate={{ opacity: 0.55 }} transition={{ duration: 0.8 }}
+              className={`absolute -inset-8 rounded-full bg-gradient-to-br ${b.g} blur-3xl`} />
+            <div className="bob-slower relative">
+              <Phone><BrandedScreen b={b} /></Phone>
+            </div>
+            {/* floating chips */}
+            <motion.span key={`chipA-${b.name}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+              className="absolute -left-16 top-12 hidden rounded-2xl border border-white/70 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-md backdrop-blur sm:block">
+              <Globe size={10} className={`mr-1 inline ${b.ink}`} /> {b.domain}
+            </motion.span>
+            <span className="absolute -right-14 bottom-20 hidden rounded-2xl border border-white/70 bg-white/80 px-2.5 py-1.5 text-[10px] font-bold text-slate-600 shadow-md backdrop-blur sm:block">
+              <Smartphone size={10} className="mr-1 inline text-mint-500" /> No app store
+            </span>
           </div>
-          <ArrowRight className="text-slate-300" />
-          <div className="rounded-3xl border border-line bg-white p-6 text-center shadow-card">
-            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-coral-400 to-blush-500 text-2xl text-white">🌟</div>
-            <div className="font-display text-lg text-brand-700">Your Academy</div>
-            <div className="text-xs font-bold text-slate-400">youracademy.app</div>
-            <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-mint-400/15 px-2.5 py-1 text-[10px] font-bold text-mint-500"><Palette size={11} /> Your brand</div>
+          {/* brand picker */}
+          <div className="relative mt-6 flex flex-wrap justify-center gap-2">
+            {WL_BRANDS.map((br, i) => (
+              <button key={br.name} onClick={() => { manualAt.current = Date.now(); setBi(i) }}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${i === bi ? `bg-gradient-to-r ${br.g} text-white shadow-md scale-105` : 'bg-white text-slate-500 border border-line'}`}>
+                {br.mark} {br.name}
+              </button>
+            ))}
           </div>
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-400">same app · your brand in one tap</p>
         </motion.div>
       </div>
     </section>
