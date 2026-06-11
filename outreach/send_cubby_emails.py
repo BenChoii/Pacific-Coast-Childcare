@@ -76,20 +76,21 @@ OKTD · Langley BC
 
 
 # (to_address, greeting_name, daycare_name, where_we_found_them)
-# BATCH E — Variation E (everything-free framing + "found you" mention, NO pricing),
-# 10 freshly researched Vancouver / Delta / Victoria centres (2026-06-11).
+# BATCH F — Variation E (everything-free framing + "found you" mention, NO pricing),
+# 10 freshly researched Burnaby / Kelowna / Abbotsford / Nanaimo / Chilliwack /
+# Maple Ridge / Vernon centres (2026-06-11). No overlap with the prior 38.
 # All emails are conspicuously published business addresses (CASL implied consent).
 EMAILS = [
-    ("tiggywi@gmail.com", "team", "Tiggy Winkle Preschool", "while looking up Kitsilano preschools"),
-    ("kitscottage@gmail.com", "team", "Kit's Cottage Daycare", "through your website while researching Vancouver daycares"),
-    ("kitsarea@kaccs.ca", "team", "Kitsilano Area Child Care Society", "through your website while researching Kitsilano childcare"),
-    ("inquiry@littlemunchkindaycare.ca", "team", "Little Munchkin Daycare", "through your website while researching Vancouver daycares"),
-    ("info@reachforthestarsmontessori.com", "team", "Reach for the Stars Montessori", "through your website while researching Vancouver Montessori programs"),
-    ("treeoflife_childcare@hotmail.com", "team", "Tree of Life Childcare", "on Delta's child care listings"),
-    ("sunnytownlearnandplay@gmail.com", "Ray", "Sunny Town Learn & Play", "through your website while researching Tsawwassen childcare"),
-    ("mkaston@svdpvictoria.com", "Meagan", "Mary's Place Childcare", "while researching Victoria childcare centres"),
-    ("childcaremanager@victoriawest.ca", "Jack", "Victoria West Childcare", "through the Victoria West Community Association site"),
-    ("info@littlefriendschildcare.ca", "team", "Little Friends Childcare", "through your website while researching Victoria childcare"),
+    ("bfl_info@burnabyfamilylife.org", "team", "Burnaby Family Life", "through your website while researching Burnaby child care"),
+    ("childcare.intake@gobaci.com", "team", "BACI Child Care", "on Burnaby's child care listings"),
+    ("coronationmontessoripreschool@gmail.com", "team", "Coronation Montessori Preschool", "through your website while researching Kelowna Montessori programs"),
+    ("childcarelittlelions@gmail.com", "team", "Little Lions Childcare", "through your website while researching Abbotsford daycares"),
+    ("office@fourseasonsmontessori.com", "team", "Four Seasons Montessori", "through your website while researching Nanaimo Montessori programs"),
+    ("office@dm-school.ca", "team", "Discover Montessori School", "through your website while researching Nanaimo childcare"),
+    ("chilliwack@creativekids.ca", "team", "Creative Kids Learning Centre", "through your website while researching Chilliwack childcare"),
+    ("littlegarden@shaw.ca", "team", "Little Garden Montessori", "through your website while researching Maple Ridge Montessori programs"),
+    ("gail@koalabeardaycare.com", "Gail", "Koala Bear Daycare", "through your website while researching Vernon daycares"),
+    ("raisingstarspreschool@gmail.com", "team", "Raising Stars Preschool", "through your website while researching Vernon preschools"),
 ]
 
 # Sent so far:
@@ -102,6 +103,10 @@ EMAILS = [
 #   Batch D (Var D free-tools value lead): Bluebird North Van, Parkway Village,
 #     Rainforest, Friendship Corner, Rocky Point, Sweet Smile (Mona), Canyon Springs,
 #     Little Footprints, WCASS, Coquitlam Montessori Society.
+#   Batch E (Var E everything-free + found-you): Tiggy Winkle, Kit's Cottage,
+#     Kitsilano Area CCS, Little Munchkin, Reach for the Stars (Vancouver),
+#     Tree of Life + Sunny Town (Delta/Tsawwassen), Mary's Place + Victoria West
+#     + Little Friends (Victoria).
 REMAINING = []
 
 
