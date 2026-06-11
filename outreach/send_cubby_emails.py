@@ -49,14 +49,9 @@ SUBJECT_TEMPLATE = "free tools for {daycare} — AI lesson plans, payroll & more
 
 BODY_TEMPLATE = """Hi {greeting},
 
-I came across {daycare} {found}, and wanted to pass along some free tools we built for BC daycares. Use them, keep them — no signup for these three:
+I came across {daycare} {found}, and wanted to pass along some free tools my studio built for BC daycares — a profitability calculator, an AI lesson-plan generator, and a BC staff-ratio calculator. Free to use, no signup, all in one place:
 
-• Profitability calculator — margins & break-even in 30 seconds:
-  https://cubbycare.vercel.app/tools/daycare-profitability-calculator
-• AI lesson plan generator — a play-based, multi-day plan in ~20 seconds:
-  https://cubbycare.vercel.app/tools/ai-lesson-plan-generator
-• BC staff ratio calculator:
-  https://cubbycare.vercel.app/tools/daycare-staff-ratio-calculator-bc
+https://cubbycare.vercel.app/resources#tools
 
 And when you have five minutes, Cubby itself is free to get started — no card, no sales call:
 
@@ -65,10 +60,11 @@ And when you have five minutes, Cubby itself is free to get started — no card,
 • Payroll prep — tracked staff hours become gross pay and printable stubs
 • AI intake — photograph a paper enrolment form and it sets up the child and the family's account
 
-Everything's at https://cubbycare.vercel.app — built in Langley by my studio (we've done web work for Swan Childcare and Maple Montessori). If you try anything and have thoughts, I read every reply.
+Built in Langley by my studio (we've done web work for Swan Childcare and Maple Montessori). If you try anything and have thoughts, I read every reply — or give me a call.
 
 Ben
 OKTD · Langley BC
+778-887-5216
 
 —
 83 - 7947 209 St, Langley BC V2Y 0Y6 · reply "unsubscribe" to opt out
