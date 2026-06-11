@@ -233,7 +233,7 @@ function Phone({ children, className = '', lift = 0 }) {
 
 function PhoneRow() {
   return (
-    <div className="mx-auto flex max-w-6xl items-end justify-center gap-4 overflow-x-auto px-5 pb-16 sm:gap-6">
+    <div className="mx-auto flex max-w-6xl items-end justify-center gap-4 overflow-x-auto px-5 pb-16 pt-4 sm:gap-6">
       <div className="bob-slow hidden sm:block"><Phone lift={20}><FeedScreen /></Phone></div>
       <div className="bob-slower z-10"><Phone><DashScreen /></Phone></div>
       <div className="bob-slow hidden sm:block"><Phone lift={20}><ChatScreen /></Phone></div>
