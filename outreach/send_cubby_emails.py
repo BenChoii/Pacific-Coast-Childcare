@@ -45,24 +45,27 @@ if not PASSWORD:
     raise SystemExit("OKTD_GMAIL_APP_PASSWORD not set in .env")
 
 
-SUBJECT_TEMPLATE = "a free profitability calculator for {daycare}"
+SUBJECT_TEMPLATE = "free tools for {daycare} — AI lesson plans, payroll & more"
 
 BODY_TEMPLATE = """Hi {greeting},
 
-I build software for BC daycares (I've done web work for Swan Childcare and Maple Montessori), and we just released three free tools owners kept asking for — no signup, no catch:
+I came across {daycare} {found}, and wanted to pass along some free tools we built for BC daycares. Use them, keep them — no signup for these three:
 
-• Daycare profitability calculator — margins, break-even, per-child profit:
+• Profitability calculator — margins & break-even in 30 seconds:
   https://cubbycare.vercel.app/tools/daycare-profitability-calculator
 • AI lesson plan generator — a play-based, multi-day plan in ~20 seconds:
   https://cubbycare.vercel.app/tools/ai-lesson-plan-generator
 • BC staff ratio calculator:
   https://cubbycare.vercel.app/tools/daycare-staff-ratio-calculator-bc
 
-They're part of Cubby, the daycare app I built after seeing what the big platforms charge: daily photo reports parents love, messaging, milestones, payroll prep from your staff's tracked hours, even AI that reads your paper intake forms and creates the family's account. Free up to 5 children, then $20/mo + $2 per child — Brightwheel-class platforms run $150+ and take a cut of tuition; we take 0%.
+And when you have five minutes, Cubby itself is free to get started — no card, no sales call:
 
-I'm signing my first 10 BC daycares as founding centres: pricing locked for life, plus my studio rebuilds your website free while you're with us.
+• Parent accounts your families join with one link — daily photos, reports & messaging
+• AI-drafted daily notes and end-of-day recaps for your educators
+• Payroll prep — tracked staff hours become gross pay and printable stubs
+• AI intake — photograph a paper enrolment form and it sets up the child and the family's account
 
-Use the tools either way — they're yours. And if the app looks interesting: https://cubbycare.vercel.app or call/text me at 778-887-5216.
+Everything's at https://cubbycare.vercel.app — built in Langley by my studio (we've done web work for Swan Childcare and Maple Montessori). If you try anything and have thoughts, I read every reply.
 
 Ben
 OKTD · Langley BC
@@ -72,21 +75,21 @@ OKTD · Langley BC
 """
 
 
-# (to_address, greeting_name, daycare_name)
-# BATCH D — Variation D (value-led: free tools first), 10 freshly researched
-# North Shore / Tri-Cities / New West / White Rock centres (2026-06-11).
+# (to_address, greeting_name, daycare_name, where_we_found_them)
+# BATCH E — Variation E (everything-free framing + "found you" mention, NO pricing),
+# 10 freshly researched Vancouver / Delta / Victoria centres (2026-06-11).
 # All emails are conspicuously published business addresses (CASL implied consent).
 EMAILS = [
-    ("bluebird_daycare@yahoo.ca", "team", "Bluebird Daycare"),                 # North Vancouver
-    ("info@pvchildcare.com", "team", "Parkway Village Childcare"),            # North Vancouver
-    ("info@rainforestlearningcentre.ca", "team", "Rainforest Learning Centre"), # Metro Van (indie multi-site)
-    ("friendship.care@live.ca", "team", "Friendship Corner"),                 # Coquitlam (Montessori, non-profit)
-    ("rockypointdaycare@gmail.com", "team", "Rocky Point Montessori"),        # Port Moody
-    ("Mona-abass@hotmail.com", "Mona", "Sweet Smile Montessori"),             # Port Coquitlam (owner: Mona)
-    ("admin@canyonspringsmontessori.com", "team", "Canyon Springs Montessori"), # Coquitlam
-    ("info@lfpacademy.com", "team", "Little Footprints Academy"),             # White Rock / Delta / Surrey
-    ("admin@wcass.com", "team", "WCASS"),                                     # New Westminster (after-school care)
-    ("chairperson@coquitlammontessori.ca", "team", "Coquitlam Montessori"),   # Coquitlam (parent-board society)
+    ("tiggywi@gmail.com", "team", "Tiggy Winkle Preschool", "while looking up Kitsilano preschools"),
+    ("kitscottage@gmail.com", "team", "Kit's Cottage Daycare", "through your website while researching Vancouver daycares"),
+    ("kitsarea@kaccs.ca", "team", "Kitsilano Area Child Care Society", "through your website while researching Kitsilano childcare"),
+    ("inquiry@littlemunchkindaycare.ca", "team", "Little Munchkin Daycare", "through your website while researching Vancouver daycares"),
+    ("info@reachforthestarsmontessori.com", "team", "Reach for the Stars Montessori", "through your website while researching Vancouver Montessori programs"),
+    ("treeoflife_childcare@hotmail.com", "team", "Tree of Life Childcare", "on Delta's child care listings"),
+    ("sunnytownlearnandplay@gmail.com", "Ray", "Sunny Town Learn & Play", "through your website while researching Tsawwassen childcare"),
+    ("mkaston@svdpvictoria.com", "Meagan", "Mary's Place Childcare", "while researching Victoria childcare centres"),
+    ("childcaremanager@victoriawest.ca", "Jack", "Victoria West Childcare", "through the Victoria West Community Association site"),
+    ("info@littlefriendschildcare.ca", "team", "Little Friends Childcare", "through your website while researching Victoria childcare"),
 ]
 
 # Sent so far:
@@ -96,6 +99,9 @@ EMAILS = [
 #     Sunshine Children's Centre, Bloom Childcare, New Leaf.
 #   Batch C (Var C credibility story): JE Fleetwood + Gateway, Bright Angels Langley,
 #     Bluebirds (Maple Ridge), ABM, Kidstown, Imagination Station, Promontory Hummingbird.
+#   Batch D (Var D free-tools value lead): Bluebird North Van, Parkway Village,
+#     Rainforest, Friendship Corner, Rocky Point, Sweet Smile (Mona), Canyon Springs,
+#     Little Footprints, WCASS, Coquitlam Montessori Society.
 REMAINING = []
 
 
@@ -107,12 +113,12 @@ def main():
         server.login(SENDER, PASSWORD)
         print(f"Logged in. Sending {len(EMAILS)} emails, ~{PACING_SECONDS}s between each.\n")
 
-        for i, (to, greeting, daycare) in enumerate(EMAILS, 1):
+        for i, (to, greeting, daycare, found) in enumerate(EMAILS, 1):
             msg = EmailMessage()
             msg["From"] = SENDER
             msg["To"] = to
             msg["Subject"] = SUBJECT_TEMPLATE.format(daycare=daycare)
-            msg.set_content(BODY_TEMPLATE.format(greeting=greeting))
+            msg.set_content(BODY_TEMPLATE.format(greeting=greeting, daycare=daycare, found=found))
             try:
                 server.send_message(msg)
                 print(f"[{i}/{len(EMAILS)}] sent → {to}")
