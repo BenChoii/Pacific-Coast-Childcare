@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import {
   ShieldCheck, Lock, Server, Ban, DollarSign, Sparkles, ArrowRightLeft, Palette,
   Globe, ArrowRight, Check, Heart, GraduationCap, Building2, Clock, Camera,
@@ -25,6 +25,8 @@ export default function Sales() {
       <Nav />
       <Hero />
       <TrustBar />
+      <PhonesShowcase />
+      <EasyCinema />
       <AllFeatures />
       <DirectorShowcase />
       <Privacy />
@@ -34,6 +36,7 @@ export default function Sales() {
       <Audience />
       <AIAutomation />
       <Migration />
+      <CubsBanner />
       <Pricing />
       <FAQSection />
       <Contact />
@@ -165,52 +168,177 @@ function Nav() {
   )
 }
 
-/* ---------------- Hero ---------------- */
+/* ---------------- Cinematic hero ---------------- */
+// Full-bleed knit-world film loop (Higgsfield). Poster carries mobile +
+// reduced-motion; the mp4 only loads ≥768px so phones never pay for it.
+function useCinemaVideo() {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    const wide = window.matchMedia('(min-width: 768px)')
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setOn(wide.matches && !still.matches)
+    update()
+    wide.addEventListener('change', update)
+    still.addEventListener('change', update)
+    return () => { wide.removeEventListener('change', update); still.removeEventListener('change', update) }
+  }, [])
+  return on
+}
+
 function Hero() {
+  const video = useCinemaVideo()
   return (
-    <section id="top" className="aurora relative overflow-hidden">
-      {/* living background */}
+    <section id="top" className="relative flex min-h-[88svh] items-center overflow-hidden bg-[#fdf3e3]">
+      {/* film layer */}
+      {video ? (
+        <video
+          className="absolute inset-0 h-full w-full object-cover [object-position:74%_50%]"
+          autoPlay muted loop playsInline
+          poster="/cinema/hero-poster.webp"
+          src="/cinema/hero-loop.mp4"
+        />
+      ) : (
+        <img src="/cinema/hero-poster.webp" alt="" className="absolute inset-0 h-full w-full object-cover [object-position:74%_50%]" />
+      )}
+      {/* legibility scrims — keep the cub clear on the right */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/45 to-transparent sm:via-white/25" />
+      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
+
+      <div className="relative mx-auto w-full max-w-6xl px-5 pb-24 pt-16">
+        <div className="max-w-xl text-left">
+          <motion.span {...fade()} className="pill-mono !bg-white/80 backdrop-blur">
+            <ShieldCheck size={12} /> Whitelabel childcare platform
+          </motion.span>
+          <motion.h1 {...fade(0.05)} className="mt-5 text-5xl leading-[1.04] text-brand-700 sm:text-6xl lg:text-7xl">
+            Your academy deserves <span className="text-shimmer italic">its own app</span> — not someone else’s platform.
+          </motion.h1>
+          <motion.p {...fade(0.12)} className="mt-5 max-w-lg text-lg font-medium text-slate-600">
+            {BRAND} runs your whole daycare — daily photos, reports, messaging, milestones, check-in,
+            lesson plans, analytics, even payroll prep and employee onboarding. Your data stays exclusively
+            yours, at a fraction of the big platforms' price, with free migration from whatever you use today.
+          </motion.p>
+          <motion.div {...fade(0.2)} className="mt-7 flex flex-wrap items-center gap-3">
+            <a href="/signup" className="btn-primary px-7 py-3 text-base">Start free <ArrowRight size={18} /></a>
+            <a href="#demo" className="btn-ghost !bg-white/80 px-7 py-3 text-base backdrop-blur">Book a demo</a>
+          </motion.div>
+          <motion.p {...fade(0.24)} className="mt-3 text-sm font-semibold text-slate-500">
+            Free for up to 5 children · no card needed · live in minutes
+          </motion.p>
+
+          {/* glass proof chips */}
+          <motion.div {...fade(0.3)} className="mt-9 grid max-w-lg grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              [<CountUp key="a" to={5} />, 'children free, forever'],
+              [<span key="b">$<CountUp to={20} /></span>, '/mo when you grow'],
+              [<span key="c"><CountUp to={0} />%</span>, 'cut of your tuition'],
+              [<span key="d"><CountUp to={2} /> min</span>, 'to go live'],
+            ].map(([v, l], i) => (
+              <div key={i} className="rounded-3xl border border-white/80 bg-white/80 px-3 py-3.5 shadow-sm backdrop-blur-md">
+                <div className="font-display text-2xl text-brand-700 sm:text-3xl">{v}</div>
+                <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">{l}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* scroll cue */}
+      <motion.a
+        href="#phones" aria-label="Scroll to see the app"
+        className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 text-brand-600"
+        animate={{ y: [0, 7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <ChevronDown size={26} />
+      </motion.a>
+    </section>
+  )
+}
+
+/* What families & educators see — the phones, on the old aurora stage */
+function PhonesShowcase() {
+  return (
+    <section id="phones" className="aurora relative overflow-hidden">
       <div className="blob blob-a left-[-6rem] top-[-4rem] h-80 w-80 bg-sky-300/70" />
       <div className="blob blob-b right-[-5rem] top-24 h-72 w-72 bg-blush-300/70" />
-      <div className="blob blob-a bottom-[-6rem] left-1/3 h-96 w-96 bg-brand-200/60" />
-      <div className="relative mx-auto max-w-6xl px-5 pb-10 pt-16 text-center">
-        <motion.span {...fade()} className="pill-mono">
-          <ShieldCheck size={12} /> Whitelabel childcare platform
-        </motion.span>
-        <motion.h1 {...fade(0.05)} className="mx-auto mt-5 max-w-4xl text-5xl leading-[1.04] text-brand-700 sm:text-6xl">
-          Your academy deserves <span className="text-shimmer italic">its own app</span> — not someone else’s platform.
-        </motion.h1>
-        <motion.p {...fade(0.12)} className="mx-auto mt-5 max-w-2xl text-lg font-medium text-slate-500">
-          {BRAND} runs your whole daycare — daily photos, reports, messaging, milestones, check-in,
-          lesson plans, analytics, even payroll prep and employee onboarding. Your data stays exclusively
-          yours, at a fraction of the big platforms' price, with free migration from whatever you use today.
-        </motion.p>
-        <motion.div {...fade(0.2)} className="mt-7 flex flex-wrap items-center justify-center gap-3">
-          <a href="/signup" className="btn-primary px-7 py-3 text-base">Start free <ArrowRight size={18} /></a>
-          <a href="#demo" className="btn-ghost px-7 py-3 text-base">Book a demo</a>
-        </motion.div>
-        <motion.p {...fade(0.24)} className="mt-3 text-sm font-semibold text-slate-400">
-          Free for up to 5 children · no card needed · live in minutes
-        </motion.p>
-
-        {/* animated proof strip */}
-        <motion.div {...fade(0.3)} className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            [<CountUp key="a" to={5} />, 'children free, forever'],
-            [<span key="b">$<CountUp to={20} /></span>, '/mo when you grow'],
-            [<span key="c"><CountUp to={0} />%</span>, 'cut of your tuition'],
-            [<span key="d"><CountUp to={2} /> min</span>, 'to go live'],
-          ].map(([v, l], i) => (
-            <div key={i} className="rounded-3xl border border-white/70 bg-white/60 px-3 py-4 shadow-sm backdrop-blur-sm">
-              <div className="font-display text-3xl text-brand-700">{v}</div>
-              <div className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">{l}</div>
-            </div>
-          ))}
-        </motion.div>
-
-        <motion.p {...fade(0.34)} className="eyebrow mt-12">What your families &amp; educators see</motion.p>
+      <div className="relative mx-auto max-w-6xl px-5 pt-14 text-center">
+        <motion.p {...fade()} className="eyebrow">What your families &amp; educators see</motion.p>
       </div>
       <PhoneRow />
+    </section>
+  )
+}
+
+/* ---------------- Ease-of-use cinema (parallax knit valley) ---------------- */
+function EasyCinema() {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  const y = useTransform(scrollYProgress, [0, 1], ['-10%', '10%'])
+  const steps = [
+    [Building2, 'Create your daycare', 'Two minutes, no credit card. Name it, add your rooms, and your app exists.'],
+    [Link2, 'Share one link', 'Families and educators join themselves from a single invite link — no spreadsheets, no IT.'],
+    [Camera, 'Run your day', 'Photos, daily reports, check-in, even billing — all flowing by snack time.'],
+  ]
+  return (
+    <section ref={ref} id="easy" className="relative overflow-hidden">
+      {/* parallax film backdrop */}
+      <motion.img
+        src="/cinema/valley.webp" alt="" aria-hidden
+        style={{ y }}
+        className="absolute -top-[10%] left-0 h-[120%] w-full object-cover"
+      />
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-white via-white/70 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/90 to-transparent" />
+
+      <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-16 sm:pt-20">
+        <motion.div {...fade()} className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow !text-slate-500">Up and running before nap time</p>
+          <h2 className="mt-2 text-4xl text-brand-700 sm:text-5xl">Live in minutes. <span className="italic">Not months.</span></h2>
+        </motion.div>
+
+        <div className="mt-56 grid gap-5 sm:mt-64 md:grid-cols-3">
+          {steps.map(([Icon, t, d], i) => (
+            <motion.div
+              {...fade(i * 0.12)}
+              key={t}
+              className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-lg backdrop-blur-md"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-grape-500 font-display text-lg text-white shadow-md">{i + 1}</span>
+                <Icon size={20} className="text-brand-500" />
+              </div>
+              <h3 className="mt-4 text-xl text-slate-800">{t}</h3>
+              <p className="mt-1.5 text-sm font-medium leading-relaxed text-slate-600">{d}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ---------------- "First five free" cinema banner ---------------- */
+function CubsBanner() {
+  return (
+    <section className="bg-white">
+      <div className="mx-auto max-w-6xl px-5 py-10">
+        <motion.div {...fade()} className="relative overflow-hidden rounded-4xl border border-line shadow-xl">
+          <img
+            src="/cinema/cubs.webp" alt="Five knitted bear cubs in a row"
+            className="absolute inset-0 h-full w-full object-cover [object-position:50%_72%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/35 to-transparent" />
+          <div className="relative px-6 pb-56 pt-12 text-center sm:pb-64 sm:pt-14">
+            <p className="eyebrow !text-slate-500">Count them</p>
+            <h2 className="mx-auto mt-2 max-w-2xl text-4xl text-brand-700 sm:text-5xl">
+              Your first five children are <span className="italic">free. Forever.</span>
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-base font-medium text-slate-600">
+              Start small, pay nothing. {BRAND} only costs money once your sixth child enrolls — and even then it’s $20/month.
+            </p>
+            <a href="/signup" className="btn-primary mt-6 px-7 py-3 text-base">Start free <ArrowRight size={18} /></a>
+          </div>
+        </motion.div>
+      </div>
     </section>
   )
 }
