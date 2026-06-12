@@ -1351,6 +1351,31 @@ const TOOLS = [TOOL_PROFIT, TOOL_AI, TOOL_RATIO]
    each paper carries a reviewed date, a TL;DR, audience takeaways and a
    non-medical-advice line. Long pieces are "papers", short ones "briefs". */
 
+
+const RESEARCH_CSS = `<style>
+#rprog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#0E74C1,#F2C6CC);width:0;z-index:99;transition:width .1s linear}
+.r-meta{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.08em;color:#7E7E7E;text-transform:uppercase}
+.r-tldr{position:relative;background:linear-gradient(135deg,#FDF1F3,#E7F1F9);border-radius:18px;padding:30px 32px 26px;margin:18px 0 34px;overflow:hidden}
+.r-tldr:before{content:"TL;DR";position:absolute;top:14px;right:18px;font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.16em;color:#0E74C1;background:#fff;border-radius:999px;padding:4px 12px}
+.r-tldr p{margin:0;font-family:'Instrument Serif',serif;font-size:clamp(19px,2.2vw,23px);line-height:1.55;color:#143A56}
+.r-body>p:first-of-type:first-letter{font-family:'Instrument Serif',serif;font-size:3.4em;float:left;line-height:.85;padding:4px 10px 0 0;color:#0E74C1}
+.r-body h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(26px,3vw,34px);margin-top:42px}
+.r-body h2:after{content:"";display:block;width:44px;height:3px;border-radius:2px;background:linear-gradient(90deg,#0E74C1,#F2C6CC);margin-top:8px}
+.r-aud{display:grid;gap:16px;margin:16px 0 8px}
+@media(min-width:760px){.r-aud{grid-template-columns:1fr 1fr 1fr}}
+.r-aud>div{background:#fff;border:1px solid #E9EDF2;border-top:4px solid var(--ac,#0E74C1);border-radius:14px;padding:20px;box-shadow:0 8px 24px rgba(14,60,100,.05)}
+.r-aud .who{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0E74C1;margin-bottom:8px}
+.r-aud p{margin:0;font-size:14.5px;line-height:1.65}
+.r-cites{background:#F7FAFC;border-radius:14px;padding:22px 26px;margin-top:10px}
+.r-cites ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;line-height:1.8}
+.r-take{font-family:'Instrument Serif',serif;font-size:clamp(21px,2.6vw,27px);line-height:1.6;color:#143A56}
+.r-take em{color:#0E74C1}
+.r-anchor{display:inline-block;margin-top:18px;background:#0E74C1;color:#fff!important;border-radius:999px;padding:10px 20px;font-weight:700;font-size:14px;text-decoration:none}
+.r-note{font-size:13px;color:#8a96a3;margin-top:14px}
+</style>
+<div id="rprog"></div>
+<script>addEventListener('scroll',()=>{const d=document.documentElement;document.getElementById('rprog').style.width=(d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%'},{passive:true})</script>`
+
 const RESEARCH = [
   {
     slug: 'risky-outdoor-play-research',
@@ -1435,41 +1460,158 @@ const RESEARCH = [
 <h2>What this means in a daycare day</h2>
 <p>A high-quality licensed program already supplies what screens displace — peers, materials, outdoor time, conversation. That is why most strong programs are functionally screen-free for children and say so in their handbook: it is evidence-aligned, and it is a selling point.</p>`,
   },
+  {
+    slug: 'toddler-naps-sleep-canadian-guidelines',
+    kind: 'Research paper',
+    mins: 7,
+    reviewed: '2026-06-12',
+    title: 'How Much Sleep Do Toddlers and Preschoolers Need? The Canadian Guidelines (2026)',
+    desc: "Canada's 24-Hour Movement Guidelines on sleep for ages 0–4 — the hour ranges, why naps count, what consistent bedtimes do, and how daycare naps fit in.",
+    h1: 'Naps & sleep: how much young children actually need',
+    sub: 'The Canadian 24-Hour Movement Guidelines, translated — for parents, educators and directors.',
+    tldr: `Canada's 24-Hour Movement Guidelines (developed by CSEP with the Public Health Agency of Canada and an international research panel) set sleep ranges that <strong>include naps</strong>: 14–17 hours for 0–3 months, 12–16 for 4–11 months, <strong>11–14 hours for toddlers (1–2)</strong> and <strong>10–13 hours for preschoolers (3–4)</strong> — with <strong>consistent bedtimes and wake-up times</strong> named in the guideline itself. The same framework recommends calm pre-sleep routines and no screens before bed. Naps aren't a daycare convenience; they're how young children reach their daily total.`,
+    audience: {
+      parents: `Count the whole 24 hours, not just the night: a 90-minute daycare nap is part of your child's 11–14 (or 10–13) hour budget. The guideline's strongest practical lever is consistency — similar bedtime and wake time every day, weekends included. If bedtime is a battle, look at the afternoon nap's end-time before assuming a sleep problem.`,
+      educators: `Your nap room is delivering a national health guideline, not just quiet time. Protect routine: same sequence, same cues, dim light, calm wind-down — the guidelines pair sleep quantity with sleep hygiene. For nap-resisters, quiet rest still respects the routine without forcing sleep.`,
+      directors: `Publish your nap schedule and wind-down routine in the parent handbook and daily reports — it reassures parents and anchors your program to the Canadian guidelines. Where parents ask to cut a child's nap, you can ground the conversation in the 24-hour totals rather than preference vs preference.`,
+    },
+    cites: [
+      ['Canadian 24-Hour Movement Guidelines for the Early Years (0–4) — official guidelines', 'https://csepguidelines.ca/guidelines/early-years/'],
+      ['Tremblay et al., Canadian 24-Hour Movement Guidelines for the Early Years: integration of physical activity, sedentary behaviour and sleep, BMC Public Health 2017', 'https://bmcpublichealth.biomedcentral.com/articles/10.1186/s12889-017-4859-6'],
+      ['Canadian 24-Hour Movement Guidelines for the Early Years (PubMed record)', 'https://pubmed.ncbi.nlm.nih.gov/29219102/'],
+      ['Canadian Paediatric Society — Screen time and preschool children (screens and sleep routines)', 'https://cps.ca/en/documents/position/screen-time-and-preschool-children'],
+    ],
+    faqs: [
+      ['How much sleep does a 2-year-old need including naps?', 'The Canadian 24-Hour Movement Guidelines recommend 11–14 hours per 24 hours for toddlers aged 1–2 — naps included — with consistent bedtimes and wake-up times.'],
+      ['When do children stop napping?', 'The guidelines set total-sleep ranges rather than a nap deadline: many preschoolers still nap, others meet their 10–13 hours overnight. Watch the 24-hour total and the child, not the calendar.'],
+      ['Do daycare naps ruin bedtime?', 'Usually the issue is timing rather than the nap itself: a nap that ends late afternoon pushes bedtime back. Programs and parents can adjust nap end-times while protecting the daily total the guidelines call for.'],
+    ],
+    body: `
+<p>Sleep is the rare parenting topic where Canada has official numbers. They live inside the 24-Hour Movement Guidelines for the Early Years — a framework that treats a child's day as one budget of movement, sitting and sleep, built by CSEP, the Public Health Agency of Canada and a panel of researchers, and published with its evidence base in BMC Public Health.</p>
+<h2>The numbers</h2>
+<ul>
+<li><strong>0–3 months:</strong> 14–17 hours (including naps)</li>
+<li><strong>4–11 months:</strong> 12–16 hours (including naps)</li>
+<li><strong>Toddlers, 1–2 years:</strong> 11–14 hours (including naps)</li>
+<li><strong>Preschoolers, 3–4 years:</strong> 10–13 hours (including naps)</li>
+</ul>
+<p>Two details in the guideline text matter as much as the ranges. First, the totals <strong>include naps</strong> — the day and night are one budget. Second, the guideline itself specifies <strong>consistent bedtimes and wake-up times</strong>; regularity is in the recommendation, not just the advice columns.</p>
+<h2>Why naps count</h2>
+<p>For a toddler in full-day care, the math is plain: an 11-hour night plus a 1.5–2 hour nap is what lands them inside the recommended range. Drop the nap without moving bedtime and a 1–2-year-old can quietly run a daily deficit. This is why a protected, routine nap block is standard practice in licensed programs — it is the guideline, operationalized.</p>
+<h2>Sleep hygiene, the early-years version</h2>
+<p>The guidelines and the Canadian Paediatric Society's screen-time position converge on the same pre-sleep picture: a calming, predictable wind-down; screens out of the routine and out of the bedroom; similar cues at every sleep. Children fall asleep on rhythm and association far more than on willpower.</p>
+<h2>The honest caveats</h2>
+<p>Ranges are ranges — a healthy child at the bottom of the band exists, and so does one at the top. Nap needs change across the third and fourth year, and the guidelines don't dictate when napping ends; the 24-hour total and the child's daytime functioning are the gauges. Persistent sleep struggles beyond routine fixes are a conversation for your family doctor.</p>`,
+  },
+  {
+    slug: 'toddler-biting-what-research-says',
+    kind: 'Research brief',
+    mins: 4,
+    reviewed: '2026-06-12',
+    title: 'Why Toddlers Bite: What the Research Actually Says (and What Works)',
+    desc: 'Biting is developmentally normal: most children under 3 bite at least once, and physical aggression peaks around 30–42 months before language takes over. What the evidence says to do.',
+    h1: 'Biting: what the research actually says',
+    sub: 'A 4-minute brief for the most dreaded incident report in childcare.',
+    tldr: `Biting is one of the most distressing — and most <strong>developmentally normal</strong> — behaviours in group care. BC's health authority notes <strong>most children under 3 bite someone at least once</strong>, and the developmental research (summarized in Canada's Encyclopedia on Early Childhood Development) shows physical aggression <strong>rises until roughly 30–42 months, then declines</strong> as language, impulse control and emotion regulation come online. Translation: a biting toddler is usually a child whose feelings outran their words — and the evidence-backed response is calm, consistent, and aimed at building those words.`,
+    audience: {
+      parents: `If your child bit — or was bitten — it is not a verdict on your parenting or the program. Reasons differ by age: mouth discomfort in infancy, frustration and control in the toddler years. Respond the same way every time, briefly and calmly ("no biting — biting hurts"), comfort the bitten child first, and give the biter words for the feeling. Frequent biting past age 3 is worth raising with your doctor.`,
+      educators: `Track the pattern, not just the incident: time of day, transition, crowding, which peers — most biting clusters around predictable triggers you can engineer away (shadowing at transitions, duplicate popular toys, smaller groupings). Keep your incident reports factual and name the developmental context for parents; it turns an accusation moment into an education moment.`,
+      directors: `Your biting policy should say out loud what the research says: it is common, developmental, handled with supervision changes — and confidentiality protects both families (no naming the biter). Train staff on a single consistent response and put the policy in the handbook before the first incident, not after.`,
+    },
+    cites: [
+      ['HealthLink BC — Biting (most children under 3 bite at least once; reasons by age)', 'https://www.healthlinkbc.ca/healthwise/biting'],
+      ['Encyclopedia on Early Childhood Development — Aggression (topic synthesis, updated 2025)', 'https://www.child-encyclopedia.com/aggression'],
+      ['Tremblay — The Development of Physical Aggression from Early Childhood to Adulthood (Encyclopedia on Early Childhood Development)', 'https://www.child-encyclopedia.com/aggression/according-experts/development-physical-aggression-early-childhood-adulthood'],
+      ['NAEYC — Understanding and Responding to Children Who Bite', 'https://www.naeyc.org/our-work/families/understanding-and-responding-children-who-bite'],
+    ],
+    faqs: [
+      ['Is biting normal in toddlers?', "Yes — BC's HealthLink notes most children younger than 3 bite someone at least once, and developmental research shows physical aggression typically peaks in the toddler years before declining as language develops."],
+      ['Why do toddlers bite?', 'It varies by age: infants may bite from mouth discomfort (teething); from roughly 15–36 months biting is usually frustration, big emotion, or wanting control — feelings that outrun a toddler’s words.'],
+      ['When is biting a concern?', 'HealthLink BC suggests biting that continues past age 3, or happens frequently at any age, deserves a conversation with a health professional.'],
+    ],
+    body: `
+<p>No daily-report notification lands harder than "your child was bitten" — except possibly "your child bit." Here is what the developmental evidence actually says, because it changes how the whole conversation should go.</p>
+<h2>It is (genuinely) normal</h2>
+<p>BC's provincial health resource is blunt: most children younger than 3 bite someone at least once, and most stop on their own. The reasons shift with age — around 5–7 months it is usually mouth discomfort; from about 15 to 36 months it is frustration, big feelings, or wanting control over another person.</p>
+<h2>The aggression curve</h2>
+<p>The wider research, synthesized in Canada's Encyclopedia on Early Childhood Development, places biting inside a known arc: physical aggression <em>increases</em> across the first 30–42 months of life, then declines as children gain attention regulation, impulse control and — crucially — words. The toddler who bites is not off the curve; they are on it, at its peak, before language has caught up to emotion.</p>
+<h2>What works</h2>
+<p>Across the clinical and early-childhood guidance the response converges: stay calm, respond the same brief way every time, attend to the bitten child first, name the feeling and give the script ("you wanted the truck — say 'my turn'"), and engineer the environment around known triggers (transitions, crowding, scarce toys). Punishment and biting-back teach fear, not regulation. And the watch-line: frequent biting, or biting past age 3, moves it from developmental to "ask a professional."</p>`,
+  },
+  {
+    slug: 'take-padded-playgrounds',
+    kind: 'Take',
+    mins: 2,
+    reviewed: '2026-06-12',
+    anchorSlug: 'risky-outdoor-play-research',
+    title: 'Take: We Padded Everything and Called It Progress',
+    desc: "A short opinion on risk-free childhoods — and why Canada's own researchers concluded the padding has a cost.",
+    h1: 'We padded everything and called it progress',
+    sub: 'A two-minute take on the risky-play evidence.',
+    tldr: '', audience: null,
+    cites: [
+      ['Tremblay et al., Position Statement on Active Outdoor Play (2015)', 'https://www.mdpi.com/1660-4601/12/6/6475'],
+    ],
+    faqs: [],
+    body: `Somewhere along the way, a scraped knee stopped being Tuesday and became a liability. We lowered the climbers, rubberized the ground, moved the children indoors when it drizzled — and told ourselves this was love.<br/><br/>
+Canada's own researchers checked. Their national position statement says the quiet part in formal language: access to outdoor play <em>with its risks</em> is essential to healthy development. Children who never meet a climbable height never learn to read one. The skill that prevents the broken arm at nine is built on the wobbly log at three.<br/><br/>
+The principle the evidence landed on is the one your grandmother already knew: <em>as safe as necessary, not as safe as possible.</em> Remove the broken glass. Keep the height. The bruise is the tuition.`,
+  },
+  {
+    slug: 'take-screen-time-guilt',
+    kind: 'Take',
+    mins: 2,
+    reviewed: '2026-06-12',
+    anchorSlug: 'screen-time-under-5-canadian-guidelines',
+    title: "Take: The Screen-Time Number Was Never the Point",
+    desc: 'A short opinion on the hour-counting wars — and what the Canadian guidance actually asks of parents.',
+    h1: 'The screen-time number was never the point',
+    sub: 'A two-minute take on the under-5 screen guidance.',
+    tldr: '', audience: null,
+    cites: [
+      ['Canadian Paediatric Society — Screen time and preschool children (2023)', 'https://cps.ca/en/documents/position/screen-time-and-preschool-children'],
+    ],
+    faqs: [],
+    body: `Parents memorized the number — under an hour for the under-fives — and then felt guilty in its general direction. But read the Canadian Paediatric Society's actual position and the stopwatch is the least of it.<br/><br/>
+The four M's it leads with — minimize, mitigate, mindful use, <em>modelling</em> — are mostly not about the child's screen. They are about ours. The toddler who can't get eye contact at dinner because of a phone is having a different developmental experience than the one who watched twenty extra minutes of a slow cartoon next to a parent who talked through it.<br/><br/>
+Count less. Co-view more. And accept the uncomfortable part of the evidence: the most influential screen in the house is the one in your hand.`,
+  },
 ]
 
 function tldrBox(html) {
-  return `<div style="background:linear-gradient(135deg,#F8E1E4,#DCEAF5);border-radius:14px;padding:22px 24px;margin:8px 0 26px">
-  <div style="font-family:var(--mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0E74C1;margin-bottom:8px">TL;DR</div>
-  <p style="margin:0;font-size:16.5px;line-height:1.6">${html}</p></div>`
+  return `<div class="r-tldr"><p>${html}</p></div>`
 }
 function audienceBoxes(a) {
-  const box = (label, html, bg) => `<div style="background:${bg};border-radius:12px;padding:18px 20px">
-    <div style="font-family:var(--mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0E74C1;margin-bottom:6px">For ${label}</div>
-    <p style="margin:0;font-size:15px;line-height:1.6">${html}</p></div>`
-  return `<h2>What to do with this</h2><div style="display:grid;gap:14px;margin:14px 0 8px">
-  ${box('parents', a.parents, '#FDF6F0')}${box('educators', a.educators, '#F0F7F1')}${box('directors', a.directors, '#F2F0F8')}</div>`
+  const box = (label, html, ac, emoji) => `<div style="--ac:${ac}"><div class="who">${emoji} For ${label}</div><p>${html}</p></div>`
+  return `<h2>What to do with this</h2><div class="r-aud">
+  ${box('parents', a.parents, '#E8A0AC', '🏡')}${box('educators', a.educators, '#7FB069', '🎨')}${box('directors', a.directors, '#8B7FC7', '🗂️')}</div>`
 }
 function citationsBlock(cites) {
   const host = (u) => u.replace(/^https?:\/\//, '').split('/')[0]
-  return `<h2>Sources</h2><ol style="font-size:14px;line-height:1.7">
+  return `<h2>Sources</h2><div class="r-cites"><ol>
 ${cites.map(([t, u]) => `<li>${esc(t)} — <a href="${u}" rel="noopener" target="_blank">${host(u)}</a></li>`).join('\n')}</ol>
-<p style="font-size:13px;color:#7E7E7E">Every claim above is drawn from the linked sources. This article is general information, not medical or legal advice — for concerns about an individual child, talk to your paediatrician or family doctor.</p>`
+<p class="r-note">Every claim above is drawn from the linked sources. This article is general information, not medical or legal advice — for concerns about an individual child, talk to your paediatrician or family doctor.</p></div>`
 }
 function researchMeta(r) {
-  return `<p style="font-family:var(--mono,monospace);font-size:12px;color:#7E7E7E;margin-top:-6px">${esc(r.kind)} · ${r.mins} min read · reviewed ${r.reviewed} · every claim cited</p>`
+  return `<p class="r-meta">${esc(r.kind)} · ${r.mins} min read · reviewed ${r.reviewed} · every claim cited</p>`
 }
-
 function researchHub() {
-  const cards = RESEARCH.map((r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 130))}…</p></a>`).join('')
+  const card = (r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 130))}…</p></a>`
+  const group = (kind, label) => {
+    const items = RESEARCH.filter((r) => r.kind === kind)
+    return items.length ? `<h2>${label}</h2><div class="grid">${items.map(card).join('')}</div>` : ''
+  }
   return layout({
     path: '/research', wide: true,
     title: 'Child Development Research, in Plain English — Mitten Research',
-    desc: 'Evidence reviews and short briefs on child development — outdoor play, screen time and more. Every claim cited to the underlying study or Canadian guideline, written for parents, educators and directors.',
+    desc: 'Evidence reviews and short briefs on child development — outdoor play, screen time, sleep, biting and more. Every claim cited to the underlying study or Canadian guideline.',
     h1: 'The research, in plain English',
     sub: 'What the actual studies and Canadian guidelines say about how young children grow — with a TL;DR, takeaways for parents, educators and directors, and every claim cited.',
     tag: 'Mitten Research',
     jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mitten Research', url: `${DOMAIN}/research` }],
-    body: `<div class="grid">${cards}</div>
+    body: `${group('Research paper', 'Research papers')}
+${group('Research brief', 'Short briefs')}
+${group('Take', 'Takes — short opinions on the evidence')}
 <h2>How we work</h2>
 <p>Each piece is built from primary sources — peer-reviewed studies, position statements and Canadian guidelines — linked in full at the bottom of every article, with a visible review date. No claim without a citation. If new evidence changes a conclusion, the article changes and the date moves.</p>`,
   })
@@ -1566,9 +1708,11 @@ for (const r of RESEARCH) {
     path, title: r.title, desc: r.desc, h1: r.h1, sub: r.sub, tag: r.kind,
     jsonld: [
       { ...articleLd(path, r.title, r.desc), dateModified: r.reviewed, citation: r.cites.map(([, u]) => u) },
-      faqLd(r.faqs),
+      ...(r.faqs && r.faqs.length ? [faqLd(r.faqs)] : []),
     ],
-    body: researchMeta(r) + tldrBox(r.tldr) + r.body + audienceBoxes(r.audience) + citationsBlock(r.cites) + cta() + faqBlock(r.faqs),
+    body: r.kind === 'Take'
+      ? RESEARCH_CSS + researchMeta(r) + `<div class="r-take">${r.body}</div>` + (r.anchorSlug ? `<a class="r-anchor" href="/research/${r.anchorSlug}">Read the research behind this take →</a>` : '') + (r.cites.length ? citationsBlock(r.cites) : '') + cta()
+      : RESEARCH_CSS + researchMeta(r) + tldrBox(r.tldr) + `<div class="r-body">` + r.body + `</div>` + audienceBoxes(r.audience) + citationsBlock(r.cites) + cta() + faqBlock(r.faqs),
   }))
 }
 
