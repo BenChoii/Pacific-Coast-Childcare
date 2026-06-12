@@ -120,7 +120,7 @@ ${body}
 </article></main>
 <footer class="site"><div class="wrap-wide">
 <p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Mitten</strong> — the childcare app built in BC. Free for your first 5 children.</p>
-<p><a href="/">Home</a><a href="/resources">Resources</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
+<p><a href="/">Home</a><a href="/resources">Resources</a><a href="/research">Research</a><a href="/about">About</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
 <p>Mitten · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
 </div></footer>
 </body></html>`
@@ -150,10 +150,23 @@ const faqLd = (faqs) => ({
   '@context': 'https://schema.org', '@type': 'FAQPage',
   mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a.replace(/<[^>]+>/g, '') } })),
 })
+// Real, verifiable E-E-A-T identities. Author is a named human (the founder),
+// publisher carries the org, founder, logo + Langley address.
+const AUTHOR = {
+  '@type': 'Person', name: 'Ben Choi', jobTitle: 'Founder, Mitten',
+  url: `${DOMAIN}/about`, worksFor: { '@type': 'Organization', name: 'Mitten' },
+}
+const PUBLISHER = {
+  '@type': 'Organization', name: 'Mitten', url: DOMAIN,
+  logo: { '@type': 'ImageObject', url: `${DOMAIN}/brand/mitten-mark.svg` },
+  founder: { '@type': 'Person', name: 'Ben Choi' },
+  parentOrganization: { '@type': 'Organization', name: 'OKTD', url: 'https://oktd.ca' },
+  address: { '@type': 'PostalAddress', streetAddress: '83–7947 209 St', addressLocality: 'Langley', addressRegion: 'BC', postalCode: 'V2Y 0Y6', addressCountry: 'CA' },
+}
 const articleLd = (path, title, desc) => ({
   '@context': 'https://schema.org', '@type': 'Article', headline: title, description: desc,
-  datePublished: TODAY, dateModified: TODAY, url: `${DOMAIN}${path}`,
-  author: { '@type': 'Organization', name: 'Mitten' }, publisher: { '@type': 'Organization', name: 'Mitten', url: DOMAIN },
+  datePublished: TODAY, dateModified: TODAY, url: `${DOMAIN}${path}`, mainEntityOfPage: `${DOMAIN}${path}`,
+  author: AUTHOR, publisher: PUBLISHER,
 })
 
 /* ───────────────────────────── guides ───────────────────────────── */
@@ -1593,7 +1606,12 @@ ${cites.map(([t, u]) => `<li>${esc(t)} — <a href="${u}" rel="noopener" target=
 <p class="r-note">Every claim above is drawn from the linked sources. This article is general information, not medical or legal advice — for concerns about an individual child, talk to your paediatrician or family doctor.</p></div>`
 }
 function researchMeta(r) {
-  return `<p class="r-meta">${esc(r.kind)} · ${r.mins} min read · reviewed ${r.reviewed} · every claim cited</p>`
+  return `<p class="r-meta">${esc(r.kind)} · ${r.mins} min read · reviewed ${r.reviewed} · every claim cited</p>
+<p style="font-size:14px;color:#56606b;margin-top:2px">By <a href="/about" style="font-weight:600">Ben Choi</a>, founder of Mitten — written from primary sources and Canadian guidelines.</p>`
+}
+function howWeResearch() {
+  return `<div style="background:#F7FAFC;border-left:4px solid #0E74C1;border-radius:0 12px 12px 0;padding:16px 20px;margin:28px 0;font-size:14px;line-height:1.6;color:#3a4652">
+  <strong>How we research this.</strong> We're a childcare-software team, not clinicians. Every claim above is drawn from a primary source — a peer-reviewed study, a national position statement, or a Canadian health guideline — and linked in full so you can check it yourself. We stamp a review date and update the piece when the evidence changes. For decisions about an individual child, talk to your paediatrician or family doctor. Spot something we got wrong? <a href="mailto:info@oktd.ca">Tell us</a> — we correct fast.</div>`
 }
 function researchHub() {
   const card = (r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 130))}…</p></a>`
@@ -1651,7 +1669,29 @@ if (!existsSync(DIST)) {
   process.exit(1)
 }
 
-const urls = ['/', '/resources']
+const urls = ['/', '/resources', '/about']
+
+// About — real story + E-E-A-T (Organization + Person schema, named founder).
+write('about/index.html', layout({
+  path: '/about',
+  title: 'About Mitten — Childcare Software Built in BC by OKTD',
+  desc: 'Mitten is a childcare app built in Langley, BC by OKTD for a real daycare — Pacific Coast Childcare Academy — and now offered to every BC daycare. Who we are and how we research our childcare guides.',
+  h1: 'About Mitten',
+  sub: 'A childcare app built in British Columbia — for a real daycare, by the studio that runs it.',
+  tag: 'About',
+  jsonld: [
+    { '@context': 'https://schema.org', '@type': 'AboutPage', url: `${DOMAIN}/about`, name: 'About Mitten' },
+    { '@context': 'https://schema.org', ...PUBLISHER },
+    { '@context': 'https://schema.org', ...AUTHOR },
+  ],
+  body: `
+<p>Mitten is a childcare management app — daily reports, photos, messaging, billing, payroll prep — built in <strong>Langley, British Columbia</strong>. It didn't start as a product. It started as software <strong>OKTD</strong> (our web &amp; app studio) built for a real client daycare, <strong>Pacific Coast Childcare Academy</strong>, who still use it every day. Once it worked for them, we opened it to every BC daycare.</p>
+<p>That origin shapes everything: Mitten is <strong>Canadian-built and Canadian-hosted</strong>, priced in the open (free for your first 5 children, then $20/mo + $2 per child), takes <strong>no cut of your tuition payments</strong>, and is built around how childcare actually works here — CCFRI, CRA tax receipts, e-Transfer, provincial ratios — not adapted from a US product.</p>
+<h2>Who writes our guides &amp; research</h2>
+<p>Our resource library — owner guides, free tools, and the <a href="/research">research hub</a> — is written and edited by <strong>Ben Choi</strong>, Mitten's founder, with the same care we put into the app. We're a software team, not clinicians, and we say so on every research page. Our rule is simple and absolute: <strong>every factual claim links to a primary source</strong> — a peer-reviewed study, a national position statement, or a Canadian health or tax guideline — with a visible review date. If the evidence changes, the article changes.</p>
+<h2>How to reach us</h2>
+<p>We read every message. Found an error in a guide, or want to suggest a topic? <a href="mailto:info@oktd.ca">info@oktd.ca</a>. Mitten · OKTD · 83–7947 209 St, Langley, BC V2Y 0Y6.</p>`,
+}))
 
 for (const g of GUIDES) {
   const path = `/guides/${g.slug}`
@@ -1712,7 +1752,7 @@ for (const r of RESEARCH) {
     ],
     body: r.kind === 'Take'
       ? RESEARCH_CSS + researchMeta(r) + `<div class="r-take">${r.body}</div>` + (r.anchorSlug ? `<a class="r-anchor" href="/research/${r.anchorSlug}">Read the research behind this take →</a>` : '') + (r.cites.length ? citationsBlock(r.cites) : '') + cta()
-      : RESEARCH_CSS + researchMeta(r) + tldrBox(r.tldr) + `<div class="r-body">` + r.body + `</div>` + audienceBoxes(r.audience) + citationsBlock(r.cites) + cta() + faqBlock(r.faqs),
+      : RESEARCH_CSS + researchMeta(r) + tldrBox(r.tldr) + `<div class="r-body">` + r.body + `</div>` + audienceBoxes(r.audience) + howWeResearch() + citationsBlock(r.cites) + cta() + faqBlock(r.faqs),
   }))
 }
 
