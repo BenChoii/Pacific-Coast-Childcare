@@ -447,6 +447,638 @@ const GUIDES = [
 <h2>5. Keep a real waitlist</h2>
 <p>A managed waitlist (collected through your site, acknowledged, updated quarterly) turns vacancy panic into a phone call. Empty spots are the most expensive marketing problem you have — see the <a href="/guides/daycare-profit-margin-guide">margin guide</a> for the math.</p>`,
   },
+  {
+    slug: 'cwelcc-10-dollar-a-day-child-care-explained',
+    tag: '$10-a-day & CWELCC',
+    title: 'CWELCC Explained (2026): How $10-a-Day Child Care Actually Works in Canada',
+    desc: 'What the Canada-Wide Early Learning and Child Care (CWELCC) program is, what fees look like in each province in 2026, who qualifies, and how it differs from child care subsidy.',
+    h1: 'CWELCC & $10-a-day child care, explained',
+    sub: 'What the program is, where fees actually stand in 2026, and what it means for your family or your centre.',
+    faqs: [
+      ['Is child care actually $10 a day now?', 'It depends on your province. Several provinces (including BC for many spaces, Manitoba, Saskatchewan and the Atlantic provinces) have reached an average of $10/day for regulated care. Ontario fees currently average about $19/day under a program extension through December 31, 2026. Quebec runs its own long-standing reduced-contribution system at roughly $9/day.'],
+      ['Do I apply for CWELCC as a parent?', 'No — there is no parent application. If your child attends a licensed program that is enrolled in CWELCC, the reduced fee is automatic on your invoice. Your job is simply to choose a participating licensed program.'],
+      ['Is CWELCC the same as child care subsidy?', 'No. CWELCC lowers the sticker price for every family at participating licensed programs regardless of income. Subsidy is a separate, income-tested program that can reduce your share further — in many provinces you can benefit from both at once.'],
+      ['Does CWELCC cover home daycares?', 'Licensed/regulated home child care (for example, providers contracted with a licensed home child care agency in Ontario, or licensed family child care in BC) can participate. Unlicensed home daycares are never part of CWELCC.'],
+    ],
+    body: `
+<p>In 2021 the federal government committed roughly $30 billion over five years to build a Canada-wide early learning and child care system — known as <strong>CWELCC</strong> — and signed agreements with every province and territory. The goal: cut regulated child care fees to an <strong>average of $10 a day</strong>. Five years in, here's where things actually stand and how the program works in practice.</p>
+<h2>The big picture: how CWELCC works</h2>
+<p>CWELCC money flows from Ottawa to your province, and from your province to <strong>licensed child care programs</strong> that enrol in the system. Enrolled programs agree to lower (and cap) parent fees and follow funding rules; in exchange, government funding replaces the fee revenue they gave up. Three things follow from this design:</p>
+<ul>
+<li><strong>Parents never apply.</strong> The discount is baked into the fee at participating programs.</li>
+<li><strong>Only licensed care counts.</strong> Unlicensed home daycares, nannies and babysitters are outside the system.</li>
+<li><strong>It applies to younger children.</strong> CWELCC fee reductions target children under six (school-age care follows ordinary fees).</li>
+</ul>
+<h2>Where fees stand by province (mid-2026)</h2>
+<ul>
+<li><strong>Ontario</strong> — fees at enrolled programs average about <strong>$19/day</strong>. Ontario and Canada signed a one-year extension (November 2025) keeping current reduced fees in place to <strong>December 31, 2026</strong>, with $695M in federal funding for the year. The $10/day goal remains, without a confirmed new date. See our <a href="/guides/10-dollar-a-day-child-care-ontario">Ontario deep-dive</a>.</li>
+<li><strong>British Columbia</strong> — a mix: a growing list of <strong>$10-a-Day ChildCareBC</strong> sites charge exactly $10/day (or $0 for low-income families), while other licensed providers offer reduced fees through the Child Care Fee Reduction Initiative, often paired with the income-tested Affordable Child Care Benefit.</li>
+<li><strong>Alberta</strong> — affordability grants and subsidy bring fees for most families to an average around $15/day or less, with the federal target tracking toward $10.</li>
+<li><strong>Manitoba, Saskatchewan, and the Atlantic provinces</strong> — generally at <strong>$10/day average</strong> for regulated care already.</li>
+<li><strong>Quebec</strong> — runs its own reduced-contribution network (the original model CWELCC copied) at roughly <strong>$9/day</strong>, indexed annually.</li>
+</ul>
+<p><em>Numbers move with announcements — this page is reviewed when provinces update their agreements.</em></p>
+<h2>CWELCC vs. subsidy: the distinction that confuses everyone</h2>
+<p><strong>CWELCC cuts the sticker price for everyone.</strong> <strong>Subsidy cuts your share based on income.</strong> They stack: an Ontario family can pay the CWELCC-reduced fee and then have part of that covered by municipal fee subsidy; a BC family can attend a fee-reduced centre and apply the Affordable Child Care Benefit on top. If money is tight, always ask about both.</p>
+<h2>What it means for operators</h2>
+<p>Joining CWELCC trades pricing freedom for funding stability and a powerful marketing fact (your posted fee drops dramatically). It also brings real administrative obligations — enrolment paperwork, fee caps, cost reporting, and audits. We wrote a dedicated guide: <a href="/guides/cwelcc-for-daycare-operators">CWELCC for operators</a>. Software that keeps clean attendance, enrolment and billing records makes the reporting side dramatically lighter — that's exactly what Mitten produces as a by-product of daily use.</p>`,
+  },
+  {
+    slug: '10-dollar-a-day-child-care-ontario',
+    tag: '$10-a-day & CWELCC',
+    title: '$10-a-Day Child Care in Ontario (2026): Current Fees, Extension & How to Get It',
+    desc: 'Ontario CWELCC in 2026: fees average about $19/day under the one-year extension to December 31, 2026. What parents pay, how to find an enrolled program, and what comes next.',
+    h1: '$10-a-day child care in Ontario: where it actually stands',
+    sub: 'Fees average ~$19/day in 2026 under a one-year extension — here is how the program works, how to benefit, and what is coming.',
+    faqs: [
+      ['How much is daycare in Ontario with CWELCC in 2026?', 'Fees at enrolled programs average about $19 per day (roughly $400 a month) for children under six â about half of pre-program fees. Exact amounts vary by program because reductions were applied to each program’s 2022 fee levels.'],
+      ['Did Ontario reach $10-a-day child care?', 'Not yet. The March 2026 target was replaced by a one-year extension (signed November 10, 2025) that keeps current reduced fees — about $19/day on average — through December 31, 2026, backed by $695 million in federal funding. The $10 goal remains without a confirmed new date.'],
+      ['How do I get the reduced fee?', 'Enrol your child in a licensed program that participates in CWELCC. There is no application and no income test — the reduced fee appears directly on your invoice. Your municipality publishes lists of participating programs.'],
+      ['Can I also get child care subsidy in Ontario?', 'Yes. Ontario’s income-tested fee subsidy (administered by municipalities) is separate from CWELCC and can reduce your share of the already-reduced fee. Apply through your local service system manager (e.g., the City of Toronto).'],
+    ],
+    body: `
+<p>Ontario signed onto the federal $10-a-day program in March 2022, and fees for young children at participating licensed programs have fallen by more than half since. Here's the honest, current picture for families and operators — without the headline spin.</p>
+<h2>The state of play in 2026</h2>
+<ul>
+<li><strong>Average fee: about $19/day</strong> at CWELCC-enrolled programs for children under six.</li>
+<li><strong>The $10 target was pushed.</strong> On November 10, 2025, Ontario and Canada signed a one-year extension keeping current fees in place until <strong>December 31, 2026</strong>, with $695M of federal funding. The extension buys time to address educator shortages and space targets before further cuts.</li>
+<li><strong>Fees are capped.</strong> Enrolled operators cannot raise base fees above their frozen caps, so the discount can't quietly erode.</li>
+<li><strong>Spaces are growing.</strong> Ontario reports ~41,000 net new spaces toward its 86,000-space target (relative to 2019) by end of 2026 — but demand still outruns supply in most cities, so waitlists remain the real constraint.</li>
+</ul>
+<h2>How to actually benefit (parents)</h2>
+<ol>
+<li><strong>Confirm the program is licensed</strong> — only licensed centres and agency-contracted home providers can participate.</li>
+<li><strong>Ask directly: "Are you enrolled in CWELCC?"</strong> Most licensed programs are, but participation is voluntary, and the difference is thousands of dollars a year.</li>
+<li><strong>Get on waitlists early</strong> — in Toronto, Ottawa and most cities, the binding constraint is a spot, not the fee. Start in pregnancy for infant care; it isn't overkill.</li>
+<li><strong>Stack subsidy if eligible</strong> — municipal fee subsidy is income-tested, separate, and applies on top. Apply through your city.</li>
+</ol>
+<h2>What operators should know</h2>
+<p>CWELCC in Ontario now runs on a <strong>cost-based funding formula</strong>: government funding covers eligible costs (with benchmarks) rather than simply topping up revenue. That makes clean records — enrolment counts, attendance, staffing hours, fee collection — the difference between smooth reporting and painful audits. Our <a href="/guides/cwelcc-for-daycare-operators">operator guide</a> covers enrolment, fee caps and reporting; our <a href="/guides/daycare-profit-margin-guide">margin guide</a> covers staying viable under caps.</p>
+<h2>What happens after December 31, 2026?</h2>
+<p>Unknown — the extension explicitly defers the question. Watch for a renegotiated agreement in late 2026; this page is updated when announcements land. <em>Last reviewed June 2026.</em></p>`,
+  },
+  {
+    slug: 'is-my-daycare-part-of-cwelcc',
+    tag: '$10-a-day & CWELCC',
+    title: 'Is My Daycare Part of CWELCC? How to Check (Every Province, 2026)',
+    desc: 'Three ways to confirm whether a daycare participates in the $10-a-day CWELCC program — what to ask, where the official lists are, and red flags that a "discount" is not the real program.',
+    h1: 'Is my daycare part of CWELCC? How to check',
+    sub: 'The three-step check, province by province — and the red flags that a discount is not the real program.',
+    faqs: [
+      ['Can an unlicensed daycare be part of CWELCC?', 'No. Only licensed/regulated child care can enrol â licensed centres, and home providers operating under a licensed agency (Ontario) or holding a family child care licence (BC, Alberta and others). An unlicensed provider advertising "$10/day" is simply setting a low price, with none of the program’s oversight.'],
+      ['My centre is licensed but my fee did not go down. Why?', 'Three common reasons: the program chose not to enrol in CWELCC (participation is voluntary), your child is six or older (reductions target under-6 care), or you are looking at extra charges (late pickup, meals, field trips) that sit outside the capped base fee. Ask the director which applies.'],
+      ['Does CWELCC apply to before/after school care?', 'No — fee reductions apply to children under six. School-age programs charge regular fees, though income-tested subsidy may still help.'],
+    ],
+    body: `
+<p>The fastest way to find out is to ask — but here's how to verify the answer, because "we offer affordable care" and "we are enrolled in CWELCC" are very different sentences.</p>
+<h2>The three-step check</h2>
+<ol>
+<li><strong>Is it licensed?</strong> Every province publishes a licensed child care registry/search. If the program isn't in it, stop — it cannot be in CWELCC.</li>
+<li><strong>Ask the magic question:</strong> "Are you enrolled in CWELCC?" (in BC: "Are you a $10-a-Day site, or in the Fee Reduction Initiative?"). Enrolled operators know exactly what this means and will answer instantly. Vague answers are themselves an answer.</li>
+<li><strong>Check the official list.</strong> Ontario municipalities (Toronto, Peel, Ottawa, etc.) publish participating-program lists; BC publishes the $10-a-Day site list; Alberta publishes affordability-grant participants. Search your municipality + "CWELCC list".</li>
+</ol>
+<h2>What the invoice should look like</h2>
+<p>At an enrolled program, the reduction is on the invoice itself — you pay the reduced base fee, full stop. You should <em>not</em> need to pay full price and claim something back, and there's no CWELCC paperwork with your name on it. (Keep receipts anyway — reduced fees are still <a href="/guides/child-care-expenses-deduction-canada">tax-deductible child care expenses</a>.)</p>
+<h2>Red flags</h2>
+<ul>
+<li>"$10/day" advertised by an <strong>unlicensed</strong> home daycare — legal as a price, but it carries no licensing oversight and no funding rules.</li>
+<li>A "discount" that requires cash payment or skips receipts — that's a provider avoiding records, not a government program.</li>
+<li>Base fee fine print: enrolled programs have capped base fees, but optional extras can be charged — make sure you know which is which.</li>
+</ul>
+<h2>For operators reading this</h2>
+<p>If parents keep asking you this question, put the answer on your website and intake forms — "We are enrolled in CWELCC; your fee is $X/day" converts tours like nothing else. Mitten's invoicing shows the reduced fee cleanly per family, so the paper trail parents (and auditors) want is automatic.</p>`,
+  },
+  {
+    slug: 'cwelcc-for-daycare-operators',
+    tag: '$10-a-day & CWELCC',
+    title: 'CWELCC for Operators (2026): Enrolment, Fee Caps, Funding & Reporting',
+    desc: 'A plain-English operator guide to CWELCC: whether to enrol, how fee caps work, what cost-based funding means in Ontario, wage floors, and the records you need to survive reporting.',
+    h1: 'CWELCC for operators: the practical guide',
+    sub: 'Whether to enrol, what you trade, how the money flows, and the records that make reporting painless.',
+    faqs: [
+      ['Is joining CWELCC mandatory for licensed daycares?', 'No — participation is voluntary. But the market pressure is real: enrolled competitors post fees roughly half of yours. Most licensed under-6 programs in Canada have enrolled.'],
+      ['Can I raise my fees if I am in CWELCC?', 'Base parent fees are capped (in Ontario, tied to your 2022 fee schedule). Cost increases are addressed through the funding formula rather than parent fees. Optional extras outside the base fee follow provincial rules — document them carefully.'],
+      ['What records does CWELCC reporting require?', 'Expect to substantiate enrolment counts by age group, attendance, parent fees charged and collected, staffing and wage costs, and eligible expenses. Clean monthly records turn reporting into an export; messy ones turn it into an audit.'],
+    ],
+    body: `
+<p>CWELCC is the biggest structural change to Canadian child care economics in a generation. For operators it's a real trade: pricing freedom for funding stability. Here's how to think it through and run it well. <em>(Rules vary by province — Ontario is the worked example here; confirm specifics with your service system manager or ministry.)</em></p>
+<h2>The trade you're making</h2>
+<p><strong>You give up:</strong> setting your own base fees (caps), some expansion flexibility (space growth is managed), and you take on reporting obligations.<br/>
+<strong>You get:</strong> government funding replacing the parent revenue you forgo, dramatically more affordable posted fees (which fills rooms and waitlists), wage support for your educators, and insulation from the fee-sensitivity that caps small-program pricing power anyway.</p>
+<p>For most under-6 programs, enrolling is the right call — an unenrolled centre competes against neighbours charging half as much. The genuine exceptions: programs serving mostly 6+, premium niche models, and providers unwilling to carry the admin load.</p>
+<h2>How the money flows (Ontario's cost-based model)</h2>
+<p>Since January 2025 Ontario funds enrolled programs on a <strong>cost-based formula</strong>: funding is built from benchmarked eligible costs (staffing, accommodation, operations) plus top-ups, rather than simply replacing revenue. Practical consequences:</p>
+<ul>
+<li><strong>Your cost records are now revenue documents.</strong> Staffing hours, wages, rent and program costs determine funding.</li>
+<li><strong>Wage floors matter:</strong> Ontario sets a rising wage floor for eligible RECEs (mid-$20s per hour and climbing annually) funded through the formula — budget for it and claim it.</li>
+<li><strong>Timing:</strong> funding flows through your municipality/service system manager on their reporting calendar. Late or sloppy reports delay cash.</li>
+</ul>
+<h2>Surviving reporting: the record-keeping spine</h2>
+<ol>
+<li><strong>Enrolment & attendance by age group</strong> — daily, timestamped, exportable.</li>
+<li><strong>Fees charged and collected per family</strong> — invoices, receipts, and arrears that reconcile.</li>
+<li><strong>Staffing records</strong> — schedules, actual hours, wages, certifications.</li>
+<li><strong>Expense documentation</strong> — categorized, with receipts, mapped to eligible-cost categories.</li>
+</ol>
+<p>This is the unglamorous reason software pays for itself under CWELCC: attendance, enrolment, invoicing and staff hours are exactly what Mitten records as a by-product of daily use — reporting becomes an export, not a reconstruction. (See also: <a href="/guides/daycare-payroll-guide-canada">payroll guide</a>, <a href="/guides/daycare-profit-margin-guide">margin guide</a>.)</p>
+<h2>Watch the calendar</h2>
+<p>Ontario's current agreement runs to <strong>December 31, 2026</strong>; renegotiation will set the next phase. Funding formulas get tweaked annually province-wide. Subscribe to your service system manager's operator bulletins — and assume the only constant is that documentation requirements grow.</p>`,
+  },
+  {
+    slug: 'how-to-start-a-daycare-in-ontario',
+    tag: 'Starting up',
+    title: 'How to Start a Daycare in Ontario (2026): Licensing, Costs & Step-by-Step',
+    desc: 'The step-by-step path to opening a licensed child care centre in Ontario — CCEYA licensing, the application process, staffing and ratio rules, realistic costs, and CWELCC.',
+    h1: 'How to start a daycare in Ontario',
+    sub: 'The CCEYA licence path, realistic costs and timelines, staffing rules, and whether to join CWELCC on day one.',
+    faqs: [
+      ['Do I need a licence to run a daycare in Ontario?', 'You need a licence under the CCEYA the moment you care for more than five children under 13 (other than your own relatives). Five or fewer can operate as an unlicensed home daycare under strict rules — see our home daycare guide.'],
+      ['How long does Ontario daycare licensing take?', 'Plan for 6–12 months from application to opening for a centre: finding and renovating a compliant space and passing municipal zoning, fire and health approvals usually take longer than the ministry review itself.'],
+      ['How much does it cost to open a daycare in Ontario?', 'Centre build-outs commonly run from tens of thousands (modest leasehold conversion) into the hundreds of thousands (new build-out in a major city) before first revenue — space, renovations to meet O. Reg. 137/15 requirements, equipment, insurance, and staffing through the licensing period are the big lines.'],
+      ['Should a new Ontario daycare join CWELCC?', 'New spaces are subject to Ontario’s managed growth â directed growth plans determine where new CWELCC spaces are approved. Apply early through your municipality; an enrolled program posts fees roughly half of an unenrolled one, which transforms fill-up speed.'],
+    ],
+    body: `
+<p>Ontario licenses child care under the <strong>Child Care and Early Years Act, 2014 (CCEYA)</strong> and O. Reg. 137/15, administered by the Ministry of Education. Here's the practical path from idea to open doors. <em>(General guidance — the <a href="https://www.ontario.ca/page/child-care-rules-ontario" rel="nofollow">ministry's rules pages</a> and your licensing program advisor are the binding sources.)</em></p>
+<h2>Step 0 — Pick your model</h2>
+<ul>
+<li><strong>Licensed child care centre</strong> — what this guide covers. Any group care beyond five children requires it.</li>
+<li><strong>Home daycare</strong> — up to five children unlicensed, or six through a licensed home child care agency. Different economics entirely: see <a href="/guides/how-to-start-a-home-daycare-in-ontario">our home daycare guide</a>.</li>
+</ul>
+<h2>Step 1 — Space first (it's the long pole)</h2>
+<p>Most licensing timelines are really real-estate timelines. Your space needs municipal <strong>zoning</strong> approval for child care use, <strong>fire</strong> and <strong>health</strong> sign-offs, and must meet O. Reg. 137/15 physical requirements — including <strong>2.8 m² of unobstructed indoor play space per child</strong>, age-appropriate outdoor play space (5.6 m²/child for most programs), separate rooms per age group, and washroom/diapering provisions. Engage the municipality before signing a lease; a beautiful space that can't be zoned is a very expensive mistake.</p>
+<h2>Step 2 — Apply through the Child Care Licensing System (CCLS)</h2>
+<p>Ontario's licensing runs through the online CCLS portal: corporate documents, floor plans, policies (anaphylaxis, safe sleep, behaviour guidance, emergency management, and more), staffing plans, and menus. A program advisor is assigned, reviews everything, and inspects the site. Expect iteration — the advisors are genuinely helpful if you treat the process as collaborative.</p>
+<h2>Step 3 — Staffing to ratio</h2>
+<p>Every age group needs qualified staff at <a href="/guides/ontario-daycare-ratios-and-group-sizes">Schedule 1 ratios</a> — e.g. infants 3 staff per 10 children, toddlers 1:5, preschool 1:8 — with <strong>RECE</strong> (Registered Early Childhood Educator) requirements per group, vulnerable sector checks, first aid/CPR-C, and a designated supervisor meeting experience requirements. Recruiting RECEs is currently the hardest part of opening in most Ontario cities; start hiring before your licence lands.</p>
+<h2>Step 4 — The money</h2>
+<p>Budget honestly: leasehold improvements, equipment (cribs, tables, playground), licensing/professional fees, insurance, and several months of payroll before enrolment catches up. Then decide on <a href="/guides/cwelcc-for-daycare-operators">CWELCC enrolment</a> — for under-6 programs it roughly halves your posted fees and transforms fill-up speed, at the cost of fee caps and reporting. Our <a href="/guides/daycare-tuition-pricing-guide">pricing guide</a> and <a href="/guides/daycare-profit-margin-guide">margin guide</a> cover the unit economics.</p>
+<h2>Step 5 — Open well</h2>
+<p>Enrolment momentum comes from waitlists collected <em>during</em> the licensing year, tours that show parents what their phone sees at 2pm, and clean professional invoicing from day one. That operational layer — enrolment, attendance, daily reports, billing, staff hours — is exactly what Mitten handles, free for your first five children, so the software cost arrives only as revenue does.</p>`,
+  },
+  {
+    slug: 'how-to-start-a-home-daycare-in-ontario',
+    tag: 'Starting up',
+    title: 'How to Start a Home Daycare in Ontario (2026): Rules, Limits & Licensed Agencies',
+    desc: 'Ontario home daycare rules in plain English: the five-child unlicensed limit, what counts toward it, joining a licensed home child care agency, insurance, taxes and realistic income.',
+    h1: 'How to start a home daycare in Ontario',
+    sub: 'The unlicensed five-child rules, the licensed agency route, and the business basics that keep you safe and profitable.',
+    faqs: [
+      ['How many children can I care for without a licence in Ontario?', 'At most five children under 13 — and your own children under four count toward the five. Within that, no more than three children may be under two years old. Care for a sixth (non-relative) child and you are operating illegally.'],
+      ['What is licensed home child care in Ontario?', 'Home providers contracted with a ministry-licensed home child care agency. The agency screens, trains, inspects and supports you; in exchange you can care for up to six children, access CWELCC reduced fees for your families, and get referrals.'],
+      ['Do home daycare parents get tax receipts?', 'Yes — you must issue receipts. Parents claim child care expenses on their returns, and as an individual provider your receipt must include your SIN. See our receipts guide for exactly what goes on one.'],
+    ],
+    body: `
+<p>Home daycare is the fastest, lowest-capital way into child care — and Ontario's rules are strict but simple once translated. <em>(Binding source: the CCEYA and <a href="https://www.ontario.ca/page/child-care-rules-ontario" rel="nofollow">ontario.ca's rules for unlicensed child care</a>.)</em></p>
+<h2>The unlicensed limits, precisely</h2>
+<ul>
+<li><strong>Maximum five children under 13</strong> at any one time — <strong>including your own children under four</strong>.</li>
+<li>Of those five, <strong>no more than three may be under two years old</strong>.</li>
+<li>You must not advertise or operate as "licensed", and you must follow basic safety rules (e.g., you can't care for children in a home where someone is on the child abuse registry; serious occurrences have reporting obligations).</li>
+</ul>
+<p>These limits are per-premises and enforced — operating over them risks orders, fines and shutdown, and it voids most insurance.</p>
+<h2>Unlicensed vs. licensed agency: the real decision</h2>
+<p><strong>Stay unlicensed</strong> for maximum autonomy: you set fees, choose families, answer to no agency — but you're capped at five, outside CWELCC (your families pay full fee with after-tax dollars they can partly deduct), and you carry compliance alone.<br/>
+<strong>Join a licensed home child care agency</strong> to care for up to <strong>six</strong> children, give your families CWELCC-reduced fees (a massive competitive edge when the centre down the road charges $19/day), and get inspections, training, backup and referrals — in exchange for agency oversight and their slice of the economics. As CWELCC matures, the agency route keeps getting relatively stronger.</p>
+<h2>Set up like a business from day one</h2>
+<ol>
+<li><strong>Insurance</strong> — home daycare liability coverage (your home policy alone does not cover this; tell your insurer or get a specialized policy).</li>
+<li><strong>Contracts</strong> — fees, hours, late pickup, holidays, termination notice, illness policy. In writing, signed before the first day.</li>
+<li><strong>Receipts & taxes</strong> — issue receipts (with your SIN), report income, and deduct aggressively-but-correctly: a share of rent/mortgage interest, utilities and food, supplies, toys, insurance. Full details in our <a href="/guides/daycare-taxes-canada">daycare tax guide</a> and <a href="/guides/daycare-tax-receipts-cra-guide">receipts guide</a>.</li>
+<li><strong>Records</strong> — daily attendance, signed agreements, incident notes. Protects you in disputes and substantiates your income and deductions.</li>
+</ol>
+<h2>What you can earn</h2>
+<p>Five full-time spots at typical unlicensed Ontario rates ($45–$65/day depending on region and age mix) gross roughly $55k–$80k/year before expenses; the agency route trades a little per-spot revenue for a sixth spot and zero-vacancy referrals. The killers are vacancy gaps and unpaid invoices — which is why waitlists and clean invoicing matter as much as craft skills. Mitten is free at home-daycare scale (up to five children) and handles daily photo updates, attendance, invoicing and receipts — the professional polish that justifies your rate.</p>`,
+  },
+  {
+    slug: 'ontario-daycare-ratios-and-group-sizes',
+    tag: 'Rules & ratios',
+    title: 'Ontario Daycare Ratios & Group Sizes (2026): Schedule 1 Explained',
+    desc: 'Ontario staff-to-child ratios and maximum group sizes under O. Reg. 137/15 Schedule 1 — infants 3:10, toddlers 1:5, preschool 1:8 — plus reduced-ratio windows and mixed-age rules.',
+    h1: 'Ontario daycare ratios & group sizes',
+    sub: 'Schedule 1 in plain English: the numbers, the reduced-ratio windows, and the mixed-age rules.',
+    faqs: [
+      ['What is the infant ratio in Ontario daycares?', 'Licensed centres run infant rooms (under 18 months) at 3 staff per 10 children with a maximum group size of 10 — and infant ratios can never be reduced, at any time of day.'],
+      ['How many toddlers can one ECE supervise in Ontario?', 'Toddler groups (18–30 months) run at 1 staff per 5 children, maximum group of 15 (so a full toddler room has 3 staff).'],
+      ['Can ratios be reduced during naps in Ontario?', 'Toddler and preschool groups may operate at half ratio during a rest period of up to two hours if another staff member is available on the premises for emergencies — infant groups never reduce. There is also a limited reduced-ratio window around opening and closing (not for infants).'],
+      ['How many children can an unlicensed home daycare have?', 'Five children under 13 maximum (counting the provider’s own children under four), with at most three under two. Licensed agency home providers may have six.'],
+    ],
+    body: `
+<p>Ratios are the load-bearing rule of Ontario child care: they set your staffing, your room layout, and most of your cost structure. Here is <strong>Schedule 1 of O. Reg. 137/15</strong> (under the CCEYA), translated. <em>(Authoritative source: the <a href="https://www.ontario.ca/document/child-care-centre-licensing-manual/part-3-ratios-and-group-size" rel="nofollow">ministry licensing manual, Part 3</a>.)</em></p>
+<h2>The core table (licensed centres)</h2>
+<ul>
+<li><strong>Infant</strong> (under 18 months) — <strong>3 staff : 10 children</strong>, max group <strong>10</strong>.</li>
+<li><strong>Toddler</strong> (18 months to under 30 months) — <strong>1 : 5</strong>, max group <strong>15</strong>.</li>
+<li><strong>Preschool</strong> (30 months to under 6 years) — <strong>1 : 8</strong>, max group <strong>24</strong>.</li>
+<li><strong>Kindergarten</strong> (44 months+, in a kindergarten group) — <strong>1 : 13</strong>, max group <strong>26</strong>.</li>
+<li><strong>Primary/junior school age</strong> (68 months+) — <strong>1 : 15</strong>, max group <strong>30</strong>.</li>
+<li><strong>Junior school age</strong> (9–12 years) — <strong>1 : 20</strong>, max group <strong>20</strong>.</li>
+</ul>
+<p>Within each group, qualification rules apply (e.g., RECE requirements per group), and group sizes are hard caps per licensed room — a 26th preschooler doesn't mean one more educator, it means another licensed group.</p>
+<h2>The flexibility windows (and their limits)</h2>
+<ul>
+<li><strong>Opening/closing:</strong> for the first 90 minutes after opening and before closing, most groups may run at two-thirds ratio. <strong>Never infants.</strong></li>
+<li><strong>Rest period:</strong> toddler and preschool groups may run at half ratio for up to two hours during sleep, provided another adult is available on site for emergencies. <strong>Never infants.</strong></li>
+<li><strong>Mixed-age grouping:</strong> a licensed group may include a limited share (generally up to 20% of group size) of younger children, with the group then following the younger rules in specific ways — this is where directors most often get tripped up; confirm your configuration with your program advisor.</li>
+</ul>
+<h2>What this means for your budget</h2>
+<p>Infant care needs one educator per ~3.3 children — which is why infant fees are highest and infant rooms are usually loss-leaders covered by preschool rooms (1:8). When you model a new room, model the <em>staffing step function</em>, not the average: the 11th infant requires a whole new group. Our <a href="/guides/daycare-profit-margin-guide">margin guide</a> walks the math, and Mitten's live ratio dashboard shows each room against its requirement in real time — including the nap-window allowance.</p>
+<h2>Home daycare limits</h2>
+<p>Unlicensed: max <strong>5</strong> children under 13 (your own under-fours count), max 3 under two. Licensed agency homes: <strong>6</strong>. Full details in the <a href="/guides/how-to-start-a-home-daycare-in-ontario">home daycare guide</a>.</p>`,
+  },
+  {
+    slug: 'how-to-export-your-data-from-brightwheel',
+    tag: 'Software help',
+    title: 'How to Export Your Data From Brightwheel (2026): Rosters, Billing & Photos',
+    desc: 'A practical guide to getting your roster, attendance, billing history and photos out of Brightwheel — what exports exist, what to request from support, and a checklist so nothing is lost.',
+    h1: 'How to export your data from Brightwheel',
+    sub: 'What you can export yourself, what to request from support, and the checklist that makes sure nothing gets left behind.',
+    faqs: [
+      ['Can I export everything from Brightwheel myself?', 'Reports and rosters generally export as CSV/Excel from the admin web dashboard report screens. Bulk photo/video export and complete historical archives typically require a request to Brightwheel support — ask before you cancel, while your account is active.'],
+      ['Who owns the data in Brightwheel â me or them?', 'Your program’s records are your business records. Vendors’ terms govern the platform copy, but you are entitled to (and responsible for) keeping your own records â export them before any cancellation takes effect.'],
+      ['What should I export before cancelling Brightwheel?', 'At minimum: child & family roster with contacts, attendance history, billing/payment history per family (you need it for taxes and disputes), staff records and hours, immunization/medical notes, and photos/videos. Export receipts and year-end statements families might request later.'],
+    ],
+    body: `
+<p>Whether you're switching platforms, closing a program, or just want your own backup (smart), here's how to get your information out of Brightwheel cleanly. Do this <strong>while your subscription is active</strong> — access typically ends when billing does.</p>
+<h2>Step 1 — Export what the dashboard gives you</h2>
+<p>From the admin <strong>web</strong> dashboard (not the mobile app), work through the reporting screens and download CSV/Excel where offered. The usual self-serve set:</p>
+<ul>
+<li><strong>Student roster</strong> — children, rooms, parent/guardian contacts, authorized pickups.</li>
+<li><strong>Attendance reports</strong> — pick the widest date range available and export by room and by child.</li>
+<li><strong>Billing reports</strong> — invoices, payments received, balances per family. Export both summary and detailed/transaction views; your accountant and the CRA care about the detail.</li>
+<li><strong>Staff records</strong> — profiles and any tracked hours.</li>
+</ul>
+<h2>Step 2 — Request what isn't self-serve</h2>
+<p>Email support (from your owner/admin account) and explicitly request: <strong>a complete export of all photos and videos</strong>, full historical daily-report data, and any records not available in dashboard reports. Name your program, your role, and a deadline. Vendors handle these requests routinely — but turnaround varies, so start this two to three weeks before you intend to cancel.</p>
+<h2>Step 3 — The nothing-left-behind checklist</h2>
+<ul>
+<li>☐ Roster + contacts (CSV)</li>
+<li>☐ Attendance history (CSV, full range)</li>
+<li>☐ Billing: invoices, payments, balances (CSV) — keep 6 years for CRA</li>
+<li>☐ Year-end tax statements/receipts issued to families</li>
+<li>☐ Photos & videos (bulk export via support)</li>
+<li>☐ Medical/immunization/allergy notes</li>
+<li>☐ Staff records and hours</li>
+<li>☐ Any signed digital forms/agreements</li>
+</ul>
+<h2>Step 4 — Verify, then cancel</h2>
+<p>Open the files, check date ranges and family counts, store a copy somewhere durable (cloud drive + local). Only then start <a href="/guides/how-to-cancel-brightwheel">cancellation</a> — and if the reason you're exporting is a switch, Mitten imports your roster CSV directly: most programs are fully moved in an afternoon, parents join by link with no app-store download, and it's free up to 5 children with published pricing after ($20/mo + $2/child).</p>`,
+  },
+  {
+    slug: 'how-to-cancel-brightwheel',
+    tag: 'Software help',
+    title: 'How to Cancel Brightwheel (2026): Steps, Timing & What Happens to Your Data',
+    desc: 'How to cancel a Brightwheel subscription cleanly: who can cancel, contract timing, the data to export first, how to tell parents, and a smooth switch path.',
+    h1: 'How to cancel Brightwheel (without losing anything)',
+    sub: 'The right order of operations: export, confirm terms, notify families, then cancel.',
+    faqs: [
+      ['How do I cancel my Brightwheel subscription?', 'As the account owner/admin, review your plan terms (annual contracts may have renewal dates that matter), export your data, then cancel through your account settings or by contacting Brightwheel support/your account manager and requesting written confirmation of the end date.'],
+      ['Will I lose my data when I cancel Brightwheel?', 'Expect access to end with your subscription. Export rosters, attendance, billing history and photos before the end date — bulk photo export usually requires a support request, which takes time.'],
+      ['Can I get a refund for unused months?', 'Depends entirely on your contract terms (monthly vs annual, renewal date). Check the agreement and ask directly â and diarize next year’s renewal date if you’re staying through a term.'],
+    ],
+    body: `
+<p>Cancelling childcare software is mostly about sequencing — done in the right order it's painless; done backwards you lose photos and billing history families will ask about for years. Here's the order.</p>
+<h2>1. Check your contract before you announce anything</h2>
+<p>Find your agreement (or ask your account manager for it): monthly or annual? When does it renew? Is there a notice period? Annual plans commonly renew automatically — a well-timed cancellation beats an argument about a surprise renewal charge.</p>
+<h2>2. Export everything first</h2>
+<p>Access typically ends when the subscription does, and bulk photo exports need a support request with lead time. Work through our full <a href="/guides/how-to-export-your-data-from-brightwheel">Brightwheel export guide</a> — roster, attendance, billing detail (CRA wants 6 years), photos, signed forms.</p>
+<h2>3. Plan the family transition</h2>
+<p>Parents experience the change as "my daily photos moved." Make it a two-line message: what's changing, what they need to do (usually: click one link), and the date. Run both systems for a few overlap days if you can — it converts anxiety into a non-event.</p>
+<h2>4. Cancel in writing</h2>
+<p>Cancel via your account settings or account manager, and get <strong>written confirmation of the final billing date and access end date</strong>. Screenshot your confirmation. If payments/tuition ran through the platform, confirm the last payout date and reconcile it against your bank.</p>
+<h2>5. If you're switching, the grass-is-greener check</h2>
+<p>Whatever drove the cancellation — price creep, processing fees, support queues — make sure the next platform actually fixes it. Mitten publishes pricing (free ≤5 children; $20/mo + $2/child after), takes no cut of tuition card payments beyond Stripe's standard processing, imports your exported roster CSV directly, and parents join via link. The <a href="/guides/how-to-switch-daycare-software-without-losing-data">switching guide</a> has the full migration playbook.</p>`,
+  },
+  {
+    slug: 'brightwheel-app-problems-and-fixes',
+    tag: 'Software help',
+    title: 'Brightwheel App Not Working? Fixes for Notifications, Check-In & Login (2026)',
+    desc: 'Practical fixes when Brightwheel misbehaves: parents not getting notifications or photos, check-in/QR problems, login loops, and missing daily reports — plus when the problem is not fixable.',
+    h1: 'Brightwheel not working? The practical fix list',
+    sub: 'The fixes that actually resolve notification, check-in and login complaints — and how to tell a glitch from a structural problem.',
+    faqs: [
+      ['Why are parents not getting Brightwheel notifications?', 'In most cases it’s device-level: notifications disabled for the app, battery-saver/focus modes suppressing them, or a stale login. Have the parent open the app settings, re-enable notifications, and sign out and back in. If one parent gets updates and the other doesn’t, check both are actually attached to the child profile.'],
+      ['Why is Brightwheel check-in not working at drop-off?', 'Usual suspects: a kiosk device on poor Wi-Fi, a stale browser/app session, the room not assigned, or the family’s code/QR changed. Refresh the kiosk session and verify connectivity; keep a paper fallback so drop-off never queues behind a glitch.'],
+      ['Brightwheel says my email is already in use — what do I do?', 'The family was probably invited twice or has a legacy account. Use the password reset on that email first; if it tangles roles (staff vs parent), support has to merge the accounts — ask them to consolidate to one login.'],
+    ],
+    body: `
+<p>When the parent app misbehaves, educators wear the complaints. This list resolves the bulk of "Brightwheel isn't working" reports — in rough order of likelihood. (It's written for Brightwheel but the logic fits any childcare app.)</p>
+<h2>Parents not receiving photos/notifications</h2>
+<ol>
+<li><strong>Device settings:</strong> app notifications enabled? Focus/Do-Not-Disturb or battery saver suppressing them? (Android battery optimizers are notorious.)</li>
+<li><strong>Stale session:</strong> sign out, sign back in. Update the app. This fixes more than anyone admits.</li>
+<li><strong>Wrong attachment:</strong> confirm the specific parent is attached to the child profile — the #1 cause when one parent gets everything and the other gets nothing.</li>
+<li><strong>Email vs push confusion:</strong> check which channels the parent expects vs what's configured.</li>
+</ol>
+<h2>Check-in / kiosk problems at drop-off</h2>
+<ol>
+<li>Refresh the kiosk session at open; verify Wi-Fi where the kiosk actually sits (door dead-zones are common).</li>
+<li>Confirm the child is assigned to the right room for the day.</li>
+<li>Keep a paper sign-in fallback — licensing wants attendance regardless of app status, and the queue at 8am can't wait for a reboot.</li>
+</ol>
+<h2>Login loops and "email already in use"</h2>
+<p>Almost always duplicate invitations or a parent who is also staff somewhere. Password-reset the existing account first; if roles are tangled, only vendor support can merge accounts — request a consolidation explicitly.</p>
+<h2>Missing daily reports</h2>
+<p>Check the room device actually synced before staff clocked out (offline edits queue silently), and that the child was checked into the room the entries were logged against. Set a 15-minute pre-close routine: sync check, then send.</p>
+<h2>When it's not a glitch</h2>
+<p>If your real complaints are <em>recurring</em> — support tickets that take days, price increases at renewal, processing fees on tuition, parents who can't manage another app login — those aren't bugs to fix, they're product economics. For owner-operated programs, Mitten's answer is structural: parents use a simple link (no app-store download, no login wall for grandparents on the photo feed), pricing is published (free ≤5 children, then $20/mo + $2/child), and support is the team that built it. <a href="/guides/how-to-switch-daycare-software-without-losing-data">Switching takes an afternoon</a>.</p>`,
+  },
+  {
+    slug: 'how-to-export-your-data-from-lillio-himama',
+    tag: 'Software help',
+    title: 'How to Export Your Data From Lillio / HiMama (2026): Reports, Billing & Photos',
+    desc: 'Getting your roster, daily reports, billing history and photos out of Lillio (formerly HiMama) — what exports exist, what to request from support, and the full checklist.',
+    h1: 'How to export your data from Lillio (HiMama)',
+    sub: 'Self-serve exports, what to request from support, and the checklist that protects your records.',
+    faqs: [
+      ['Can I export photos from Lillio/HiMama in bulk?', 'Families can save individual photos, but program-wide bulk export generally goes through a support request from the account owner. Ask while your subscription is active and allow a couple of weeks.'],
+      ['What data should I keep after leaving Lillio?', 'Roster and contacts, attendance, billing and payment history (6 years for CRA), daily report/development documentation you want for portfolios, immunization and allergy notes, staff records, and photos/videos.'],
+      ['Does Lillio delete my data after I cancel?', 'Expect your access to end with the subscription and retention to follow their policies. The safe assumption for any platform: export everything before the end date rather than relying on post-cancellation retrieval.'],
+    ],
+    body: `
+<p>Lillio (the platform long known as HiMama) holds a lot of irreplaceable material for a typical program — years of daily documentation and photos. Whether you're switching or just building a backup, here's the clean path out. Do it <strong>before</strong> cancelling.</p>
+<h2>Step 1 — Self-serve exports from the web dashboard</h2>
+<ul>
+<li><strong>Roster/enrolment</strong> — children, rooms, family contacts.</li>
+<li><strong>Attendance</strong> — widest available date range, exported per room and per child.</li>
+<li><strong>Billing & payments</strong> — invoices and transactions per family, summary and detail. Tax season and payment disputes both want the detail.</li>
+<li><strong>Reports/documentation</strong> — export or print-to-PDF the development documentation you care about (portfolios, learning stories) — this is Lillio's strength and the thing programs most regret losing.</li>
+</ul>
+<h2>Step 2 — The support request</h2>
+<p>From the owner/admin email, request: bulk export of <strong>all photos and videos</strong>, complete daily-report history, and anything not exposed in dashboard reports. Be specific ("all media for all classrooms, full history, delivered as a download link"). Allow two to three weeks before your intended cancellation date.</p>
+<h2>Step 3 — Checklist</h2>
+<ul>
+<li>☐ Roster + family contacts</li>
+<li>☐ Attendance history</li>
+<li>☐ Billing/payment history (keep 6 years)</li>
+<li>☐ Year-end receipts issued to families</li>
+<li>☐ Daily reports / learning documentation (PDF)</li>
+<li>☐ Photos & videos (bulk, via support)</li>
+<li>☐ Medical/allergy/immunization notes</li>
+<li>☐ Staff records</li>
+</ul>
+<h2>Step 4 — If this export is a switch</h2>
+<p>Mitten imports your roster CSV directly, daily reports and photo feeds work from day one (AI-drafted notes included free), milestones build into memory books families keep, and parents join with a link — no app store, no password wall for grandparents. Free up to 5 children, then $20/mo + $2/child, published right on the site. The <a href="/guides/how-to-switch-daycare-software-without-losing-data">switching guide</a> covers the family-communication piece.</p>`,
+  },
+  {
+    slug: 'lillio-himama-app-problems-and-fixes',
+    tag: 'Software help',
+    title: 'Lillio / HiMama App Not Working? Fixes for Reports, Photos & Login (2026)',
+    desc: 'Practical fixes when Lillio (HiMama) misbehaves: daily reports not sending, parents missing photos or notifications, login problems, and sync issues — plus when to rethink the platform.',
+    h1: 'Lillio (HiMama) not working? The practical fix list',
+    sub: 'Daily reports stuck, photos missing, parents locked out — the fixes in order of likelihood.',
+    faqs: [
+      ['Why didn’t my Lillio daily report send to parents?', 'Most often the entries were logged on a device that hadn’t synced (offline edits queue silently), the child wasn’t checked into the room the activity was logged against, or the report was saved as draft rather than sent/published. Sync the room device, verify check-in status, then re-send.'],
+      ['Why can’t a parent see photos in HiMama/Lillio?', 'Check the parent is attached to the child’s profile, that the photo was actually published (not draft), and the parent’s app is updated and logged in. If one guardian sees content and another doesn’t, it’s nearly always profile attachment.'],
+      ['Lillio login not working — what first?', 'Password reset on the exact email the invitation went to, then app update, then sign-out/sign-in. Duplicate accounts from double invitations need a support merge.'],
+    ],
+    body: `
+<p>Lillio's documentation depth is its strength — which means more steps where things can quietly fail. These fixes cover the bulk of educator complaints.</p>
+<h2>Daily reports not sending</h2>
+<ol>
+<li><strong>Sync first:</strong> entries made offline queue on the device — sync the classroom tablet before staff leave. Make it part of the closing routine.</li>
+<li><strong>Check-in mismatch:</strong> activities logged against a room the child wasn't checked into can vanish from the family view. Verify attendance status matches reality.</li>
+<li><strong>Draft vs sent:</strong> confirm the report was actually published/sent, not saved as draft.</li>
+</ol>
+<h2>Parents missing photos or notifications</h2>
+<ol>
+<li>Profile attachment — is <em>this</em> guardian linked to the child?</li>
+<li>Published vs draft media.</li>
+<li>Device-level notification settings, focus modes, battery savers; then sign out/in and update the app.</li>
+</ol>
+<h2>Login and account tangles</h2>
+<p>Reset the password on the exact invited email. Parents with children at two Lillio programs, or staff who are also parents, sometimes end up with conflicting accounts — that's a support merge; ask for consolidation to one login.</p>
+<h2>Sync & speed on classroom devices</h2>
+<p>Old shared tablets + big media uploads = the afternoon hang. Clear app cache periodically, keep the app updated, upload on Wi-Fi, and stagger photo posting rather than batch-dumping at 4:55pm.</p>
+<h2>If the problems are chronic</h2>
+<p>A platform you fight daily costs more than its subscription â in educator time and parent trust. If renewal pricing, tiered features, or documentation overhead are the real issue (not bugs), look at fit instead: Mitten keeps the daily-report ritual but drafts the writing with AI (included free), parents join by link with no login wall, and pricing is published â free up to 5 children, $20/mo + $2/child after. <a href="/guides/how-to-switch-daycare-software-without-losing-data">Here’s the switching playbook</a>, including how to bring your exported documentation with you.</p>`,
+  },
+  {
+    slug: 'how-to-switch-daycare-software-without-losing-data',
+    tag: 'Software help',
+    title: 'How to Switch Daycare Software Without Losing Data (2026 Migration Playbook)',
+    desc: 'The complete playbook for switching childcare platforms: export checklists for Brightwheel/Lillio/Procare, the parent-communication template, overlap week, and day-one setup.',
+    h1: 'Switching daycare software: the no-data-loss playbook',
+    sub: 'Export everything, move in an afternoon, and make the change a non-event for families.',
+    faqs: [
+      ['How long does switching childcare software take?', 'For an owner-operated program: data export over a week or two (photo exports from support are the slow part), then actual setup on the new platform in an afternoon — roster import, rooms, billing plans, parent invitations. The overlap/transition week is for comfort, not necessity.'],
+      ['When is the best time to switch daycare software?', 'The start of a month (clean billing cutover) and outside September. Many programs pick a mid-winter or early-summer month. Don’t switch mid-billing-cycle unless you enjoy reconciliation.'],
+      ['Will parents be annoyed by a software change?', 'Only if it surprises them or adds work. A two-line heads-up, one link to click, and an overlap week where both apps run makes it a non-event — and if the new platform needs no app-store download, adoption is same-day.'],
+    ],
+    body: `
+<p>Programs stay on software they dislike for years because switching feels risky — photos, billing history, parent goodwill. Sequenced properly, the whole thing is two calm weeks and one busy afternoon. Here's the playbook.</p>
+<h2>Week 1–2: Export everything (while access still works)</h2>
+<p>Use the platform-specific guides — <a href="/guides/how-to-export-your-data-from-brightwheel">Brightwheel</a>, <a href="/guides/how-to-export-your-data-from-lillio-himama">Lillio/HiMama</a> — or the universal checklist: roster + contacts, attendance history, <strong>billing detail per family</strong> (CRA: 6 years), year-end receipts, photos/videos (support request — this is the long pole), medical/allergy notes, signed forms, staff records and hours. Verify the files open and cover the full date range before you trust them.</p>
+<h2>Pick the cutover date</h2>
+<p>First of a month, never mid-billing-cycle, ideally a calm season. Tell staff first, then families (template below), then cancel the old platform <em>after</em> the new one is live and verified — a few days of overlap is cheap insurance.</p>
+<h2>The parent message (steal this)</h2>
+<p><em>"Hi families! On [date] we're moving our daily updates, photos and invoices to a new app called Mitten. One thing to do: tap this link and you're in — no app store, no new passwords to manage. Your [Month] invoice will come from the new system. Everything else stays the same. Questions? Grab me at pickup."</em></p>
+<h2>Setup afternoon (the actual switch)</h2>
+<ol>
+<li>Import the roster CSV; create rooms and assign children.</li>
+<li>Configure billing plans/tuition per family; set the first invoice date to the cutover.</li>
+<li>Invite staff; post one practice update per room.</li>
+<li>Send the parent link; watch joins roll in same-day when there's no download barrier.</li>
+<li>Overlap week: run both, then export a final delta (any last photos/records) and <a href="/guides/how-to-cancel-brightwheel">cancel the old platform in writing</a>.</li>
+</ol>
+<h2>What "no data loss" means six months later</h2>
+<p>It's not just the migration — it's whether the <em>next</em> export is also easy. Whatever you choose, prefer platforms with published pricing and easy data export; lock-in is a product strategy, not an accident. Mitten's position: your data is yours, exports are self-serve, pricing is public (free up to 5 children; $20/mo + $2/child), parents join by link, and we'll import your roster for you. Switching to us takes an afternoon — and so would leaving, which is exactly why we have to stay good.</p>`,
+  },
+  {
+    slug: 'how-to-start-a-daycare-in-alberta',
+    tag: 'Starting up',
+    title: 'How to Start a Daycare in Alberta (2026): Licensing, Day Homes & Costs',
+    desc: 'Opening child care in Alberta: facility-based licence vs family day home, the licensing steps under the Early Learning and Child Care Act, space and ratio rules, and realistic costs.',
+    h1: 'How to start a daycare in Alberta',
+    sub: 'Facility licence or day home, the licensing path, and the numbers that decide viability.',
+    faqs: [
+      ['Do I need a licence to run a dayhome in Alberta?', 'You can operate a private dayhome caring for up to six children (not counting your own) without a licence — or join a licensed family day home agency, which brings oversight, support, and access to affordability funding for your families.'],
+      ['How many children require a daycare licence in Alberta?', 'A licence is required for facility-based programs caring for seven or more children. Private dayhomes max out at six unrelated children.'],
+      ['How much indoor space does an Alberta daycare need?', 'Licensed facility-based programs need at least 3 m² of net primary play space per child (measured excluding hallways, washrooms, storage and similar).'],
+    ],
+    body: `
+<p>Alberta runs child care under the <strong>Early Learning and Child Care Act</strong> and its regulation, with licensing through Alberta Children and Family Services. There are two genuinely different paths — pick first, then execute. <em>(Binding sources: the <a href="https://www.alberta.ca/licensed-facility-based-programs" rel="nofollow">Alberta licensing pages</a> and licensing handbook.)</em></p>
+<h2>Path A — Family day home</h2>
+<p><strong>Private dayhome:</strong> up to <strong>six</strong> children (excluding your own), no licence required. Full autonomy; no affordability-program access; you carry everything (insurance, contracts, compliance) yourself.<br/>
+<strong>Agency day home:</strong> contract with a licensed family day home agency — they screen, train, visit and support you, and your families can access affordability funding, which materially improves what you can charge net. Most providers who plan to do this for years end up on the agency path.</p>
+<h2>Path B — Facility-based licence (7+ children)</h2>
+<ol>
+<li><strong>Attend the orientation/information session</strong> for first-time applicants (offered by Children and Family Services) — it walks the requirements and saves months of guessing.</li>
+<li><strong>Secure a compliant space:</strong> municipal zoning + development permit, fire inspection, AHS health approval, and at least <strong>3 m² of net play space per child</strong> (hallways/washrooms/storage excluded), plus outdoor play requirements.</li>
+<li><strong>Apply for the licence:</strong> program plan, policies, staffing plan, insurance, floor plans. A licensing officer reviews and inspects.</li>
+<li><strong>Staff to ratio and certification:</strong> educators must hold Alberta ECE certification (Levels 1–3); see the <a href="/guides/alberta-daycare-ratios-and-group-sizes">Alberta ratio table</a> for the staffing math by age.</li>
+<li><strong>Decide on affordability funding:</strong> Alberta’s grants and subsidy bring parent fees down dramatically at participating programs â like CWELCC everywhere, it trades reporting obligations for filled spots. Our <a href="/guides/cwelcc-for-daycare-operators">operator guide</a> covers the record-keeping spine that makes reporting painless.</li>
+</ol>
+<h2>The viability math</h2>
+<p>Alberta's combination — lower commercial rents than Toronto/Vancouver, affordability funding, and 1:8/1:10 ratios for 3+ — makes preschool-age rooms the economic engine; infant rooms (1:3 under 12 months) are a service you cross-subsidize. Model the staffing step function before signing a lease: the <a href="/guides/daycare-profit-margin-guide">margin guide</a> and <a href="/tools/daycare-profitability-calculator">profitability calculator</a> do the arithmetic.</p>
+<h2>Open with systems, not paper</h2>
+<p>Licensing inspections, affordability reporting and parent trust all run on the same fuel: clean daily records. Attendance, enrolment, daily reports, invoicing and staff hours from day one — Mitten does exactly this, free until your sixth child, which conveniently is the moment you become a licensed facility.</p>`,
+  },
+  {
+    slug: 'alberta-daycare-ratios-and-group-sizes',
+    tag: 'Rules & ratios',
+    title: 'Alberta Daycare Ratios & Group Sizes (2026): The Full Table Explained',
+    desc: 'Alberta staff-to-child ratios and maximum group sizes for licensed facility-based child care — infants 1:3/1:4, 19 months+ 1:6, preschool 1:8, kindergarten-age 1:10 — plus nap-time and mixed-age rules.',
+    h1: 'Alberta daycare ratios & group sizes',
+    sub: 'The facility-based table, nap-time halving, mixed-age rules and what they mean for staffing budgets.',
+    faqs: [
+      ['What is the infant ratio in Alberta daycares?', 'Under 12 months: 1 staff per 3 infants, maximum group of 6. From 12 to under 19 months: 1:4 with a maximum group of 8.'],
+      ['Can Alberta ratios be reduced at nap time?', 'Yes — primary staff ratios may be halved while children are sleeping, provided supervision requirements are still met. Plan your lunch-break schedule around it, and document it.'],
+      ['How many four-year-olds can one educator supervise in Alberta?', 'Children four years to kindergarten age run at 1:10 with a maximum group size of 20; three-year-olds run 1:8 (group 16); school-age children 1:15 (group 30).'],
+    ],
+    body: `
+<p>Alberta's facility-based ratios (Early Learning and Child Care Regulation) are the staffing spine of every licence. Here's the table and the rules around it. <em>(Confirm specifics with your licensing officer — and note day homes follow different limits.)</em></p>
+<h2>The facility-based table</h2>
+<ul>
+<li><strong>Under 12 months</strong> — <strong>1 : 3</strong>, max group <strong>6</strong></li>
+<li><strong>12 to under 19 months</strong> — <strong>1 : 4</strong>, max group <strong>8</strong></li>
+<li><strong>19 months to under 3 years</strong> — <strong>1 : 6</strong>, max group <strong>12</strong></li>
+<li><strong>3 to under 4 years</strong> — <strong>1 : 8</strong>, max group <strong>16</strong></li>
+<li><strong>4 years to kindergarten age</strong> — <strong>1 : 10</strong>, max group <strong>20</strong></li>
+<li><strong>School age (grade 1+)</strong> — <strong>1 : 15</strong>, max group <strong>30</strong></li>
+</ul>
+<h2>The flexibility rules</h2>
+<ul>
+<li><strong>Nap-time halving:</strong> primary staff ratios may drop to half while children sleep (supervision must still be adequate) — this is your staff-lunch window; schedule and record it deliberately.</li>
+<li><strong>Mixed-age groups:</strong> programs may mix children over 19 months through the day, with the group following the rules tied to its composition. Infants are the exception â if you’re licensed for 3+ infants, mixing under-12-month children with older groups during core hours needs specific approval.</li>
+<li><strong>Day homes:</strong> capacity rules differ entirely (six unrelated children, with sub-limits by age) — see the <a href="/guides/how-to-start-a-daycare-in-alberta">Alberta startup guide</a>.</li>
+</ul>
+<h2>The budget translation</h2>
+<p>The jump from 1:6 (under 3) to 1:8 (age 3) to 1:10 (age 4+) is where Alberta programs make their economics work — and why infant spots are scarce and expensive everywhere. When projecting a new room, model the step function: child #13 in a 19-month room doesn't cost one-twelfth more staffing, it costs a whole new group. The <a href="/tools/daycare-profitability-calculator">profitability calculator</a> runs the scenario; Mitten's live dashboard then tracks each room against ratio in real time, including the nap window.</p>`,
+  },
+  {
+    slug: 'daycare-tax-receipts-cra-guide',
+    tag: 'Money & taxes',
+    title: 'Daycare Tax Receipts in Canada (2026): What CRA Requires (SIN, Format, Timing)',
+    desc: 'Exactly what a Canadian child care receipt must include — when a SIN is required, what corporations include instead, when to issue receipts, and a copy-paste compliant template.',
+    h1: 'Daycare tax receipts: exactly what CRA expects',
+    sub: 'What goes on the receipt, when the SIN is required, timing, and a compliant template you can copy.',
+    faqs: [
+      ['Does a daycare receipt need a SIN in Canada?', 'If the care was provided by an individual (home daycare, nanny, babysitter), yes â the receipt must show that individual’s Social Insurance Number. Licensed centres operating as corporations issue receipts under the business name/address instead (a business number is good practice).'],
+      ['When should daycares issue tax receipts?', 'Best practice is annual receipts by the end of February for the prior year (matching the tax-slip rhythm parents expect), plus receipts on request. Many programs simply issue a receipt with every payment — also fine.'],
+      ['What must a child care receipt include?', 'Provider name and address (and SIN if an individual), the parent/payer name, the child’s name, the period of care, the amount actually paid, the date issued, and a signature for handwritten receipts. Reduced CWELCC fees are receipted at the amount the parent actually paid.'],
+      ['Do parents need to submit receipts with their tax return?', 'No â receipts aren’t filed with the return, but CRA routinely asks for them afterward. Parents must keep them six years; providers should keep copies just as long.'],
+    ],
+    body: `
+<p>Every February, daycare inboxes fill with the same request: "Can I get a receipt for taxes?" Here's exactly what that receipt needs, straight from the CRA's requirements for the <a href="/guides/child-care-expenses-deduction-canada">child care expenses deduction</a> — plus a template. <em>(Educational, not tax advice.)</em></p>
+<h2>What must be on the receipt</h2>
+<ul>
+<li><strong>Provider identity:</strong> your name and address. <strong>Individuals (home providers, nannies): your SIN is mandatory</strong> — parents literally cannot complete Form T778 without it. Incorporated centres use the corporate name/address (adding your business number is good practice).</li>
+<li><strong>Who paid:</strong> the parent/guardian name.</li>
+<li><strong>Who the care was for:</strong> the child’s name.</li>
+<li><strong>Period and amount:</strong> the dates of care and the amount <em>actually paid</em> in the calendar year (not billed — paid).</li>
+<li><strong>Date issued</strong>, and a signature if handwritten.</li>
+</ul>
+<h2>The template (copy, fill, done)</h2>
+<p><em>"Official receipt for income tax purposes — [Year]. Received from [Parent name] the sum of $[amount] for child care services provided to [Child name] from [start date] to [end date]. Provider: [Your name / business name], [address]. SIN/BN: [number]. Issued [date]. Signature: ______"</em></p>
+<h2>The questions that trip providers up</h2>
+<p><strong>"I don't want to give out my SIN."</strong> Understood — but for individual providers it's required for the parent's claim. Issue receipts securely (sealed, or via a portal) rather than refusing; refusing puts your families in an impossible spot and invites CRA attention from their side.</p>
+<p><strong>Cash payments:</strong> receipt them identically. Unreceipted cash isn't a discount, it's unreported income — and the parent will often claim the expense anyway, naming you.</p>
+<p><strong>CWELCC-reduced fees:</strong> receipt what the parent actually paid (the reduced amount). The government portion isn't the parent's expense.</p>
+<p><strong>Multiple children / split custody:</strong> issue per-child amounts (one receipt itemizing per child is fine), and where parents pay separately, receipt each payer for what they actually paid — in shared custody both parents may have claims for their own paid amounts.</p>
+<h2>Keep copies — six years</h2>
+<p>Receipts substantiate your reported income just as they substantiate the parent's deduction; keep copies (digital is fine) for six years. If issuing receipts each February means an evening of spreadsheet archaeology, that's fixable: Mitten generates CRA-style annual receipts per family automatically from the year's actual payments — one click, every family, with your details pre-filled.</p>`,
+  },
+  {
+    slug: 'child-care-expenses-deduction-canada',
+    tag: 'Money & taxes',
+    title: 'Child Care Expenses Deduction Canada (2026): Line 21400 & Form T778 Explained',
+    desc: 'How the Canadian child care expenses deduction works: who must claim it, the $8,000/$5,000 limits, eligible expenses (daycare, home care, camps), Form T778, and the receipts you need.',
+    h1: 'The child care expenses deduction, explained',
+    sub: 'Line 21400 and Form T778 in plain English: who claims, the limits, what counts, and the receipts CRA expects.',
+    faqs: [
+      ['How much child care can I deduct in Canada?', 'Up to $8,000 per year for each child under 7, $5,000 for each child aged 7â16, and $11,000 for a child eligible for the disability tax credit â capped overall at two-thirds of the claiming parent’s earned income. Weekly limits apply to overnight camps and boarding schools.'],
+      ['Which parent claims child care expenses?', 'Generally the parent with the lower net income must claim. Exceptions let the higher-income parent claim for periods the lower-income parent was in school, hospitalized, imprisoned, or incapable of caring for the child — documented on Form T778.'],
+      ['Is daycare tax deductible if I pay a family member?', 'Payments to a relative can qualify only if the caregiver is 18 or older and not the child’s parent (or your spouse), and you have a receipt with their SIN. Payments to the child’s parent or to your under-18 relative never qualify.'],
+      ['Are CWELCC reduced fees still deductible?', 'Yes — you deduct what you actually paid. The reduced fee is your expense; keep the receipts your provider issues.'],
+    ],
+    body: `
+<p>The child care expenses deduction (Line 21400, calculated on <strong>Form T778</strong>) is the main way Canadian parents get tax relief on daycare — and it's a <em>deduction</em>, not a credit, so it reduces taxable income directly. Here's how it actually works. <em>(Educational, not tax advice.)</em></p>
+<h2>The limits</h2>
+<ul>
+<li><strong>$8,000</strong>/year per child under 7 (at December 31)</li>
+<li><strong>$5,000</strong>/year per child 7–16</li>
+<li><strong>$11,000</strong>/year per child eligible for the disability tax credit</li>
+<li>Overall cap: <strong>two-thirds of the claiming parent's earned income</strong></li>
+<li>Weekly per-child limits apply to overnight camps/boarding schools ($200/$125/$275)</li>
+</ul>
+<h2>Who must claim (the rule everyone gets backwards)</h2>
+<p>The <strong>lower-net-income</strong> spouse/partner claims — not whoever benefits more. The exceptions (claimable by the higher earner, computed weekly on T778): the lower earner was enrolled in school, hospitalized or confined for 2+ weeks, imprisoned, certified incapable of caring for children, or you were living separately due to relationship breakdown for the required period.</p>
+<h2>What counts</h2>
+<ul>
+<li>Licensed daycare and home daycare fees (including <a href="/guides/cwelcc-10-dollar-a-day-child-care-explained">CWELCC-reduced</a> fees — claim what you paid)</li>
+<li>Nannies, babysitters and individual caregivers (receipt must show their SIN)</li>
+<li>Before/after-school programs, day camps and day sports schools (where the primary purpose is care)</li>
+<li>Overnight camps and boarding schools — within the weekly limits</li>
+</ul>
+<p><strong>What doesn't:</strong> regular school tuition, most lesson/activity fees where care isn't the purpose, medical expenses, payments to the child's parent or your under-18 relative, and unreceipted cash.</p>
+<h2>The mechanics</h2>
+<ol>
+<li>Collect receipts — individual caregivers' receipts must include their SIN (<a href="/guides/daycare-tax-receipts-cra-guide">what a compliant receipt looks like</a>).</li>
+<li>Complete Form T778 with your software or accountant; the result lands on Line 21400.</li>
+<li>Don't file the receipts — but keep them six years; child care is a routine CRA review category.</li>
+</ol>
+<h2>Note for providers reading this</h2>
+<p>Your families need annual receipts (by late February, ideally) with the right fields on them. If that's a painful evening every winter, Mitten generates compliant annual receipts per family in one click from actual recorded payments — and your parents stop emailing you in March.</p>`,
+  },
+  {
+    slug: 'does-brightwheel-work-in-canada',
+    tag: 'Software guide',
+    title: 'Does Brightwheel Work in Canada? (2026) — The Honest Answer for Canadian Programs',
+    desc: 'Brightwheel works in Canada — but CWELCC reporting, CRA receipts, provincial ratios and CAD billing are where Canadian programs feel the gaps. What works, what does not, and the Canadian-built alternative.',
+    h1: 'Does Brightwheel work in Canada?',
+    sub: 'Short answer: yes, it functions. The longer answer is about CWELCC, CRA receipts and provincial rules — the parts a US platform was not built for.',
+    faqs: [
+      ['Can Canadian daycares use Brightwheel?', 'Yes — Brightwheel operates in Canada and Canadian programs use it for check-in, daily reports and messaging. The friction shows up in the Canada-specific layers: CWELCC fee caps and reporting, CRA-compliant receipts, provincial ratio configurations, and payments/payouts in CAD.'],
+      ['Does Brightwheel handle CWELCC?', 'CWELCC is a Canadian funding program with provincial reporting requirements; US platforms don’t build first-class support for it. Programs typically track CWELCC obligations in spreadsheets alongside the app â which is exactly the double-entry that software was supposed to remove.'],
+      ['What is a Canadian alternative to Brightwheel?', 'Mitten is Canadian-built for owner-operated programs: CAD billing with card and e-Transfer, CRA-style annual receipts, provincial ratio dashboards, published pricing (free up to 5 children, then $20/mo + $2/child) and no sales call.'],
+    ],
+    body: `
+<p>Canadian directors ask this constantly, and the honest answer has two halves: <strong>yes, the app works in Canada</strong> — and <strong>no, it wasn't built for running a Canadian program</strong>. Whether that matters depends on which half of the job you're hiring software for.</p>
+<h2>What works fine</h2>
+<p>The universal layer: check-in/out, daily reports and photos, parent messaging, staff management. None of it cares which country you're in, and Brightwheel does it competently in Canada just as in Ohio.</p>
+<h2>Where Canadian programs feel the gaps</h2>
+<ul>
+<li><strong>CWELCC / affordability programs.</strong> Fee caps, enrolment reporting, cost-based funding documentation — the administrative reality of Canadian child care since 2022 — are not first-class features in a US platform. The workaround is always the same: a parallel spreadsheet.</li>
+<li><strong>CRA receipts.</strong> Canadian parents need Line 21400-compliant receipts (and individual providers must show a SIN). US platforms generate US-style year-end statements; close, but the February email asking for "a proper receipt" keeps coming.</li>
+<li><strong>Provincial ratios.</strong> Schedule 1 in Ontario, Alberta's age bands, BC's certification tiers — US defaults are state-shaped, so ratio dashboards need manual configuration if they fit at all.</li>
+<li><strong>US-centric content and features.</strong> CACFP food-program tooling, state licensing templates and US tax content are dead weight in a Canadian program's interface (our <a href="/guides/daycare-taxes-canada">Canadian tax guide</a> exists because the in-app guidance won't).</li>
+<li><strong>Pricing and payments.</strong> Quote-based USD-anchored pricing, and tuition processing where the platform takes its own cut — on top of FX considerations for Canadian banking.</li>
+</ul>
+<h2>The decision framework</h2>
+<p>If you're a large multi-site group that mostly needs the universal layer and has admin staff for the Canadian paperwork — Brightwheel works, and our <a href="/guides/brightwheel-pricing-and-setup-guide">pricing guide</a> covers what it costs. If you're an owner-operated program where <em>you</em> are the admin staff, the Canadian layer is precisely the work you need software to absorb: that's Mitten — CAD billing with card + Interac e-Transfer rails, one-click CRA-style annual receipts, provincial ratio dashboards, CWELCC-friendly attendance and fee records, free up to 5 children and $20/mo + $2/child after, no sales call. <a href="/guides/how-to-switch-daycare-software-without-losing-data">Switching takes an afternoon</a>.</p>`,
+  },
+  {
+    slug: 'average-cost-of-daycare-ontario',
+    tag: 'Costs & data',
+    title: 'Average Cost of Daycare in Ontario (2026): CWELCC vs Full Fees, By Age',
+    desc: 'What daycare actually costs in Ontario in 2026: about $19/day average at CWELCC programs for under-6s, full market rates for unlicensed and school-age care, by age group and city.',
+    h1: 'What daycare costs in Ontario (2026)',
+    sub: 'CWELCC fees vs market fees, by age — and why the waitlist, not the price, is now the constraint.',
+    faqs: [
+      ['How much is daycare per month in Ontario in 2026?', 'At a CWELCC-enrolled licensed program, fees for children under six average about $19/day — roughly $400/month full-time, varying by program. Outside CWELCC (unlicensed home care, school-age programs), market rates apply: commonly $45–$80+/day depending on age, city and care type.'],
+      ['Is daycare cheaper than a nanny in Ontario?', 'Almost always for one child: CWELCC daycare around $400/month vs a full-time nanny at $3,500–$5,000+/month including payroll costs. With three+ young children, or nonstandard hours, the comparison narrows.'],
+      ['Why is infant daycare so much more expensive?', 'Ratios. Ontario infant rooms run 3 staff per 10 children versus 1:8 for preschool — more than double the staffing per child, which is why infant spots are both the priciest and the scarcest.'],
+    ],
+    body: `
+<p>Ontario child care pricing has split into two worlds: CWELCC programs (capped, roughly half their 2019 prices) and everything else (market rates). Here's the realistic picture, updated as the program evolves. <em>Last reviewed June 2026.</em></p>
+<h2>World 1: CWELCC-enrolled licensed care (under 6)</h2>
+<p>Average across enrolled programs: <strong>about $19/day — roughly $350–$450/month full-time</strong> depending on the program's capped fee. Infant, toddler and preschool fees converge under the caps far more than they used to. This is the price <em>if you can get a spot</em> — which is the real constraint: Ontario has added ~41,000 net new spaces toward an 86,000 target, and urban infant rooms still run multi-year waitlists. Strategy: <a href="/guides/10-dollar-a-day-child-care-ontario">how the Ontario program works</a>, and get on lists early — pregnancy is not too early for infant care.</p>
+<h2>World 2: market-rate care</h2>
+<ul>
+<li><strong>Unlicensed home daycare:</strong> commonly <strong>$45–$65/day</strong> ($950–$1,400/month) by region — often the realistic option when licensed waitlists don't move. Know <a href="/guides/how-to-start-a-home-daycare-in-ontario">the five-child rules</a> and verify receipts.</li>
+<li><strong>Non-enrolled licensed programs:</strong> a minority, at pre-CWELCC-style fees — frequently $70–$110+/day for younger children in big cities.</li>
+<li><strong>School-age before/after care:</strong> outside CWELCC; commonly <strong>$15–$30/day</strong> for before+after combined, varying widely by board and provider.</li>
+<li><strong>Nannies:</strong> $20–$30+/hour plus employer payroll obligations — $3,500–$5,000+/month full-time.</li>
+</ul>
+<h2>What softens the bill</h2>
+<ul>
+<li><strong>Municipal fee subsidy</strong> — income-tested, stacks on CWELCC fees; apply through your city.</li>
+<li><strong>The tax deduction</strong> — up to $8,000/child under 7 off the lower earner's taxable income; receipts required. Full mechanics: <a href="/guides/child-care-expenses-deduction-canada">Line 21400 guide</a>.</li>
+<li><strong>Canada Child Benefit</strong> — separate, automatic with your tax return, helps fund whichever care you choose.</li>
+</ul>
+<h2>For providers benchmarking against this page</h2>
+<p>If you're pricing a program, the question isn't the average — it's your costs under your ratios. The <a href="/guides/daycare-tuition-pricing-guide">tuition pricing guide</a> and <a href="/tools/daycare-profitability-calculator">profitability calculator</a> do the work, and Mitten's analytics keep margins visible per room once you're running.</p>`,
+  },
 ]
 
 /* ───────────────────────── competitor guides ───────────────────────── */
@@ -712,6 +1344,137 @@ $('type').addEventListener('change',rc);$('count').addEventListener('input',rc);
 
 const TOOLS = [TOOL_PROFIT, TOOL_AI, TOOL_RATIO]
 
+
+/* ───────────────────────────── research ─────────────────────────────
+   Evidence-based papers for parents, educators and directors. House rules:
+   every claim links to a real, verifiable source (no secondary blog citations),
+   each paper carries a reviewed date, a TL;DR, audience takeaways and a
+   non-medical-advice line. Long pieces are "papers", short ones "briefs". */
+
+const RESEARCH = [
+  {
+    slug: 'risky-outdoor-play-research',
+    kind: 'Research paper',
+    mins: 9,
+    reviewed: '2026-06-12',
+    title: 'Risky Outdoor Play: What a Decade of Research Actually Says (2026 Review)',
+    desc: "Canada's position statement on active outdoor play, the UBC research behind it, and what 'as safe as necessary' means in practice — for parents, educators and daycare directors.",
+    h1: 'Risky outdoor play: what the research actually says',
+    sub: 'A plain-English review of the Canadian evidence — written for parents, educators and directors.',
+    tldr: `Canadian researchers — led from UBC and endorsed by a national coalition — concluded that <strong>access to active outdoor play, including its risks, is essential for healthy child development</strong>. The evidence links outdoor and risky play to more physical activity, better social skills and resilience, while serious injuries in supervised early-childhood settings remain rare. The guiding principle the field landed on: keep children <strong>“as safe as necessary, not as safe as possible.”</strong> The position was first published in 2015 and renewed by an updated national statement in 2025.`,
+    audience: {
+      parents: `A scraped knee is part of the curriculum, not a failure of supervision. Ask your program <em>how</em> children get outdoor time daily (rain or shine is a good sign), not just whether the yard is padded. At home, let your child climb, balance and take small supervised chances — the research links this to confidence and risk-assessment skills, not recklessness.`,
+      educators: `Frame risk as something children learn to read, not something adults eliminate. Use risk-benefit thinking: name what a child gains from an activity alongside its hazards, and remove <em>hazards</em> (broken glass, faulty equipment) rather than <em>risks</em> (height, speed, weather). Document outdoor learning the way you document literacy — it is developmental work.`,
+      directors: `Daily outdoor time, year-round, is defensible policy backed by a national position statement — useful language for parent handbooks and licensing conversations. Pair an outdoor-play policy with clear hazard checklists and incident documentation so the “as safe as necessary” line is auditable, not aspirational.`,
+    },
+    cites: [
+      ['Tremblay et al., Position Statement on Active Outdoor Play, Int. J. Environ. Res. Public Health 12(6), 2015', 'https://www.mdpi.com/1660-4601/12/6/6475'],
+      ['2025 Position Statement on Active Outdoor Play: process and methodology, Int. J. Behav. Nutr. Phys. Act.', 'https://ijbnpa.biomedcentral.com/articles/10.1186/s12966-025-01806-8'],
+      ["UBC School of Population & Public Health — Risky outdoor play positively impacts children's health", 'https://spph.ubc.ca/risky-outdoor-play-positively-impacts-childrens-health-ubc-study/'],
+      ['Pan-Canadian Public Health Network — Active Outdoor Play Statement', 'https://www.phn-rsp.ca/en/position-statements/active-outdoor-play-statement.html'],
+      ['Position Statement on Active Outdoor Play (PubMed record)', 'https://pubmed.ncbi.nlm.nih.gov/26062040/'],
+    ],
+    faqs: [
+      ['Is risky play the same as dangerous play?', 'No. The research distinguishes risks (challenges a child can perceive and choose, like climbing higher) from hazards (dangers a child cannot see, like a broken rung). The evidence supports giving children risks while adults remove hazards.'],
+      ['Does more outdoor play mean more injuries?', 'Serious injuries in supervised early-childhood settings are rare, and the 2015 Canadian position statement concluded the developmental benefits of outdoor play with risk outweigh the small injury risk in typical programs.'],
+      ['What does "as safe as necessary" mean?', 'It is the principle adopted by the Canadian position statement: instead of maximizing safety at the cost of development ("as safe as possible"), programs manage real hazards while preserving the challenges children grow from.'],
+    ],
+    body: `
+<p>Few topics divide a parent meeting faster than a child on top of the climber. Over the last decade, Canadian researchers have produced an unusually clear answer — clear enough that it became a national position statement, renewed in 2025. This review summarizes what that evidence says and what it means on a Tuesday morning in the play yard.</p>
+<h2>Where the evidence comes from</h2>
+<p>In 2015, a cross-Canada group of researchers and health organizations published the <em>Position Statement on Active Outdoor Play</em> in the International Journal of Environmental Research and Public Health, built on systematic reviews of the research on outdoor and risky play. Its central conclusion: <strong>“Access to active play in nature and outdoors — with its risks — is essential for healthy child development.”</strong> The statement explicitly recommends increasing self-directed outdoor play at home, at school, <strong>in child care</strong>, and in the community. A decade later, the field returned to the evidence and published an updated national position statement (2025), keeping the core conclusion intact.</p>
+<p>Much of this research program is led from British Columbia — UBC's School of Population and Public Health summarized the systematic-review evidence that risky outdoor play positively impacts children's health, from physical activity to social behaviour.</p>
+<h2>What counts as “risky” play</h2>
+<p>In this literature, risky play is challenge a child can see and choose: height (climbing), speed (running, sliding, biking), play near natural elements, rough-and-tumble play, and increasing independence. The crucial distinction is <strong>risk vs hazard</strong>: a high branch is a risk a child evaluates; a rotten branch is a hazard an adult removes. The research consensus is to preserve risks and eliminate hazards — summarized in the statement's phrase, keep children <em>“as safe as necessary, not as safe as possible.”</em></p>
+<h2>What the evidence links it to</h2>
+<ul>
+<li><strong>More movement:</strong> children are simply more active outdoors, and outdoor time is one of the most reliable levers on daily physical activity.</li>
+<li><strong>Social development:</strong> reviews link unstructured and rough-and-tumble outdoor play with social skills, negotiation and confidence.</li>
+<li><strong>Risk literacy:</strong> children given graduated challenges practice assessing risk — the skill that actually prevents injuries as independence grows.</li>
+<li><strong>Perspective on injury:</strong> the statement weighs developmental benefit against injury data and concludes the benefits dominate in supervised settings, where serious injuries are rare.</li>
+</ul>
+<h2>The honest caveats</h2>
+<p>This is a literature about <em>supervised, age-appropriate</em> challenge — not the absence of judgment. The position statements concern children roughly 3–12; toddler programs apply the same principles with tighter envelopes. And “outdoor play is essential” does not mean every yard is automatically developmental: quality of the space and the adults' approach to risk both matter, which is why the 2025 update focuses on implementation.</p>`,
+  },
+  {
+    slug: 'screen-time-under-5-canadian-guidelines',
+    kind: 'Research brief',
+    mins: 4,
+    reviewed: '2026-06-12',
+    title: 'Screen Time Under 5: What the Canadian Guidelines Actually Say (2026)',
+    desc: "The Canadian Paediatric Society's screen-time position for children under 5 — the limits, the four M's, and what it means for daycares and home routines, in plain English.",
+    h1: 'Screen time under 5: what the Canadian guidelines actually say',
+    sub: 'A 4-minute brief on the Canadian Paediatric Society position — for parents, educators and directors.',
+    tldr: `The Canadian Paediatric Society's position (updated 2023): <strong>no routine screen time for children under 2</strong>, and <strong>less than 1 hour a day for ages 2–5</strong> — with the quality and context of use mattering as much as the count. Its framework is four M's: <strong>minimize, mitigate, mindfully use, and model</strong> healthy screen habits. For licensed childcare, the practical translation is simple: screens have almost no place in a high-quality program day.`,
+    audience: {
+      parents: `Counting minutes is less useful than the four M's: keep screens out of routines (meals, bedtime, the car by default), co-view when screens are used, choose slow-paced content, and remember children copy what they see you do with your phone. Under 2, video-chatting grandma is the accepted exception.`,
+      educators: `In a program day rich with materials, peers and outdoor time, screens add little — the CPS position supports keeping them rare and purposeful. When you do use one (documentation, music, the odd video), narrate it: how adults use tools is itself the lesson.`,
+      directors: `A written screen policy is an easy trust-builder in your parent handbook: state what (if anything) screens are used for, and anchor it to the CPS position. It also answers the tour question every parent silently asks.`,
+    },
+    cites: [
+      ['Canadian Paediatric Society — Screen time and preschool children: promoting health and development in a digital world (2023)', 'https://cps.ca/en/documents/position/screen-time-and-preschool-children'],
+      ['CPS (2017) — Screen time and young children, Paediatrics & Child Health (PMC)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC5823000/'],
+      ['Caring for Kids (CPS parent resource) — Screen use and young children', 'https://caringforkids.cps.ca/handouts/behavior-and-development/screen-time-and-young-children'],
+    ],
+    faqs: [
+      ['How much screen time is OK for a 3-year-old in Canada?', 'The Canadian Paediatric Society advises less than one hour per day of screen time for children aged 2–5 — and emphasizes that content quality, co-viewing and context matter as much as the number.'],
+      ['Is any screen time OK under age 2?', 'The CPS advises no routine screen time under 2; live video-chat with family is the commonly accepted exception.'],
+      ["Should daycares use screens at all?", "The CPS framework (minimize, mitigate, mindful use, modelling) supports keeping screens rare and purposeful in group care; most high-quality programs reserve them for documentation rather than children's viewing."],
+    ],
+    body: `
+<p>“How much is too much?” is the most common screen question parents ask — and Canada has an actual, current answer. Here it is without the noise.</p>
+<h2>The numbers</h2>
+<ul>
+<li><strong>Under 2:</strong> no routine screen time (video-chat with family is the accepted exception).</li>
+<li><strong>Ages 2–5:</strong> less than 1 hour per day — and less is better.</li>
+</ul>
+<h2>The part people skip: the four M's</h2>
+<p>The CPS position is built less on the stopwatch and more on four practices: <strong>minimize</strong> (fewer, shorter, not in routines), <strong>mitigate</strong> (co-view, choose calm, age-appropriate content), <strong>mindful use</strong> (ask what the screen is displacing — sleep, play, conversation), and <strong>modelling</strong> (children adopt the screen habits they watch adults perform). The 2023 update kept these principles at the centre.</p>
+<h2>Why the under-5 years get the strict version</h2>
+<p>The position's reasoning: early childhood development runs on serve-and-return interaction, movement and sleep, and screen exposure in these years is associated with displacement of all three. The CPS frames screens as a thing to be budgeted against development, not banned with panic.</p>
+<h2>What this means in a daycare day</h2>
+<p>A high-quality licensed program already supplies what screens displace — peers, materials, outdoor time, conversation. That is why most strong programs are functionally screen-free for children and say so in their handbook: it is evidence-aligned, and it is a selling point.</p>`,
+  },
+]
+
+function tldrBox(html) {
+  return `<div style="background:linear-gradient(135deg,#F8E1E4,#DCEAF5);border-radius:14px;padding:22px 24px;margin:8px 0 26px">
+  <div style="font-family:var(--mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0E74C1;margin-bottom:8px">TL;DR</div>
+  <p style="margin:0;font-size:16.5px;line-height:1.6">${html}</p></div>`
+}
+function audienceBoxes(a) {
+  const box = (label, html, bg) => `<div style="background:${bg};border-radius:12px;padding:18px 20px">
+    <div style="font-family:var(--mono,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0E74C1;margin-bottom:6px">For ${label}</div>
+    <p style="margin:0;font-size:15px;line-height:1.6">${html}</p></div>`
+  return `<h2>What to do with this</h2><div style="display:grid;gap:14px;margin:14px 0 8px">
+  ${box('parents', a.parents, '#FDF6F0')}${box('educators', a.educators, '#F0F7F1')}${box('directors', a.directors, '#F2F0F8')}</div>`
+}
+function citationsBlock(cites) {
+  const host = (u) => u.replace(/^https?:\/\//, '').split('/')[0]
+  return `<h2>Sources</h2><ol style="font-size:14px;line-height:1.7">
+${cites.map(([t, u]) => `<li>${esc(t)} — <a href="${u}" rel="noopener" target="_blank">${host(u)}</a></li>`).join('\n')}</ol>
+<p style="font-size:13px;color:#7E7E7E">Every claim above is drawn from the linked sources. This article is general information, not medical or legal advice — for concerns about an individual child, talk to your paediatrician or family doctor.</p>`
+}
+function researchMeta(r) {
+  return `<p style="font-family:var(--mono,monospace);font-size:12px;color:#7E7E7E;margin-top:-6px">${esc(r.kind)} · ${r.mins} min read · reviewed ${r.reviewed} · every claim cited</p>`
+}
+
+function researchHub() {
+  const cards = RESEARCH.map((r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 130))}…</p></a>`).join('')
+  return layout({
+    path: '/research', wide: true,
+    title: 'Child Development Research, in Plain English — Mitten Research',
+    desc: 'Evidence reviews and short briefs on child development — outdoor play, screen time and more. Every claim cited to the underlying study or Canadian guideline, written for parents, educators and directors.',
+    h1: 'The research, in plain English',
+    sub: 'What the actual studies and Canadian guidelines say about how young children grow — with a TL;DR, takeaways for parents, educators and directors, and every claim cited.',
+    tag: 'Mitten Research',
+    jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mitten Research', url: `${DOMAIN}/research` }],
+    body: `<div class="grid">${cards}</div>
+<h2>How we work</h2>
+<p>Each piece is built from primary sources — peer-reviewed studies, position statements and Canadian guidelines — linked in full at the bottom of every article, with a visible review date. No claim without a citation. If new evidence changes a conclusion, the article changes and the date moves.</p>`,
+  })
+}
+
 /* ───────────────────────────── hub + writing ───────────────────────────── */
 
 function hubPage() {
@@ -728,6 +1491,7 @@ function hubPage() {
     jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mitten Resources', url: `${DOMAIN}/resources` }],
     body: `
 <h2 id="tools">Free tools</h2><div class="grid">${tools}</div>
+<h2>Research, in plain English</h2><p style="margin-top:-6px"><a href="/research">Browse all research →</a></p><div class="grid">${RESEARCH.map((r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 110))}…</p></a>`).join("")}</div>
 <h2>Guides for daycare owners</h2><div class="grid">${guides}</div>
 <h2>Childcare software guides & comparisons</h2><div class="grid">${comps}</div>
 ${cta('Everything these guides recommend — daily reports, billing, payroll prep, parent messaging — is one app.')}`,
@@ -795,6 +1559,23 @@ for (const t of TOOLS) {
   }))
 }
 
+for (const r of RESEARCH) {
+  const path = `/research/${r.slug}`
+  urls.push(path)
+  write(`research/${r.slug}.html`, layout({
+    path, title: r.title, desc: r.desc, h1: r.h1, sub: r.sub, tag: r.kind,
+    jsonld: [
+      { ...articleLd(path, r.title, r.desc), dateModified: r.reviewed, citation: r.cites.map(([, u]) => u) },
+      faqLd(r.faqs),
+    ],
+    body: researchMeta(r) + tldrBox(r.tldr) + r.body + audienceBoxes(r.audience) + citationsBlock(r.cites) + cta() + faqBlock(r.faqs),
+  }))
+}
+
+urls.push('/research')
+write('research/index.html', researchHub())
+
+
 write('resources/index.html', hubPage())
 
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
@@ -802,4 +1583,4 @@ write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${urls.map((u) => `<url><loc>${DOMAIN}${u}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
 </urlset>`)
 
-console.log(`✓ content built: ${GUIDES.length} guides, ${COMPETITORS.length + 1} competitor pages, ${TOOLS.length} tools, hub + sitemap (${urls.length} URLs)`)
+console.log(`✓ content built: ${RESEARCH.length} research papers, ${GUIDES.length} guides, ${COMPETITORS.length + 1} competitor pages, ${TOOLS.length} tools, hub + sitemap (${urls.length} URLs)`)
