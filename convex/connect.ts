@@ -11,6 +11,13 @@ import { requireFacility } from './lib'
 
 const API = 'https://api.stripe.com/v1'
 
+// Connect (daycare payments) runs on the Mitten.Care platform account.
+// Subscriptions stay on the main account (STRIPE_SECRET_KEY). Falls back to
+// the main key so dev/test environments with one account keep working.
+export function connectKey() {
+  return process.env.STRIPE_CONNECT_KEY || process.env.STRIPE_SECRET_KEY
+}
+
 function form(data: Record<string, string>) {
   const b = new URLSearchParams()
   for (const [k, val] of Object.entries(data)) b.set(k, val)
@@ -61,7 +68,7 @@ export const saveAccount = internalMutation({
 export const createOnboardingLink = action({
   args: { origin: v.string() },
   handler: async (ctx, { origin }): Promise<{ configured: boolean; url?: string; error?: string }> => {
-    const key = process.env.STRIPE_SECRET_KEY
+    const key = connectKey()
     if (!key) return { configured: false }
     const fac: any = await ctx.runQuery(internal.connect.myFacility, {})
     if (fac.isDemo) return { configured: true, error: 'Connect is disabled on the demo facility.' }
@@ -94,7 +101,7 @@ export const createOnboardingLink = action({
 export const refreshStatus = action({
   args: {},
   handler: async (ctx): Promise<{ configured: boolean; ready?: boolean; detailsSubmitted?: boolean }> => {
-    const key = process.env.STRIPE_SECRET_KEY
+    const key = connectKey()
     if (!key) return { configured: false }
     const fac: any = await ctx.runQuery(internal.connect.myFacility, {})
     if (!fac.stripeAccountId) return { configured: true, ready: false }

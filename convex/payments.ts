@@ -1,6 +1,7 @@
 import { action } from './_generated/server'
 import { api, internal } from './_generated/api'
 import { v } from 'convex/values'
+import { connectKey } from './connect'
 
 // Stripe Checkout for tuition. Activates automatically once STRIPE_SECRET_KEY
 // is set on the deployment. When the facility has a ready Stripe Connect
@@ -18,13 +19,15 @@ function todayLabel() {
 export const createCheckoutSession = action({
   args: { id: v.string(), origin: v.string() },
   handler: async (ctx, { id, origin }): Promise<{ configured: boolean; url?: string; error?: string }> => {
-    const key = process.env.STRIPE_SECRET_KEY
-    if (!key) return { configured: false }
+    if (!process.env.STRIPE_SECRET_KEY) return { configured: false }
 
     const invoice: any = await ctx.runQuery(api.invoices.getOne, { id })
     if (!invoice) return { configured: true, error: 'Invoice not found.' }
     const fac: any = await ctx.runQuery(internal.connect.facilityForInvoice, { invId: id })
     const useAccount = fac?.stripeAccountId && fac.stripeAccountReady ? fac.stripeAccountId : undefined
+    // Direct charges on a daycare's account go through the Mitten.Care Connect
+    // platform; the platform fallback charge stays on the main account.
+    const key = useAccount ? connectKey() : process.env.STRIPE_SECRET_KEY
 
     const body = new URLSearchParams()
     body.set('mode', 'payment')
@@ -34,7 +37,12 @@ export const createCheckoutSession = action({
     body.set('line_items[0][price_data][currency]', 'cad')
     body.set('line_items[0][price_data][unit_amount]', String(Math.round(invoice.amount * 100)))
     body.set('line_items[0][price_data][product_data][name]', `Tuition — ${invoice.period}`)
-    body.set('line_items[0][price_data][product_data][description]', fac?.name || 'Childcare tuition')
+    body.set(
+      'line_items[0][price_data][product_data][description]',
+      useAccount
+        ? fac?.name || 'Childcare tuition'
+        : `${fac?.name || 'Childcare tuition'} · processed by Mitten, an OKTD.ca company — statement shows OKTD.CA`,
+    )
     body.set('metadata[invId]', id)
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
@@ -63,14 +71,14 @@ export const createCheckoutSession = action({
 export const confirmCheckout = action({
   args: { sessionId: v.string(), invId: v.optional(v.string()) },
   handler: async (ctx, { sessionId, invId }): Promise<{ ok: boolean; invId?: string }> => {
-    const key = process.env.STRIPE_SECRET_KEY
-    if (!key) return { ok: false }
+    if (!process.env.STRIPE_SECRET_KEY) return { ok: false }
 
     let account: string | undefined
     if (invId) {
       const stamp: any = await ctx.runMutation(internal.invoices.getSession, { id: invId })
       if (stamp?.accountId) account = stamp.accountId
     }
+    const key = account ? connectKey() : process.env.STRIPE_SECRET_KEY
 
     const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${sessionId}`, {
       headers: { Authorization: `Bearer ${key}`, ...(account ? { 'Stripe-Account': account } : {}) },
