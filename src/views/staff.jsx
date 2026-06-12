@@ -5,7 +5,7 @@ import {
   Camera, MessageCircle, Plus, Check, Sparkles, ClipboardList, Clock, Utensils, Bandage, CalendarDays, Loader2,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { StatCard, Card, SectionHeader, Pill, Avatar, ListSkeleton, HomeSkeleton, Skeleton } from '../components/ui.jsx'
+import { StatCard, Card, SectionHeader, Pill, Avatar, ListSkeleton, HomeSkeleton, Skeleton, YarnConfetti } from '../components/ui.jsx'
 import {
   lessonPlan, ACTIVITY_TYPES, quickMeals, quickMoods, diaperOptions, rooms,
 } from '../data/mockData.js'
@@ -189,6 +189,7 @@ function ClockCard() {
     educators.find((e) => viewer?.name && e.name === viewer.name) ||
     educators[0]
   const [now, setNow] = useState(Date.now())
+  const [justIn, setJustIn] = useState(0)
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
@@ -207,6 +208,8 @@ function ClockCard() {
       emoji: clockedIn ? '👋' : '⏰',
       tone: clockedIn ? 'coral' : 'mint',
     })
+    // a little shower of yarn to start the shift
+    if (!clockedIn) { setJustIn(Date.now()); setTimeout(() => setJustIn(0), 2200) }
   }
 
   return (
@@ -215,6 +218,7 @@ function ClockCard() {
       animate={{ opacity: 1, y: 0 }}
       className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 p-5 text-white shadow-playful"
     >
+      {justIn > 0 && <YarnConfetti key={justIn} count={16} />}
       <div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3.5">

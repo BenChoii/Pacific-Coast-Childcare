@@ -97,6 +97,13 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
             <h2 className="mt-8 font-display text-4xl leading-[1.1]">
               {isJoin ? <>Your daycare is<br />waiting for you.</> : <>Your whole daycare,<br />in one calm app.</>}
             </h2>
+            <motion.img
+              src="/cinema/spots/welcome.webp" alt=""
+              initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ delay: 0.25, duration: 0.45 }}
+              className="mt-6 h-28 w-28 rounded-[1.75rem] border-2 border-white/40 object-cover shadow-lg"
+            />
           </div>
           <div className="relative space-y-3.5">
             {[

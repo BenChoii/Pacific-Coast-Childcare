@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Send, Circle } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
+import { KnitEmpty } from '../components/ui.jsx'
 
 export default function Messages() {
   const { conversations, sendMessage, markConversationRead } = useApp()
@@ -24,13 +25,12 @@ export default function Messages() {
 
   if (conversations.length === 0) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <span className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-50 text-brand-500 text-3xl">💬</span>
-        <h2 className="text-2xl text-slate-800">No conversations yet</h2>
-        <p className="mt-2 max-w-sm text-sm font-semibold text-slate-400">
-          Family message threads appear here as soon as parents join. Invite a family from
-          Account → Family links, and you’ll be able to chat right away.
-        </p>
+      <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center">
+        <KnitEmpty
+          image="/cinema/spots/letter.webp"
+          title="No conversations yet"
+          hint="Family message threads appear here the moment parents join. Invite a family from Account → Family links, and you can chat right away."
+        />
       </div>
     )
   }

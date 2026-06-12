@@ -5,7 +5,7 @@ import {
   BookHeart, Camera, Loader2,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { SectionHeader, Card, Pill, Avatar } from '../components/ui.jsx'
+import { SectionHeader, Card, Pill, Avatar, KnitEmpty, YarnConfetti } from '../components/ui.jsx'
 
 export const DOMAINS = [
   { id: 'Motor', label: 'Motor', icon: Footprints, soft: 'bg-brand-50 text-brand-700', dot: 'bg-brand-500',
@@ -37,6 +37,7 @@ export function MilestoneTracker() {
   const [status, setStatus] = useState('Progressing')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [justSaved, setJustSaved] = useState(0)
   const dm = domainMeta(domain)
 
   const save = async () => {
@@ -46,6 +47,8 @@ export function MilestoneTracker() {
       await addMilestone({ childId: child.id, domain, label: label.trim(), status, note: note.trim() || undefined })
       pushToast(`Milestone logged for ${child.first} 🌟`, { emoji: '🌟', tone: 'mint' })
       setLabel(''); setNote('')
+      setJustSaved(Date.now())
+      setTimeout(() => setJustSaved(0), 2200)
     } finally { setBusy(false) }
   }
 
@@ -55,7 +58,11 @@ export function MilestoneTracker() {
     return (
       <div className="space-y-5">
         <SectionHeader eyebrow="Development" title="Milestones 🌟" />
-        <Card className="text-center"><p className="text-sm font-semibold text-slate-400">Add children first (Account → Children), then track their milestones here.</p></Card>
+        <KnitEmpty
+          image="/cinema/spots/cubs.webp"
+          title="Waiting on your first little ones"
+          hint="Add children in Account → Children, then capture their growth moments here — every milestone lands in their family’s Memory Book."
+        />
       </div>
     )
   }
@@ -74,7 +81,8 @@ export function MilestoneTracker() {
         ))}
       </div>
 
-      <Card className="space-y-4">
+      <Card className="relative space-y-4 overflow-hidden">
+        {justSaved > 0 && <YarnConfetti key={justSaved} count={20} />}
         {/* Domain tabs */}
         <div className="flex flex-wrap gap-2">
           {DOMAINS.map((d) => (
@@ -155,7 +163,11 @@ export function MemoryBook() {
     return (
       <div className="space-y-5">
         <SectionHeader eyebrow="Keepsake" title="Memory Book 📖" />
-        <Card className="text-center"><p className="text-sm font-semibold text-slate-400">Your child’s memory book appears here once they’re linked.</p></Card>
+        <KnitEmpty
+          image="/cinema/spots/memory.webp"
+          title="A book waiting for its first page"
+          hint="Your child’s memory book appears here once they’re linked to your account."
+        />
       </div>
     )
   }
@@ -193,7 +205,12 @@ export function MemoryBook() {
       <div>
         <h3 className="mb-3 flex items-center gap-2 font-extrabold text-slate-800"><Award size={18} className="text-grape-500" /> Milestones</h3>
         {childMilestones.length === 0 ? (
-          <Card className="text-center"><p className="text-sm font-semibold text-slate-400">{child.first}’s educators will add milestones as they grow — they’ll appear here. 🌱</p></Card>
+          <KnitEmpty
+            image="/cinema/spots/memory.webp"
+            size="h-28 w-28"
+            title={`${child.first}’s story starts here`}
+            hint={`Educators add milestones as ${child.first} grows — every one lands in this book, ready to look back on.`}
+          />
         ) : (
           <Card>
             <div className="relative pl-2">

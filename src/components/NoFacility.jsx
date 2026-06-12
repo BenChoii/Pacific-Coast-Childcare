@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { MailQuestion, Loader2, LogOut, ArrowRight } from 'lucide-react'
+import { Loader2, LogOut, ArrowRight } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import BrandLockup from './BrandLockup.jsx'
 
@@ -37,7 +37,7 @@ export default function NoFacility() {
         className="w-full max-w-md rounded-4xl border border-line bg-white/90 p-8 shadow-playful backdrop-blur"
       >
         <div className="mb-6"><BrandLockup variant="nav" /></div>
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><MailQuestion size={22} /></span>
+        <img src="/cinema/spots/lost.webp" alt="" className="h-24 w-24 rounded-3xl object-cover shadow-card" />
         <h1 className="mt-4 text-2xl text-brand-700">Join your daycare</h1>
         <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
           You’re signed in, but not connected to a daycare yet. Paste the invite link your

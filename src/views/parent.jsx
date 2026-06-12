@@ -8,7 +8,7 @@ import {
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { openInvoicePrint } from '../lib/invoiceDoc.js'
-import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton } from '../components/ui.jsx'
+import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton, KnitEmpty } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { ParentExtrasCard } from './finance.jsx'
 import { ACTIVITY_TYPES, calendarEvents } from '../data/mockData.js'
@@ -75,9 +75,11 @@ export function ParentHome() {
     return (
       <div className="space-y-6">
         <SectionHeader eyebrow="Family" title={`Welcome, ${firstName}`} />
-        <Card className="text-center">
-          <p className="text-sm font-semibold text-slate-500">No child is linked to your account yet. Your daycare will add your child shortly, or ask them for an invite link.</p>
-        </Card>
+        <KnitEmpty
+          image="/cinema/spots/cubs.webp"
+          title="Almost there!"
+          hint="No child is linked to your account yet. Your daycare will add your child shortly, or ask them for an invite link."
+        />
       </div>
     )
   }
@@ -258,6 +260,13 @@ export function ParentTimeline() {
         })}
       </div>
 
+      {items.length === 0 ? (
+        <KnitEmpty
+          image="/cinema/spots/nap.webp"
+          title="All quiet for now"
+          hint={child ? `${child.first}’s day will appear here moment by moment — meals, naps, learning and play.` : 'Live updates will appear here as the day unfolds.'}
+        />
+      ) : (
       <Card>
         <div className="relative pl-2">
           <div className="absolute bottom-2 left-[1.35rem] top-2 w-0.5 bg-slate-100" />
@@ -294,6 +303,7 @@ export function ParentTimeline() {
           </div>
         </div>
       </Card>
+      )}
     </div>
   )
 }

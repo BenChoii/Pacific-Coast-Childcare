@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Sparkles, Baby, Users, Share2, Compass, ArrowRight, ArrowLeft, Check, Copy,
+  Baby, Users, Share2, Compass, ArrowRight, ArrowLeft, Check, Copy,
   Loader2, Home, MessageCircle, Image, CalendarDays, BookOpen, CreditCard, ClipboardList,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import BrandLockup from './BrandLockup.jsx'
+import { YarnConfetti } from './ui.jsx'
 
 const origin = () => window.location.origin
 
@@ -23,10 +24,36 @@ const FEATURES = [
 export default function Onboarding() {
   const { facility, enrollChild, generateInvite, completeOnboarding, pushToast } = useApp()
   const [step, setStep] = useState(0)
+  const [celebrating, setCelebrating] = useState(false)
   const steps = ['welcome', 'child', 'team', 'families', 'tour']
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1))
   const back = () => setStep((s) => Math.max(s - 1, 0))
-  const finish = async () => { await completeOnboarding(); }
+  // Send-off moment first, then flip onboarded → the dashboard appears under it.
+  const finish = async () => {
+    setCelebrating(true)
+    await new Promise((r) => setTimeout(r, 1900))
+    await completeOnboarding()
+  }
+
+  if (celebrating) {
+    return (
+      <div className="aurora relative flex min-h-screen items-center justify-center overflow-hidden px-5">
+        <YarnConfetti count={40} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 14 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+          className="relative flex flex-col items-center text-center"
+        >
+          <img src="/cinema/spots/confetti.webp" alt="" className="h-44 w-44 rounded-[2.5rem] object-cover shadow-playful" />
+          <h1 className="mt-6 text-4xl text-brand-700">You’re all set! 🧶</h1>
+          <p className="mt-2 max-w-sm text-sm font-semibold text-slate-500">
+            {facility?.name || 'Your daycare'} is open for its first day on Mitten. Your families are going to love this.
+          </p>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="aurora min-h-screen px-5 py-10">
@@ -66,7 +93,11 @@ export default function Onboarding() {
 function Welcome({ facility, onNext }) {
   return (
     <div className="text-center">
-      <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-400 to-grape-500 text-white shadow-md"><Sparkles size={30} /></span>
+      <motion.img
+        src="/cinema/spots/welcome.webp" alt=""
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
+        className="mx-auto mb-4 h-32 w-32 rounded-[2rem] object-cover shadow-card"
+      />
       <p className="eyebrow">Welcome to Mitten</p>
       <h1 className="mt-1 text-3xl text-brand-700">{facility?.name || 'Your daycare'} is live 🎉</h1>
       <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-slate-500">
@@ -97,7 +128,9 @@ function AddChildStep({ enrollChild, onNext, onBack }) {
     } finally { setBusy(false) }
   }
   return (
-    <div>
+    <div className="relative">
+      {/* the first child is a moment — let it land */}
+      {added && <YarnConfetti count={18} />}
       <StepHead icon={Baby} eyebrow="Step 1" title="Add your first child" />
       <form onSubmit={add} className="mt-4 grid gap-3 sm:grid-cols-2">
         <input className="input" placeholder="First name" value={form.first} onChange={(e) => setForm({ ...form, first: e.target.value })} />

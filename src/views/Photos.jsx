@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Download, Camera, Users, Baby, Loader2, X, ImagePlus } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { SectionHeader, Card } from '../components/ui.jsx'
+import { SectionHeader, Card, KnitEmpty } from '../components/ui.jsx'
 
 export default function Photos({ canPost = false }) {
   const { photos, likePhoto, postPhoto, childrenList, pushToast } = useApp()
@@ -110,7 +110,16 @@ export default function Photos({ canPost = false }) {
       )}
 
       {photos.length === 0 ? (
-        <Card className="text-center"><p className="text-sm font-semibold text-slate-400">No photos yet{canPost ? ' — share your first moment above!' : '.'}</p></Card>
+        <KnitEmpty
+          image="/cinema/spots/camera.webp"
+          title="No moments shared yet"
+          hint={canPost
+            ? 'Share the first photo of the day — families light up the second it lands in their feed.'
+            : 'Sweet moments from your child’s day will appear here as educators share them.'}
+          action={canPost && !open ? (
+            <button onClick={() => setOpen(true)} className="btn-primary"><Camera size={16} /> Post the first photo</button>
+          ) : null}
+        />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {photos.map((p, i) => (

@@ -9,7 +9,7 @@ import {
   Baby, Share2, Image as ImageIcon, MessageCircle, BookOpen, CreditCard, Plus, ArrowRight,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
-import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton } from '../components/ui.jsx'
+import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton, KnitEmpty } from '../components/ui.jsx'
 import {
   enrollmentPipeline, staffSchedule, rooms, attendanceTrend, revenueTrend,
   enrollmentByRoom, billingSummary,
@@ -215,7 +215,11 @@ export function Enrollment() {
       <div className="space-y-5">
         <SectionHeader title="Enrollment 🌱" subtitle={`${childrenList.length} children enrolled`} />
         {childrenList.length === 0 ? (
-          <Card className="text-center"><p className="text-sm font-semibold text-slate-400">No children enrolled yet. Add them in Account → Children.</p></Card>
+          <KnitEmpty
+            image="/cinema/spots/cubs.webp"
+            title="Your roster is ready for its first friend"
+            hint="Add children in Account → Children — or scan a paper enrolment form in Intake and we’ll do the typing."
+          />
         ) : (
           <Card className="p-0">
             {childrenList.map((c, i, arr) => (
