@@ -64,7 +64,7 @@ export const applySubscriptionStatus = internalMutation({
   },
 })
 
-// ── Stripe REST helpers ────────────────────────────────────────────────────
+// ── Stripe REST helpers ────────────────────────────────────────────────────────
 function form(obj: Record<string, string | number>) {
   const b = new URLSearchParams()
   for (const [k, val] of Object.entries(obj)) b.set(k, String(val))
@@ -93,7 +93,8 @@ async function makeCheckout(key: string, st: any, count: number, origin: string)
     'line_items[0][price_data][recurring][interval]': 'month',
     'line_items[0][price_data][unit_amount]': 1,
     'line_items[0][price_data][product_data][name]': `Mitten — ${st.name}`,
-    'line_items[0][price_data][product_data][description]': 'Monthly subscription · billed per enrolled child',
+    'line_items[0][price_data][product_data][description]':
+      'Monthly subscription · billed per enrolled child · Mitten is an OKTD.ca company — your card statement will show OKTD.CA',
     'line_items[0][quantity]': qty,
     success_url: `${origin}/app?billing=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/app?billing=cancel`,
@@ -133,7 +134,7 @@ async function syncSubscription(key: string, st: any, count: number) {
   }
 }
 
-// ── Public actions ─────────────────────────────────────────────────────────
+// ── Public actions ───────────────────────────────────────────────────────────
 
 // Enroll a child. Free under the limit; at the limit, requires a card on file
 // (returns a Checkout URL). With a card, it adds + auto-adjusts the bill.

@@ -113,6 +113,12 @@ function PlanPanel() {
         </div>
       )}
 
+      {!isDemo && (
+        <p className="text-center text-[11px] font-bold text-slate-400">
+          Mitten is an OKTD.ca company — subscription charges appear as OKTD.CA on your card statement.
+        </p>
+      )}
+
       <Card>
         <h3 className="font-extrabold text-slate-800">Your pricing</h3>
         <p className="mb-3 text-xs font-bold text-slate-400">Roughly half of what the big platforms charge — and free to start.</p>
