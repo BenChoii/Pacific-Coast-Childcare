@@ -16,6 +16,7 @@ import type * as children from "../children.js";
 import type * as connect from "../connect.js";
 import type * as conversations from "../conversations.js";
 import type * as crons from "../crons.js";
+import type * as directory from "../directory.js";
 import type * as educators from "../educators.js";
 import type * as extras from "../extras.js";
 import type * as facilities from "../facilities.js";
@@ -32,6 +33,7 @@ import type * as photos from "../photos.js";
 import type * as resources from "../resources.js";
 import type * as roster from "../roster.js";
 import type * as seed from "../seed.js";
+import type * as subsidies from "../subsidies.js";
 import type * as users from "../users.js";
 
 import type {
@@ -49,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   connect: typeof connect;
   conversations: typeof conversations;
   crons: typeof crons;
+  directory: typeof directory;
   educators: typeof educators;
   extras: typeof extras;
   facilities: typeof facilities;
@@ -65,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   resources: typeof resources;
   roster: typeof roster;
   seed: typeof seed;
+  subsidies: typeof subsidies;
   users: typeof users;
 }>;
 

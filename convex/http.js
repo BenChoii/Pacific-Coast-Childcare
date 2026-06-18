@@ -129,4 +129,32 @@ http.route({
   }),
 })
 
+// ── Public childcare directory: live statuses for the static /childcare boards ──
+// The marketing pages on mitten.care fetch this cross-origin to overlay live,
+// owner-set statuses on the crawlable baseline. Read-only, cached briefly.
+const CORS_GET = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+http.route({
+  path: '/directory',
+  method: 'OPTIONS',
+  handler: httpAction(async () => new Response(null, { status: 204, headers: CORS_GET })),
+})
+
+http.route({
+  path: '/directory',
+  method: 'GET',
+  handler: httpAction(async (ctx, request) => {
+    const area = (new URL(request.url).searchParams.get('area') || '').slice(0, 60).toLowerCase()
+    const listings = area ? await ctx.runQuery(internal.directory.publicByArea, { area }) : []
+    return new Response(JSON.stringify({ area, listings }), {
+      status: 200,
+      headers: { ...CORS_GET, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+    })
+  }),
+})
+
 export default http

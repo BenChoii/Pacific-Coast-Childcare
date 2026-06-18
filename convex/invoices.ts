@@ -2,6 +2,7 @@ import { query, mutation, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
 import { resolveFacilityId, requireFacility } from './lib'
+import { subsidyReductionItems } from './subsidies'
 
 async function requireAdmin(ctx: any) {
   const f = await requireFacility(ctx)
@@ -126,6 +127,7 @@ export const create = mutation({
         for (const s of subs.filter((s: any) => s.childId === kid._id && s.active)) {
           items.push({ label: `${s.serviceName} (monthly plan) — ${kid.name}`, amt: Math.round(s.monthlyCents / 100) })
         }
+        for (const it of await subsidyReductionItems(ctx, kid._id, kid.name)) items.push(it)
       }
     }
 
@@ -271,6 +273,7 @@ export const generateMonthly = internalMutation({
             items.push({ label: `${c.serviceName} — ${kid.name} (${c.date})`, amt: Math.round(c.amountCents / 100) })
             await ctx.db.patch(c._id, { status: 'billed' })
           }
+          for (const it of await subsidyReductionItems(ctx, kid._id, kid.name)) items.push(it)
         }
         const amount = items.reduce((s, it) => s + it.amt, 0)
         if (amount <= 0) continue

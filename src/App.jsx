@@ -1,7 +1,7 @@
 import {
   Home, ListChecks, Image, MessageCircle, CalendarDays, CreditCard, Baby,
   ClipboardList, BookOpen, LogIn, Users, Sprout, Wallet, DoorOpen, BarChart3, User,
-  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText,
+  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText, Landmark,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useApp } from './context/AppContext.jsx'
@@ -28,6 +28,7 @@ import { CalmCorner } from './views/calm.jsx'
 import { IntakeDesk } from './views/intake.jsx'
 import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
 import { InvoicingStudio } from './views/invoicing.jsx'
+import { SubsidiesStudio } from './views/subsidies.jsx'
 
 function Loader() {
   return (
@@ -84,7 +85,7 @@ function AlreadySignedIn({ viewer, facility, joining }) {
 }
 
 export default function App() {
-  const { role, view, conversations, authResolving, isAuthenticated, viewer, facility } = useApp()
+  const { role, view, conversations, authResolving, isAuthenticated, viewer, facility, claimArea } = useApp()
 
   if (authResolving) return <Loader />
   if (!role) return <Login />
@@ -96,18 +97,24 @@ export default function App() {
     }
     // Has a facility — wait for it to resolve, then onboard new owners.
     if (facility === null) return <Loader />
-    if (facility && !facility.isDemo && !facility.onboarded && facility.isOwner) return <Onboarding />
+    // A daycare claiming its directory listing skips the full onboarding wizard —
+    // they just want to set their status. Saving it counts as onboarding.
+    if (facility && !facility.isDemo && !facility.onboarded && facility.isOwner && !claimArea) return <Onboarding />
   }
 
   // A signed-in user clicking "Start free" (/signup) or an invite link must get
   // a clear choice — not a silent hop into their existing portal. But someone
   // who JUST signed in/up on this very screen goes straight to their portal.
   const entry = getEntry()
+  // A returning owner clicking a "claim your listing" link (/signup?claim=<area>)
+  // should land in their portal (→ Account · Public listing), not the
+  // "create a separate daycare" wall. claimArea persists past the URL rewrite.
+  const claiming = !!claimArea
   if (isAuthenticated && viewer && (entry.kind === 'owner' || entry.kind === 'join')) {
     if (sessionStorage.getItem('cubby_fresh_auth')) {
       sessionStorage.removeItem('cubby_fresh_auth')
       window.history.replaceState(null, '', '/app')
-    } else if (facility?.onboarded && !facility?.isDemo) {
+    } else if (facility?.onboarded && !facility?.isDemo && !(claiming && entry.kind === 'owner')) {
       return <AlreadySignedIn viewer={viewer} facility={facility} joining={entry.kind === 'join'} />
     }
   }
@@ -144,6 +151,7 @@ export default function App() {
       { id: 'account', label: 'Account', icon: Settings, render: Account, dock: true },
       { id: 'finance', label: 'Finance', icon: PiggyBank, render: FinanceStudio },
       { id: 'invoices', label: 'Invoices', icon: ReceiptText, render: InvoicingStudio },
+      { id: 'subsidies', label: 'Subsidies', icon: Landmark, render: SubsidiesStudio },
       { id: 'profit', label: 'Profitability', icon: TrendingUp, render: Profitability },
       { id: 'families', label: 'Families', icon: UsersRound, render: Families, dock: true },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },

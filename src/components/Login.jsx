@@ -5,7 +5,7 @@ import { Heart, GraduationCap, Building2, ArrowRight, LogIn, Sparkles, Loader2 }
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { BRAND } from '../brand.js'
-import { getEntry } from '../routes.js'
+import { getEntry, currentPath } from '../routes.js'
 import BrandLockup from './BrandLockup.jsx'
 import Auth from './Auth.jsx'
 
@@ -32,6 +32,10 @@ export default function Login() {
   if (entry.kind === 'owner') return <Auth intent={{ kind: 'owner' }} onBack={go('/app')} />
   if (entry.kind === 'join') return <Auth intent={{ kind: 'join', token: entry.token }} onBack={go('/app')} />
   if (entry.kind === 'slug') return <SlugLanding slug={entry.slug} token={entry.token} />
+  // /portal is the families' door — e.g. a daycare's marketing site hands parents
+  // off to mitten.care/portal?email=…. Drop them straight into the family sign-in
+  // ("Welcome back"), not the owner-facing "start your daycare" landing.
+  if (currentPath() === '/portal') return <Auth intent={{ kind: 'default' }} onBack={go('/app')} />
   return <DefaultLanding />
 }
 

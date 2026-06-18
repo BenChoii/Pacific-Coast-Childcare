@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useAction, useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import { api } from '../../convex/_generated/api'
@@ -18,6 +18,22 @@ export function AppProvider({ children }) {
   // --- UI-only state ---
   const [demoRole, setDemoRole] = useState(null) // set when exploring without an account
   const [view, setView] = useState('home')
+  // A daycare claiming its public directory listing arrives via
+  // mitten.care/childcare/<area> → /signup?claim=<area>. Stash the area so it
+  // survives signup + onboarding (which rewrite the URL), then route them to
+  // Account → Public listing once their facility exists.
+  const [claimArea, setClaimArea] = useState(() => {
+    try {
+      const c = new URLSearchParams(window.location.search).get('claim')
+      if (c) { sessionStorage.setItem('mitten_claim_area', c); return c }
+      return sessionStorage.getItem('mitten_claim_area') || null
+    } catch { return null }
+  })
+  const claimRoutedRef = useRef(false)
+  const clearClaimArea = useCallback(() => {
+    setClaimArea(null)
+    try { sessionStorage.removeItem('mitten_claim_area') } catch {}
+  }, [])
   const [activeChildId, setActiveChildId] = useState('c1')
   const [toasts, setToasts] = useState([])
 
@@ -55,6 +71,16 @@ export function AppProvider({ children }) {
   const lessonBlocks = lessonBlocksQ ?? []
   const resources = resourcesQ ?? []
   const facility = facilityQ ?? null
+
+  // Once a claiming owner has a facility, jump them to Account → Public listing
+  // (the panel reads claimArea to preselect their area). Fires even before the
+  // full onboarding wizard — claiming + setting a status is their onboarding.
+  useEffect(() => {
+    if (claimArea && !claimRoutedRef.current && facility && !facility.isDemo && facility.isOwner) {
+      claimRoutedRef.current = true
+      setView('account')
+    }
+  }, [claimArea, facility])
   const childrenList = childrenQ ?? []
   const invites = invitesQ ?? []
   const milestones = milestonesQ ?? []
@@ -312,6 +338,8 @@ export function AppProvider({ children }) {
     viewer,
     view,
     setView,
+    claimArea,
+    clearClaimArea,
     activeChildId,
     setActiveChildId,
     loading,

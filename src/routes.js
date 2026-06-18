@@ -5,7 +5,7 @@
 export const SALES_ROUTES = ['/partners', '/whitelabel', '/sell', '/for-childcare']
 export const APP_ROUTES = ['/app', '/demo', '/portal']
 export const LEGAL_ROUTES = ['/terms', '/privacy']
-const RESERVED = new Set([...SALES_ROUTES, ...APP_ROUTES, ...LEGAL_ROUTES, '/signup', '/join', '/onboard', '/login', '/onboarding', '/resources', '/guides', '/tools', '/research', '/about', '/', ''])
+const RESERVED = new Set([...SALES_ROUTES, ...APP_ROUTES, ...LEGAL_ROUTES, '/signup', '/join', '/onboard', '/login', '/onboarding', '/resources', '/guides', '/tools', '/research', '/about', '/childcare', '/', ''])
 
 export function currentPath() {
   return window.location.pathname.replace(/\/+$/, '') || '/'

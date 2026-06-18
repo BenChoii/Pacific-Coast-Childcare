@@ -48,11 +48,36 @@ export default defineSchema({
     autoInvoice: v.optional(v.boolean()), // cron generates tuition invoices on the 1st
     stripeAccountId: v.optional(v.string()), // Stripe Connect (Express) — card payments land in THEIR account
     stripeAccountReady: v.optional(v.boolean()), // charges_enabled after Connect onboarding
+    // ── Public business profile (shown on the mitten.care/childcare board, and
+    //    a head-start on full app onboarding — set once, reused everywhere) ──
+    programs: v.optional(v.array(v.object({
+      name: v.string(), // e.g. "Infant/Toddler", "3–5 Preschool", "Before & After School"
+      capacity: v.optional(v.number()), // how many children this program takes
+      opensAt: v.optional(v.string()), // when it opens / next intake — free text e.g. "Sep 2026", "Rolling"
+    }))),
+    paymentMethods: v.optional(v.array(v.string())), // e.g. "e-Transfer", "Credit/debit card", "CCFRI/subsidy"
+    about: v.optional(v.string()), // what their programs contain / what sets them apart
+    agesServed: v.optional(v.string()), // e.g. "10 months – 5 years"
+    website: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index('by_slug', ['slug'])
     .index('by_subscription', ['stripeSubscriptionId'])
     .index('by_customer', ['stripeCustomerId']),
+
+  // Public childcare-directory listing a daycare sets for itself — powers the
+  // live status overlay on the static /childcare/<area> boards. One per facility.
+  directoryListings: defineTable({
+    facilityId: v.id('facilities'),
+    area: v.string(), // area slug, e.g. 'north-vancouver'
+    name: v.string(), // public display name (defaults to facility name)
+    status: v.string(), // 'accepting' | 'waitlist' | 'full' | 'unconfirmed'
+    spots: v.optional(v.number()), // open spots when accepting
+    visible: v.boolean(), // owner opted to show on the public board
+    updatedAt: v.number(),
+  })
+    .index('by_facility', ['facilityId'])
+    .index('by_area', ['area']),
 
   // Shareable join links for parents / staff (carry role + facility).
   invites: defineTable({
@@ -155,6 +180,27 @@ export default defineSchema({
     .index('by_facility', ['facilityId', 'order'])
     .index('by_invId', ['invId'])
     .index('by_parent', ['facilityId', 'parentUserId']),
+
+  // Government childcare-subsidy tracking, per child. CCFRI (provider fee
+  // reduction, not income-tested), ACCB (income-tested, family applies + renews
+  // yearly), CWELCC ($10/day cap). Approved records with a monthlyAmount net
+  // off the family's invoices automatically as a transparent reduction line.
+  subsidies: defineTable({
+    facilityId: v.id('facilities'),
+    childId: v.id('children'),
+    type: v.string(), // 'ccfri' | 'accb' | 'cwelcc' | 'other'
+    status: v.string(), // 'tracking' | 'applied' | 'approved' | 'expired'
+    monthlyAmount: v.optional(v.number()), // $/month reduction (applied to invoices when approved)
+    startDate: v.optional(v.string()),
+    expiryDate: v.optional(v.string()), // ACCB renews yearly → drives renewal reminders
+    reference: v.optional(v.string()), // government file / confirmation number
+    notes: v.optional(v.string()),
+    applyToInvoices: v.optional(v.boolean()), // net this off invoices (default true once approved + amount)
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_facility', ['facilityId'])
+    .index('by_child', ['childId']),
 
   photos: defineTable({
     facilityId: v.id('facilities'),

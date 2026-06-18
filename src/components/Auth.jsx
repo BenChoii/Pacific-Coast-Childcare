@@ -27,7 +27,10 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
   const [flow, setFlow] = useState(isOwner || isJoin ? 'signUp' : 'signIn')
   const [name, setName] = useState('')
   const [facilityName, setFacilityName] = useState('')
-  const [email, setEmail] = useState('')
+  // Prefill from a handoff link (e.g. the Pacific Coast site's Parent Portal →
+  // mitten.care/portal?email=…). The password is always entered here, on Mitten's
+  // own secure origin — never collected on a partner marketing domain.
+  const [email, setEmail] = useState(() => new URLSearchParams(window.location.search).get('email') || '')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('parent')
   const [error, setError] = useState('')

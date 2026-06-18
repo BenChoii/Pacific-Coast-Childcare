@@ -83,7 +83,7 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--brand);box-shadow:0
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-function layout({ path, title, desc, h1, sub, tag, body, jsonld = [], wide = false }) {
+function layout({ path, title, desc, h1, sub, tag, body, jsonld = [], wide = false, heroHtml = '' }) {
   const url = `${DOMAIN}${path}`
   const ld = jsonld.map((o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('\n')
   return `<!doctype html>
@@ -107,20 +107,20 @@ ${ld}
 <body>
 <nav class="top"><div class="in">
 <a class="logo" href="/"><img src="/brand/mitten-mark.svg" alt="Mitten" />Mitten</a>
-<a href="/resources">Resources</a><a href="/resources#tools">Free tools</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a>
+<a href="/childcare">Find a daycare</a><a href="/resources">Resources</a><a href="/resources#tools">Free tools</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a>
 <a class="btn btn-primary" href="/signup">Start free</a>
 </div></nav>
-<div class="aurora"><div class="${wide ? 'wrap-wide' : 'wrap'} hero">
+${heroHtml || `<div class="aurora"><div class="${wide ? 'wrap-wide' : 'wrap'} hero">
 ${tag ? `<span class="eyebrow">${esc(tag)}</span>` : ''}
 <h1>${h1}</h1>
 ${sub ? `<p class="sub">${sub}</p>` : ''}
-</div></div>
+</div></div>`}
 <main class="${wide ? 'wrap-wide' : 'wrap'}"><article>
 ${body}
 </article></main>
 <footer class="site"><div class="wrap-wide">
 <p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Mitten</strong> — the childcare app built in BC. Free for your first 5 children.</p>
-<p><a href="/">Home</a><a href="/resources">Resources</a><a href="/research">Research</a><a href="/about">About</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
+<p><a href="/">Home</a><a href="/childcare">Find a daycare</a><a href="/resources">Resources</a><a href="/research">Research</a><a href="/about">About</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
 <p>Mitten · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
 </div></footer>
 </body></html>`
@@ -172,6 +172,76 @@ const articleLd = (path, title, desc) => ({
 /* ───────────────────────────── guides ───────────────────────────── */
 
 const GUIDES = [
+  {
+    slug: 'how-to-apply-affordable-child-care-benefit-bc',
+    tag: 'Subsidies',
+    title: 'How to Apply for the Affordable Child Care Benefit in BC (2026)',
+    desc: 'A step-by-step guide to applying for the BC Affordable Child Care Benefit (ACCB): who qualifies, the income limit, the documents you need, the CF2798 form, and yearly renewal.',
+    h1: 'How to apply for the Affordable Child Care Benefit (BC)',
+    sub: 'Who qualifies, what you need, and the exact steps — plus the CF2798 form and the yearly renewal most families forget.',
+    faqs: [
+      ['What is the income limit for the Affordable Child Care Benefit?', 'Families with household income up to roughly $111,000 may qualify. The benefit is income-tested, so the amount also depends on your family size, your child’s age, and the type of care. Lower incomes receive more, and at the lowest incomes it can cover most or all of your fee.'],
+      ['How long does an Affordable Child Care Benefit application take?', 'Once you start in My Family Services you have 60 days to finish, and you can save and return. Processing times vary; apply as early as you can, because the benefit generally isn’t backdated to before your application.'],
+      ['Do I have to reapply every year?', 'Yes. The Affordable Child Care Benefit must be renewed annually. Diarize your renewal date — if it lapses, your fee reduction stops until you reapply.'],
+      ['Does the Affordable Child Care Benefit stack with CCFRI?', 'Yes. CCFRI lowers your fee automatically at a participating centre, and the Affordable Child Care Benefit applies on top of that reduced fee — together they can bring your cost close to zero for lower-income families.'],
+    ],
+    body: `
+<p>The <strong>Affordable Child Care Benefit (ACCB)</strong> is BC’s income-tested childcare subsidy. Unlike <a href="/guides/ccfri-explained-for-parents">CCFRI</a> (which your provider opts into and applies automatically), the ACCB is one <em>you</em> apply for — and it stacks on top of CCFRI. Here’s exactly how to get it.</p>
+<h2>1. Check if you’re likely eligible</h2>
+<p>Eligibility is income-tested: households earning up to about <strong>$111,000</strong> may qualify, with the amount based on your income, family size, your child’s age and the type of care. You generally also need to be working, looking for work, studying, or have a medical or other approved reason for care. Want a quick read on your numbers first? Use our <a href="/tools/bc-child-care-subsidy-calculator">BC child care subsidy calculator</a>.</p>
+<h2>2. Gather your documents</h2>
+<ul>
+<li>Your <strong>Social Insurance Number</strong></li>
+<li>Proof of income — usually your <strong>CRA Notice of Assessment</strong></li>
+<li>Proof of your child’s citizenship — a <strong>birth certificate or passport</strong></li>
+<li><strong>Banking details</strong> for direct deposit</li>
+</ul>
+<h2>3. Apply online through My Family Services</h2>
+<p>Apply (and later check status) at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>. Once you begin you have 60 days to complete it, and you can save and finish later.</p>
+<h2>4. Complete the CF2798 (Child Care Arrangement form)</h2>
+<p>This is the form that trips families up: the <strong>CF2798</strong> needs details from both you and your provider, plus the provider’s signature. Get a head-start with our free <a href="/tools/cf2798-child-care-arrangement-form">CF2798 helper</a> — and if your daycare runs on <a href="/">Mitten</a>, they can hand you a copy with their half already filled in.</p>
+<h2>5. Renew every year</h2>
+<p>The ACCB lapses annually. Mark your renewal date the day you’re approved — a missed renewal silently stops your reduction. (Daycares on Mitten get an automatic renewal-reminder radar for exactly this.)</p>
+<h2>How much will you actually save?</h2>
+<p>Between CCFRI’s automatic reduction, the ACCB on top, and the $10-a-day cap at participating sites, most BC families pay far less than the sticker price. Estimate your total with the <a href="/tools/bc-child-care-subsidy-calculator">subsidy calculator</a>, then find a centre with space on our <a href="/childcare">free childcare boards</a>.</p>`,
+  },
+  {
+    slug: 'ccfri-explained-for-parents',
+    tag: 'Subsidies',
+    title: 'CCFRI Explained for Parents: BC Child Care Fee Reductions (2026 Amounts)',
+    desc: 'What CCFRI is, the 2025–26 fee reduction amounts by age, why you don’t apply, and how it stacks with the Affordable Child Care Benefit and $10-a-day care in BC.',
+    h1: 'CCFRI explained for parents',
+    sub: 'The automatic BC fee reduction you don’t apply for — the 2025–26 amounts, the $10-a-day floor, and how it stacks with the other subsidies.',
+    faqs: [
+      ['Do I need to apply for CCFRI?', 'No. Families don’t apply for CCFRI — the child care provider opts the facility in, and the savings are passed to you automatically each month as a reduced fee. The Affordable Child Care Benefit is the separate one you apply for yourself.'],
+      ['How much is the CCFRI reduction?', 'For 2025–26 (group/centre care): up to $900/month for infants and toddlers under 36 months, $545 for 3-years-to-Kindergarten, $320 for Kindergarten, $115 for Grade 1 to age 12, and $95 for preschool. Family/in-home rates differ. Fees are never reduced below $200/month ($10/day).'],
+      ['How do I know if my daycare offers CCFRI?', 'Ask them, or check your invoice for a fee reduction line. Most licensed BC centres participate. If yours doesn’t, the reduction won’t apply — which is worth factoring into where you enrol.'],
+    ],
+    body: `
+<p><strong>CCFRI</strong> — the Child Care Fee Reduction Initiative — is the BC subsidy that lowers your childcare fee <em>automatically</em> at a participating centre. You don’t apply, there’s no income test, and the savings simply show up as a reduced monthly fee.</p>
+<h2>The 2025–26 fee reduction amounts</h2>
+<table>
+<thead><tr><th>Age category</th><th>Group / centre</th><th>Family / in-home</th></tr></thead>
+<tbody>
+<tr><td>Infant (0–18 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>Toddler (18–36 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>3 years to Kindergarten</td><td>$545</td><td>$500</td></tr>
+<tr><td>Kindergarten</td><td>$320</td><td>$320</td></tr>
+<tr><td>Grade 1 to age 12</td><td>$115</td><td>$145</td></tr>
+<tr><td>Preschool (part-day)</td><td>$95</td><td>—</td></tr>
+</tbody>
+</table>
+<p style="font-size:.9rem;color:var(--slate-5)">Full-time maximums. CCFRI won’t reduce a fee below $200/month ($10/day), or $140/month for preschool. Source: BC Ministry of Education and Child Care, CCFRI Funding Guidelines 2025–26.</p>
+<h2>Why you don’t apply</h2>
+<p>CCFRI is paid to the <em>provider</em>, who opts the facility in and passes the reduction to families. That’s the opposite of the <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">Affordable Child Care Benefit</a>, which you apply for yourself and which is income-tested.</p>
+<h2>How it stacks with the other subsidies</h2>
+<ul>
+<li><strong>CCFRI</strong> reduces your base fee automatically (above).</li>
+<li><strong>Affordable Child Care Benefit</strong> applies on top, income-tested — for lower incomes it can take the rest close to $0.</li>
+<li><strong>$10-a-day (CWELCC)</strong> sites cap the fee at about $200/month for full-time care.</li>
+</ul>
+<p>See what all three add up to for your family in the <a href="/tools/bc-child-care-subsidy-calculator">BC child care subsidy calculator</a>, then browse centres with space on our <a href="/childcare">childcare boards</a>.</p>`,
+  },
   {
     slug: 'daycare-taxes-canada',
     tag: 'Money & taxes',
@@ -1355,7 +1425,152 @@ $('type').addEventListener('change',rc);$('count').addEventListener('input',rc);
   ],
 }
 
-const TOOLS = [TOOL_PROFIT, TOOL_AI, TOOL_RATIO]
+const TOOL_SUBSIDY = {
+  slug: 'bc-child-care-subsidy-calculator',
+  title: 'BC Child Care Subsidy Calculator (2026) — CCFRI, Affordable Child Care Benefit & $10/Day',
+  desc: 'Free BC child care subsidy calculator: see your CCFRI fee reduction by age, check Affordable Child Care Benefit (ACCB) eligibility, and estimate what you’ll actually pay for daycare after subsidies. No signup.',
+  h1: 'BC child care subsidy calculator',
+  sub: 'Estimate your CCFRI fee reduction, the $10-a-day cap and Affordable Child Care Benefit eligibility — and what you’ll actually pay each month. Free, no signup.',
+  body: `
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))">
+<div><label class="f" for="ctype">Care type</label><select class="f" id="ctype"><option value="group" selected>Group / centre care</option><option value="family">Family / in-home care</option></select></div>
+<div><label class="f" for="age">Child's age category</label><select class="f" id="age"><option value="infant">Infant (0–18 months)</option><option value="toddler">Toddler (18–36 months)</option><option value="g3k" selected>3 years to Kindergarten</option><option value="kinder">Kindergarten</option><option value="grade">Grade 1 to age 12</option><option value="pre">Preschool (part-day)</option></select></div>
+<div><label class="f" for="fee">Your current monthly fee ($)</label><input class="f" id="fee" type="number" value="1200" min="0" /></div>
+<div><label class="f" for="inc">Household income ($/year)</label><input class="f" id="inc" type="number" value="90000" min="0" /></div>
+</div>
+<label style="display:flex;align-items:center;gap:.5rem;margin-top:.9rem;font-size:.92rem;font-weight:600;color:var(--slate)"><input type="checkbox" id="ten" /> My centre is a $10-a-day (CWELCC) site</label>
+<div class="result" id="sout"></div>
+</div>
+<p class="note" style="margin-top:1rem">Estimates only, not an eligibility decision. CCFRI amounts assume your centre opted in (most licensed centres have). The Affordable Child Care Benefit is income-tested and depends on your full circumstances — confirm your amount and apply at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>.</p>
+
+<h2>How BC childcare subsidies stack</h2>
+<p>BC has three layers of help, and they combine. <strong>CCFRI</strong> (the Child Care Fee Reduction Initiative) lowers your fee automatically at a participating centre — you don't apply, the savings just show up. <strong>The Affordable Child Care Benefit (ACCB)</strong> is income-tested (household income up to about $111,000), you apply and renew yearly, and it stacks <em>on top</em> of CCFRI — for lower incomes it can bring your fee close to $0. At <strong>$10-a-day (CWELCC)</strong> sites, your fee is capped at about $200/month ($10/day) for full-time care.</p>
+
+<h3>CCFRI maximum monthly fee reductions (2025–26)</h3>
+<table>
+<thead><tr><th>Age category</th><th>Group / centre</th><th>Family / in-home</th></tr></thead>
+<tbody>
+<tr><td>Infant (0–18 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>Toddler (18–36 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>3 years to Kindergarten</td><td>$545</td><td>$500</td></tr>
+<tr><td>Kindergarten</td><td>$320</td><td>$320</td></tr>
+<tr><td>Grade 1 to age 12</td><td>$115</td><td>$145</td></tr>
+<tr><td>Preschool (part-day)</td><td>$95</td><td>—</td></tr>
+</tbody>
+</table>
+<p style="font-size:.9rem;color:var(--slate-5)">Full-time amounts; CCFRI won't reduce a fee below $200/month ($10/day), or $140/month for preschool. Source: BC Ministry of Education and Child Care, CCFRI Funding Guidelines 2025–26.</p>
+
+<h2>How to apply (the steps)</h2>
+<ol>
+<li><strong>CCFRI — nothing to do.</strong> Ask your centre if they're a CCFRI participant (most are). If so, the reduction is already on your invoice.</li>
+<li><strong>Affordable Child Care Benefit — apply online.</strong> Use <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">My Family Services</a> (here's our <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">step-by-step ACCB guide</a>). Have your SIN, your CRA Notice of Assessment, your child's birth certificate and your banking details ready.</li>
+<li><strong>Complete the Child Care Arrangement form (CF2798) with your provider.</strong> It needs both your details and the provider's — and the provider's signature. Use our free <a href="/tools/cf2798-child-care-arrangement-form">CF2798 helper</a> to fill it in, then submit the official form with your application.</li>
+<li><strong>Renew every year.</strong> The ACCB lapses annually — diarize it so your reduction doesn't stop.</li>
+</ol>
+<p>Looking for a centre with space? Browse our free <a href="/childcare">BC childcare boards</a> — many list whether they take CCFRI/subsidy. Running a daycare? <a href="/">Mitten</a> tracks each child's CCFRI/ACCB and nets it off invoices automatically, and generates the CF2798 for your families — free for your first 5 children.</p>
+<script>
+var CCFRI={group:{infant:900,toddler:900,g3k:545,kinder:320,grade:115,pre:95},family:{infant:600,toddler:600,g3k:500,kinder:320,grade:145,pre:0}};
+var $=function(id){return document.getElementById(id);};var fmt=function(n){return '$'+Math.round(n).toLocaleString();};
+function scalc(){
+var ct=$('ctype').value,age=$('age').value,fee=+$('fee').value||0,inc=+$('inc').value||0,ten=$('ten').checked;
+var red=(CCFRI[ct]||{})[age]||0;var floor=(age==='pre')?140:200;
+var net,ccfri;
+if(ten){net=Math.min(fee,200);ccfri=Math.max(0,fee-net);}
+else{net=(fee<=floor)?fee:Math.max(fee-red,floor);ccfri=fee-net;}
+var elig=inc>0&&inc<111000;var savings=Math.max(0,fee-net);
+var noFamPre=(ct==='family'&&age==='pre');
+$('sout').innerHTML='<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))">'
++'<div><div class="eyebrow">CCFRI fee reduction</div><div class="big" style="color:#2eb88a">'+(noFamPre?'n/a':fmt(ccfri)+'/mo')+'</div></div>'
++'<div><div class="eyebrow">'+(ten?'$10-a-day capped fee':'Fee after CCFRI')+'</div><div class="big">'+fmt(net)+'/mo</div></div>'
++'<div><div class="eyebrow">Monthly saving</div><div class="big" style="color:#0E74C1">'+fmt(savings)+'</div></div></div>'
++'<p style="margin:.9rem 0 0">'+(elig
+?'<strong style="color:#2eb88a">You likely qualify for the Affordable Child Care Benefit</strong> — your household income is under the ~$111,000 ceiling. The ACCB is income-tested and stacks on top of the above, so your real fee could be <strong>lower than '+fmt(net)+'</strong> — for lower incomes, potentially close to $0. Estimate your exact amount and apply at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>.'
+:(inc>=111000?'Your household income is at or above the ~$111,000 ceiling, so you likely won\\'t receive the income-tested Affordable Child Care Benefit — but the CCFRI reduction above still applies automatically at a participating centre.':'Enter your household income to check Affordable Child Care Benefit eligibility.'))
++'</p>'+(noFamPre?'<p style="color:#a9791b;font-weight:600;margin:.6rem 0 0">Preschool isn\\'t a family-care category — pick Group / centre care for preschool.</p>':'');}
+['ctype','age','fee','inc','ten'].forEach(function(id){var e=$(id);e.addEventListener('input',scalc);e.addEventListener('change',scalc);});scalc();
+</script>`,
+  faqs: [
+    ['How much is the CCFRI fee reduction in BC?', 'For 2025–26, the maximum monthly reduction at participating centres is $900 for infants and toddlers (under 36 months), $545 for 3-years-to-Kindergarten, $320 for Kindergarten, $115 for Grade 1 to age 12, and $95 for preschool (group/centre rates; family/in-home rates differ). Fees are never reduced below $200/month ($10/day).'],
+    ['What is the income limit for the Affordable Child Care Benefit?', 'Families with household income up to roughly $111,000 may qualify; the amount is income-tested and also depends on family size, the child’s age and the type of care. You apply and renew every year through My Family Services.'],
+    ['Do I have to apply for CCFRI?', 'No — families don’t apply for CCFRI. The child care provider opts the facility in, and the savings are passed to you automatically each month as a reduced fee. The Affordable Child Care Benefit is the one you apply for yourself.'],
+    ['What is the CF2798 / Child Care Arrangement form?', 'It’s the form that records your child care arrangement for an Affordable Child Care Benefit application — it needs both your details and your provider’s, plus the provider’s signature. Some daycares (those on Mitten) can give you a pre-filled head-start to save time.'],
+  ],
+}
+
+const TOOL_CF2798 = {
+  slug: 'cf2798-child-care-arrangement-form',
+  title: 'CF2798 Child Care Arrangement Form — Free Pre-Fill Helper (BC ACCB)',
+  desc: 'Free helper for the BC CF2798 Child Care Arrangement form, required for the Affordable Child Care Benefit. Fill it in and download a clean, ready-to-sign PDF head-start — no signup.',
+  h1: 'CF2798 Child Care Arrangement form helper',
+  sub: 'The form you submit with your Affordable Child Care Benefit application. Fill it in below and download a clean, ready-to-sign copy. Free, no signup.',
+  body: `
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))">
+<div><label class="f" for="cn">Child's full name</label><input class="f" id="cn" /></div>
+<div><label class="f" for="cdob">Child's date of birth</label><input class="f" id="cdob" type="date" /></div>
+<div><label class="f" for="pn">Parent / guardian name</label><input class="f" id="pn" /></div>
+<div><label class="f" for="fn">Provider / facility name</label><input class="f" id="fn" /></div>
+<div><label class="f" for="fa">Provider address</label><input class="f" id="fa" /></div>
+<div><label class="f" for="fp">Provider phone</label><input class="f" id="fp" /></div>
+<div><label class="f" for="lic">Licence / facility number</label><input class="f" id="lic" placeholder="ask your provider" /></div>
+<div><label class="f" for="ct">Type of care</label><select class="f" id="ct"><option>Licensed group child care</option><option>Licensed family child care</option><option>In-home multi-age child care</option><option>Registered license-not-required</option><option>License-not-required</option></select></div>
+<div><label class="f" for="sd">Care start date</label><input class="f" id="sd" type="date" /></div>
+<div><label class="f" for="dpw">Days per week</label><input class="f" id="dpw" type="number" min="1" max="7" placeholder="5" /></div>
+<div><label class="f" for="hrs">Hours per day (from–to)</label><input class="f" id="hrs" placeholder="7:30am – 5:30pm" /></div>
+<div><label class="f" for="fee">Monthly fee ($)</label><input class="f" id="fee" type="number" min="0" placeholder="1200" /></div>
+</div>
+<button class="btn btn-primary" id="gen" style="margin-top:1.1rem;border:0;cursor:pointer;font-size:1rem">📄 Generate my CF2798 head-start</button>
+</div>
+<p class="note" style="margin-top:1rem">This is a clean, organised head-start to save you time — <strong>not</strong> a replacement for the official form. Submit the official CF2798 with your application at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>. Nothing you type is sent anywhere — it stays in your browser.</p>
+
+<h2>What is the CF2798?</h2>
+<p>The <strong>Child Care Arrangement form (CF2798)</strong> records the details of your child care arrangement, and you submit it with your <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">Affordable Child Care Benefit application</a>. It's the one form that needs information from <em>both</em> you and your provider — and the provider's signature — which is why it's the part of the application families most often get stuck on.</p>
+<h2>Who fills it out and signs it?</h2>
+<ul>
+<li><strong>You (the parent/guardian)</strong> provide your details and your child's, and sign.</li>
+<li><strong>Your child care provider</strong> confirms the arrangement — care type, schedule and fee — and signs. (If your daycare runs on <a href="/">Mitten</a>, they can hand you a version with their half already filled in.)</li>
+</ul>
+<p>Not sure how much you'll actually pay after subsidies? Estimate your CCFRI reduction and ACCB eligibility with our <a href="/tools/bc-child-care-subsidy-calculator">BC child care subsidy calculator</a>.</p>
+<script>
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+var V=function(id){return ($(id)?$(id).value:'')||'';};
+function L(val){return val?'<b style="color:#0f172a">'+esc(val)+'</b>':'<span style="display:inline-block;min-width:150px;border-bottom:1px solid #94a3b8">&nbsp;</span>';}
+function row(a,av,b,bv){return '<div style="display:flex;gap:28px;margin:9px 0"><div style="flex:1"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8">'+a+'</div>'+L(av)+'</div>'+(b?'<div style="flex:1"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8">'+b+'</div>'+L(bv)+'</div>':'')+'</div>';}
+$('gen').addEventListener('click',function(){
+var fee=V('fee');var feeTxt=fee?('$'+Number(fee).toLocaleString('en-CA',{minimumFractionDigits:2})+' / month'):'';
+var H='<!doctype html><html><head><meta charset="utf-8"><title>Child Care Arrangement — '+esc(V('cn')||'Child')+'</title></head>'
++'<body style="font:13.5px/1.55 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1e293b;padding:48px;max-width:780px;margin:0 auto">'
++'<div style="position:fixed;top:16px;right:16px"><button onclick="window.print()" style="background:#0E74C1;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer">Print / Save as PDF</button></div>'
++'<div style="border-bottom:3px solid #0E74C1;padding-bottom:18px"><div style="font-family:Georgia,serif;font-size:21px;color:#0E74C1">Child Care Arrangement</div><div style="color:#64748b;font-size:12px;margin-top:3px">Head-start for the BC Affordable Child Care Benefit (CF2798)</div></div>'
++'<div style="margin:18px 0 6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;font-size:12.5px;color:#334155">A head-start to save you time — complete and submit the official <b>CF2798</b> with your application at <b>gov.bc.ca/affordablechildcarebenefit</b>. This is not a replacement for the official form.</div>'
++'<h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#0E74C1;margin:24px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:5px">Child</h3>'
++row("Child's full name",V('cn'),"Date of birth",V('cdob'))
++'<h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#0E74C1;margin:24px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:5px">Parent / Guardian</h3>'
++row("Name",V('pn'),"Social Insurance Number","")
++row("Home address","","Phone","")
++'<h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#0E74C1;margin:24px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:5px">Child care provider</h3>'
++row("Facility / provider name",V('fn'),"Licence / facility number",V('lic'))
++row("Address",V('fa'),"Phone",V('fp'))
++row("Type of care",V('ct'),"",null)
++'<h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#0E74C1;margin:24px 0 6px;border-bottom:1px solid #e2e8f0;padding-bottom:5px">The arrangement</h3>'
++row("Care start date",V('sd'),"Days per week",V('dpw'))
++row("Hours per day",V('hrs'),"Monthly fee",feeTxt)
++'<div style="display:flex;gap:40px;margin-top:34px"><div style="flex:1"><div style="border-bottom:1.5px solid #334155;height:42px"></div><div style="font-size:11px;color:#64748b;margin-top:5px">Parent / guardian signature &amp; date</div></div><div style="flex:1"><div style="border-bottom:1.5px solid #334155;height:42px"></div><div style="font-size:11px;color:#64748b;margin-top:5px">Provider signature &amp; date</div></div></div>'
++'<div style="margin-top:28px;border-top:1px solid #e2e8f0;padding-top:12px;color:#94a3b8;font-size:11px">Confirm all details against the official CF2798 before submitting. Official form &amp; application: gov.bc.ca/affordablechildcarebenefit · prepared with Mitten</div>'
++'</body></html>';
+var w=window.open('','_blank','width=840,height=940');if(!w){alert('Please allow pop-ups to open your form.');return;}w.document.write(H);w.document.close();
+});
+</script>`,
+  faqs: [
+    ['What is the CF2798 form in BC?', 'The CF2798 is the Child Care Arrangement form you submit with an Affordable Child Care Benefit application. It records your child, your details, and your provider\'s details, and must be signed by both you and your child care provider.'],
+    ['Who signs the CF2798?', 'Both the parent/guardian and the child care provider sign it — the provider confirms the care type, schedule and fee. That shared sign-off is why it\'s often the slowest part of an application.'],
+    ['Is this the official CF2798 form?', 'No — this free helper produces a clean, pre-filled head-start to save you time. Always complete and submit the official CF2798 with your application through My Family Services at gov.bc.ca/affordablechildcarebenefit.'],
+  ],
+}
+
+const TOOLS = [TOOL_SUBSIDY, TOOL_CF2798, TOOL_PROFIT, TOOL_AI, TOOL_RATIO]
 
 
 /* ───────────────────────────── research ─────────────────────────────
@@ -1651,10 +1866,488 @@ function hubPage() {
     jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Mitten Resources', url: `${DOMAIN}/resources` }],
     body: `
 <h2 id="tools">Free tools</h2><div class="grid">${tools}</div>
+<h2>Find a daycare near you</h2><p style="margin-top:-6px"><a href="/childcare">Browse all childcare boards →</a></p><div class="grid">${DIRECTORY.map((s) => `<a class="tile" href="/childcare/${s.slug}"><span class="tag">${esc(s.region)} · Board</span><h3>${esc(s.name)} daycares</h3><p>Live openings · ${s.daycares.length} centres</p></a>`).join('')}</div>
 <h2>Research, in plain English</h2><p style="margin-top:-6px"><a href="/research">Browse all research →</a></p><div class="grid">${RESEARCH.map((r) => `<a class="tile" href="/research/${r.slug}"><span class="tag">${esc(r.kind)}</span><h3>${esc(r.h1)}</h3><p>${esc(r.desc.slice(0, 110))}…</p></a>`).join("")}</div>
 <h2>Guides for daycare owners</h2><div class="grid">${guides}</div>
 <h2>Childcare software guides & comparisons</h2><div class="grid">${comps}</div>
 ${cta('Everything these guides recommend — daily reports, billing, payroll prep, parent messaging — is one app.')}`,
+  })
+}
+
+/* ─────────────────── childcare directory (per-suburb boards) ─────────────────── */
+// A free, parent-facing "who's accepting enrolments" board, one page per area.
+// Daycares self-claim and set their own status/spots — and the claim IS a Mitten
+// signup, i.e. partial onboarding. HONESTY RULE: we never publish a made-up
+// status. Pre-added centres are 'unconfirmed' until the owner claims and sets
+// their own, and every page says so. Listing a public business name is fine;
+// inventing its availability is not.
+const STATUS = {
+  accepting: ['Accepting', 'st-acc'],
+  waitlist: ['Waitlist open', 'st-wait'],
+  full: ['Full', 'st-full'],
+  unconfirmed: ['Unconfirmed', 'st-unc'],
+}
+const unc = (arr) => arr.map((d) => ({ status: 'unconfirmed', ...d }))
+const DIRECTORY = [
+  { slug: 'north-vancouver', name: 'North Vancouver', region: 'BC', daycares: unc([
+    { name: 'Park Place Montessori Daycare' }, { name: 'Park Place Montessori — Lonsdale' },
+    { name: 'CEFA Early Years North Vancouver' },
+    { name: 'Rainforest Learning Centre North Vancouver' }, { name: 'Bluebird Daycare Centre' },
+  ]) },
+  { slug: 'surrey', name: 'Surrey', region: 'BC', daycares: unc([
+    { name: 'Bonnycastle Montessori Daycare', area: 'Guildford' }, { name: "Honey Tree Children's Learning Centre" },
+    { name: 'Playbox Childcare Centre' }, { name: 'Beacon House Childcare' }, { name: 'BrightPath Clayton Hills Child Care' },
+    { name: 'Rothewood Academy', area: 'White Rock' }, { name: 'Surrey City Childcare', area: 'Guildford' }, { name: 'Power Play Early Learning' },
+    { name: 'UMMI Early Learning' }, { name: 'A to Z Childcare Centre', area: 'Fleetwood' }, { name: 'Treehouse Kids Care' },
+    { name: 'Little Stars Daycare' }, { name: "Laura Lee's Little Learning Center" }, { name: 'i kids Learning Centre' },
+  ]) },
+  { slug: 'vancouver', name: 'Vancouver', region: 'BC', daycares: unc([
+    { name: 'Mums Montessori Childcare' }, { name: 'Montessori Day Care Society' }, { name: 'Vancouver Montessori School' },
+    { name: 'Little Oak Montessori' }, { name: 'Reach for the Stars Montessori' },
+  ]) },
+  { slug: 'vernon', name: 'Vernon', region: 'BC', daycares: unc([
+    { name: 'Appletree Childcare' }, { name: 'Maven Lane Child Care' }, { name: 'Kids Corner Daycare' }, { name: 'Raising Stars Preschool' },
+  ]) },
+  { slug: 'comox-valley', name: 'Comox Valley', region: 'BC', daycares: unc([
+    { name: "Akasha's Littlest Explorers", area: 'Courtenay' }, { name: "Beaufort Children's Centre", area: 'Comox' }, { name: 'Valley Kids Academy', area: 'Courtenay' },
+  ]) },
+  { slug: 'burnaby', name: 'Burnaby', region: 'BC', daycares: unc([
+    { name: "Capitol Hill Children's Centre" }, { name: "Busy Bee Montessori Children's House" }, { name: 'Burnaby Lake Childcare' },
+    { name: "Parkview Montessori Children's Centre" }, { name: 'Verdant Early Learning Centre' }, { name: 'Happy Feet Childcare Centre' },
+    { name: 'Starlight Child Care Centre' },
+  ]) },
+  { slug: 'richmond', name: 'Richmond', region: 'BC', daycares: unc([
+    { name: 'Maple House Infant Toddler Daycare' }, { name: 'Brighouse United Church Daycare' }, { name: 'Little Waddlers Daycare' },
+    { name: 'Treehouse Daycare & Preschool', area: 'Steveston' }, { name: 'Seedlings Childcare', area: 'City Centre' },
+  ]) },
+  { slug: 'langley', name: 'Langley', region: 'BC', daycares: unc([
+    { name: 'Educare Early Learning' }, { name: 'Holistic Roots Childcare Centre' }, { name: 'Little Birds Academy' },
+    { name: 'Rainforest Learning Centre Langley' }, { name: 'Jellybean Park Early Learning Centre' }, { name: 'CEFA Willowbrook' },
+    { name: 'Fort Langley Learning Centre', area: 'Fort Langley' }, { name: 'Yorkson Childcare Academy', area: 'Willoughby' },
+    { name: 'Mumta Childcare', area: 'Aldergrove' },
+  ]) },
+  { slug: 'coquitlam', name: 'Coquitlam', region: 'BC', daycares: unc([
+    { name: 'Green Apple Daycare' }, { name: 'Rainforest Learning Centre Coquitlam' }, { name: 'Parkland Players' },
+    { name: 'Mountainview Group Daycare' }, { name: "3 Angels Children's Centre" }, { name: 'Able Child Academy Early Learning' },
+  ]) },
+  { slug: 'victoria', name: 'Victoria', region: 'BC', daycares: unc([
+    { name: 'Carousel Child Care Centre' }, { name: 'Castleview Child Care Centre' }, { name: 'CEFA Early Learning Victoria' },
+    { name: 'Centennial Day Care Society' }, { name: 'Compass Childcare' }, { name: 'Willowbrae Childcare Academy Victoria' },
+  ]) },
+  { slug: 'abbotsford', name: 'Abbotsford', region: 'BC', daycares: unc([
+    { name: 'ABC Child Care Centre' }, { name: 'Peek N Play Child Care Centre' }, { name: "Learn n' Play Early Learning Centre" },
+    { name: 'Jr. Adventures Childcare' }, { name: 'Wind & Tide Child Development Centre' },
+  ]) },
+  { slug: 'kelowna', name: 'Kelowna', region: 'BC', daycares: unc([
+    { name: 'Grins & Giggles Childcare Centre' }, { name: 'Green Gables Infant Toddler Daycare' }, { name: 'Expanding Horizons Pre-School' },
+    { name: 'Kelowna Child Care Society' }, { name: 'Heritage Christian Preschool' },
+  ]) },
+  { slug: 'nanaimo', name: 'Nanaimo', region: 'BC', daycares: unc([
+    { name: 'Inquiring Little Minds' }, { name: 'Alphabet Playhouse Childcare Centre' }, { name: 'Bright Beginnings Early Childhood Centre' },
+    { name: 'Green Trails Montessori Daycare' }, { name: "Kid's Place Childcare Centre" },
+  ]) },
+  { slug: 'new-westminster', name: 'New Westminster', region: 'BC', daycares: unc([
+    { name: 'Radiance Childcare Centre' }, { name: 'Graham Montessori School' }, { name: 'Somewhere to Grow Montessori Childcare Centre' },
+    { name: 'Tulip Childcare Centre' }, { name: "Queen's Park Daycare" }, { name: 'Precious Early Years Childcare Centre' },
+  ]) },
+  { slug: 'maple-ridge', name: 'Maple Ridge', region: 'BC', daycares: unc([
+    { name: 'Cotton Cloud Daycare' }, { name: "Maple Montessori Children's Center" }, { name: 'Happy Hearts Childcare Centre' },
+    { name: 'Lily of the Valley Montessori Center' }, { name: 'Creative Cove Holistic Childcare Centre' }, { name: 'Curious Minds Learning Centre' },
+  ]) },
+]
+const DIR_CSS = `<style>
+/* ---- cinematic hero ---- */
+.dchero{position:relative;overflow:hidden;background:#0E4E80 url('/cinema/hero-poster.webp') center/cover no-repeat;isolation:isolate}
+.dchero .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.dchero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,42,73,.5) 0%,rgba(8,42,73,.72) 55%,rgba(8,42,73,.9) 100%)}
+.dchero .in{max-width:60rem;margin:0 auto;padding:4.6rem 1.25rem 3.2rem;text-align:center;color:#fff}
+.dchero .eyebrow{color:#bcd9ee}
+.dchero h1{color:#fff;margin:.35em 0 .25em;font-size:clamp(2.3rem,6vw,3.8rem);text-shadow:0 2px 36px rgba(0,0,0,.4)}
+.dchero .sub{max-width:40rem;margin:.2rem auto 0;color:rgba(255,255,255,.92);font-size:1.12rem}
+.dchero .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:2.2rem;margin:1.8rem 0 1.5rem}
+.dchero .stat b{font-family:'Instrument Serif',serif;font-size:2.4rem;line-height:1;display:block;color:#fff}
+.dchero .stat .lbl{font-family:'Geist Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);margin-top:.25rem}
+.dchero .acts{display:flex;flex-wrap:wrap;justify-content:center;gap:.7rem}
+.dchero .btn-primary{background:#fff;color:var(--ink)!important}
+.dchero .btn-primary:hover{background:#eaf4fb;color:var(--ink)!important;transform:translateY(-2px)}
+.dchero .btn-ghost{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.1);color:#fff!important}
+.dchero .btn-ghost:hover{background:rgba(255,255,255,.2)}
+.dchero .live-dot{box-shadow:0 0 0 0 rgba(255,255,255,.6)}
+@keyframes lpulse{0%{box-shadow:0 0 0 0 rgba(46,184,138,.5)}70%{box-shadow:0 0 0 .4rem rgba(46,184,138,0)}100%{box-shadow:0 0 0 0 rgba(46,184,138,0)}}
+.reveal{transition:opacity .7s ease,transform .7s ease}
+.js .reveal{opacity:0;transform:translateY(14px)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none}.dchero video{display:none}}
+/* ---- trust strip ---- */
+.trust{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1.6rem;padding:.85rem 1.25rem;background:var(--tint);border-bottom:1px solid var(--line);font-size:.84rem;color:var(--slate-5);text-align:center}
+.trust span{display:inline-flex;align-items:center;gap:.4rem}.trust b{color:var(--ink);font-weight:700}.trust .tk{color:var(--mint);font-weight:800}
+/* ---- value-to-owners trio ---- */
+.vtrio{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));margin:1.6rem 0 .6rem}
+.vcard{position:relative;border:1px solid var(--line);border-radius:1.3rem;padding:1.35rem;background:#fff;box-shadow:0 12px 34px -22px rgba(14,78,128,.4)}
+.vcard .ic{width:2.7rem;height:2.7rem;border-radius:.85rem;display:flex;align-items:center;justify-content:center;font-size:1.35rem;background:var(--brand-50);margin-bottom:.7rem}
+.vcard h3{margin:0 0 .3rem;font-size:1.18rem}
+.vcard p{font-size:.93rem;color:var(--slate-5);margin:0}
+.vcard .pin{position:absolute;top:1.1rem;right:1.1rem;font-family:'Geist Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mint);font-weight:700}
+/* ---- live board ---- */
+.boardhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem;margin:1.4rem 0 .2rem}
+.boardhead h2{margin:0}
+.board{margin:.6rem 0 0;border:1px solid var(--line);border-radius:1.3rem;overflow:hidden;box-shadow:0 14px 40px -28px rgba(14,78,128,.45)}
+.board table{margin:0;font-size:.95rem;border-collapse:separate;border-spacing:0}
+.board thead th{background:var(--tint);font-family:'Geist Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--slate-4);font-weight:600;padding:.7rem 1.1rem;border:0;border-bottom:1px solid var(--line)}
+.board td{border:0;border-bottom:1px solid var(--line);padding:.85rem 1.1rem;vertical-align:middle}
+.board tr:last-child td{border-bottom:0}
+.board tbody tr{transition:background .15s}.board tbody tr:hover{background:var(--brand-50)}
+.board tr[data-live="1"]{background:#f3fbf7}.board tr[data-live="1"]:hover{background:#e9f7f0}
+.board td:nth-child(2),.board td:nth-child(3){white-space:nowrap}
+.board td:last-child{text-align:right;white-space:nowrap}
+.board .dcname{font-weight:700;color:var(--ink);font-size:1rem}
+.st{display:inline-block;border-radius:999px;font-size:.72rem;font-weight:700;padding:.22rem .65rem;white-space:nowrap}
+.st-acc{background:#e6f6ee;color:#1f8a55}.st-wait{background:#fdf1d8;color:#a9791b}.st-full{background:#eef1f4;color:#64748b}.st-unc{background:#eef4fb;color:#0E74C1}
+.claim{display:inline-block;font-weight:700;text-decoration:none;font-size:.82rem;color:var(--brand);border:1px solid #bcd9ee;border-radius:999px;padding:.3rem .8rem;transition:.16s}
+.claim:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.steps{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));margin:1.2rem 0}
+.steps .s{background:var(--tint);border-radius:1.1rem;padding:1.1rem 1.2rem;border:1px solid var(--line)}.steps .n{font-family:'Instrument Serif',serif;font-size:1.6rem;color:var(--brand)}
+.subs{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.subs a{border:1px solid var(--line);border-radius:999px;padding:.35rem .9rem;font-size:.85rem;text-decoration:none;color:var(--ink);background:#fff}.subs a:hover{border-color:#bcd9ee;background:var(--brand-50)}
+.live-note{display:none;align-items:center;gap:.45rem;margin:.7rem 0 0;font-size:.84rem;font-weight:700;color:#1f8a55}
+.live-dot{width:.5rem;height:.5rem;border-radius:999px;background:#2eb88a;display:inline-block;box-shadow:0 0 0 0 rgba(46,184,138,.5);animation:lpulse 2s infinite}
+.dc-d{margin:.45rem 0 0}
+.dc-d summary{cursor:pointer;color:var(--brand);font-weight:600;font-size:.82rem;list-style:none;display:inline-block}
+.dc-d summary::-webkit-details-marker{display:none}
+.dc-d[open] summary{margin-bottom:.2rem}
+.dc-info{font-size:.88rem;color:#475569;display:grid;gap:.35rem;padding:.55rem .8rem;background:#f6fbff;border:1px solid var(--line);border-radius:.7rem}
+.dc-info strong{color:var(--ink)}
+.dc-info ul{margin:.2rem 0 0;padding-left:1.1rem}.dc-info li{margin:.12rem 0}
+.dc-about{margin:.2rem 0 0;color:#475569;font-style:italic}
+.dc-links a{color:var(--brand);font-weight:600;text-decoration:none}
+/* ---- product showcase (tech authority) ---- */
+.showcase{display:grid;gap:1.6rem;grid-template-columns:1.1fr .9fr;align-items:center;margin:2.4rem 0 1rem;background:linear-gradient(135deg,#0E4E80,#0E74C1);border-radius:1.6rem;padding:2rem;color:#fff;overflow:hidden}
+.showcase h2{color:#fff;margin:0 0 .4rem}.showcase p{color:rgba(255,255,255,.9);margin:0 0 .9rem}
+.showcase ul{list-style:none;padding:0;margin:0 0 1.1rem}.showcase li{padding:.18rem 0 .18rem 1.6rem;position:relative;color:rgba(255,255,255,.95);font-size:.96rem}
+.showcase li::before{content:"\\2713";position:absolute;left:0;color:#7ee0bd;font-weight:800}
+.showcase .btn-primary{background:#fff;color:var(--ink)!important}
+.phone{justify-self:center;width:13.5rem;background:#fff;border-radius:1.6rem;padding:.55rem;box-shadow:0 30px 60px -25px rgba(0,0,0,.55)}
+.phone .scr{background:var(--tint);border-radius:1.2rem;padding:.7rem;overflow:hidden}
+.phone .ptop{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--slate-5);margin-bottom:.5rem}
+.phone .pcard{background:#fff;border:1px solid var(--line);border-radius:.8rem;padding:.55rem;margin-bottom:.5rem}
+.phone .pphoto{height:4.2rem;border-radius:.55rem;background:linear-gradient(135deg,#bcd9ee,#e6c6cc);margin-bottom:.4rem;background-size:cover;background-position:center}
+.phone .pname{font-weight:700;font-size:.74rem;color:var(--ink)}
+.phone .pmeta{font-size:.66rem;color:var(--slate-5)}
+.phone .pmsg{display:flex;gap:.4rem;align-items:flex-start;font-size:.68rem;color:var(--slate)}
+.phone .pbub{background:var(--brand-50);border-radius:.6rem .6rem .6rem .2rem;padding:.35rem .5rem;color:var(--ink)}
+.phone .ppill{display:inline-block;background:#e6f6ee;color:#1f8a55;font-weight:700;font-size:.62rem;border-radius:999px;padding:.12rem .5rem}
+@media(max-width:46rem){.showcase{grid-template-columns:1fr;text-align:center}.showcase ul{display:inline-block;text-align:left}.phone{margin-top:.4rem}}
+</style>`
+const dnorm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '')
+const normUrl = (u) => { u = String(u || '').trim(); if (!u) return ''; return u.slice(0, 4) === 'http' ? u : 'https://' + u }
+// Build-time rich detail (baked into static HTML for crawlers/AI when a centre has claimed).
+function dcDetail(d) {
+  const has = (d.programs && d.programs.length) || (d.about && String(d.about).trim()) || (d.paymentMethods && d.paymentMethods.length) || (d.agesServed && String(d.agesServed).trim()) || d.website || d.phone
+  if (!has) return ''
+  let inner = ''
+  if (d.agesServed) inner += `<div><strong>Ages:</strong> ${esc(d.agesServed)}</div>`
+  if (d.programs && d.programs.length) inner += `<div><strong>Programs &amp; spaces:</strong><ul>${d.programs.map((p) => `<li>${esc(p.name || '')}${p.capacity != null && p.capacity !== '' ? ` — ${p.capacity} spaces` : ''}${p.opensAt ? ` · opens ${esc(p.opensAt)}` : ''}</li>`).join('')}</ul></div>`
+  if (d.paymentMethods && d.paymentMethods.length) inner += `<div><strong>Payments:</strong> ${esc(d.paymentMethods.join(', '))}</div>`
+  if (d.about && String(d.about).trim()) inner += `<p class="dc-about">${esc(d.about)}</p>`
+  const links = []
+  if (d.phone) links.push(`☎ ${esc(d.phone)}`)
+  if (d.website) links.push(`<a href="${esc(normUrl(d.website))}" target="_blank" rel="noopener">Website ↗</a>`)
+  if (links.length) inner += `<div class="dc-links">${links.join(' · ')}</div>`
+  return `<details class="dc-d"><summary>Programs, payments &amp; more</summary><div class="dc-info">${inner}</div></details>`
+}
+// Per-daycare schema.org entity — enriched with the claimed profile so AI/search index it.
+function childCareLd(d, areaName, region, path) {
+  const cc = {
+    '@type': 'ChildCare', name: d.name,
+    areaServed: { '@type': 'City', name: areaName },
+    address: { '@type': 'PostalAddress', addressLocality: d.area || areaName, addressRegion: region, addressCountry: 'CA' },
+    url: d.website ? normUrl(d.website) : `${DOMAIN}${path}#dc-${d.key || dnorm(d.name)}`,
+  }
+  if (d.phone) cc.telephone = d.phone
+  if (d.paymentMethods && d.paymentMethods.length) cc.paymentAccepted = d.paymentMethods.join(', ')
+  const desc = []
+  if (d.about) desc.push(d.about)
+  if (d.agesServed) desc.push('Ages: ' + d.agesServed)
+  if (d.programs && d.programs.length) desc.push('Programs: ' + d.programs.map((p) => p.name + (p.capacity ? ` (${p.capacity} spaces)` : '')).join('; '))
+  if (desc.length) cc.description = desc.join('. ')
+  return cc
+}
+function dcRow(d, areaSlug) {
+  const [label, cls] = STATUS[d.status] || STATUS.unconfirmed
+  const spots = d.status === 'accepting' ? (d.spots ? `${d.spots} open` : 'Yes') : (d.status === 'full' ? '0' : '—')
+  const key = d.key || dnorm(d.name)
+  const claimed = d.status && d.status !== 'unconfirmed'
+  const lastCell = claimed ? '' : `<a class="claim" href="${areaSlug ? `/signup?claim=${areaSlug}` : '/signup'}">Claim →</a>`
+  const det = dcDetail(d)
+  return `<tr id="dc-${key}" data-name="${key}"${det ? ' data-detailed="1"' : ''}><td><strong>${esc(d.name)}</strong>${d.area ? `<br><span class="mono" style="color:var(--slate-4)">${esc(d.area)}</span>` : ''}${det}</td><td data-cell="status"><span class="st ${cls}">${label}</span></td><td data-cell="spots">${spots}</td><td>${lastCell}</td></tr>`
+}
+function suburbPage(s, live = []) {
+  const path = `/childcare/${s.slug}`
+  const updated = new Date().toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })
+  // Merge the pre-listed centres with live owner-claimed listings (baked at build time
+  // so crawlers + AI see real statuses/profiles; the client overlay keeps it fresh between rebuilds).
+  const liveList = (live || []).slice()
+  const usedLive = new Set()
+  const match = (name) => {
+    const k = dnorm(name)
+    let l = liveList.find((x) => dnorm(x.name) === k && !usedLive.has(x))
+    if (!l) l = liveList.find((x) => { const xk = dnorm(x.name); return xk && !usedLive.has(x) && (xk.indexOf(k) === 0 || k.indexOf(xk) === 0) })
+    return l
+  }
+  const enrich = (base, l) => ({ ...base, status: l.status, spots: l.spots, programs: l.programs, paymentMethods: l.paymentMethods, about: l.about, agesServed: l.agesServed, website: l.website, phone: l.phone })
+  const rows = s.daycares.map((d) => {
+    const base = { name: d.name, key: dnorm(d.name), area: d.area }
+    const l = match(d.name)
+    if (l) { usedLive.add(l); return enrich(base, l) }
+    return { ...base, status: 'unconfirmed' }
+  })
+  liveList.forEach((l) => { if (!usedLive.has(l)) rows.push(enrich({ name: l.name, key: dnorm(l.name) }, l)) })
+  const total = rows.length
+  const confirmed = rows.filter((d) => d.status && d.status !== 'unconfirmed').length
+  const faqs = [
+    [`Which daycares in ${s.name} are accepting enrolments?`, `Mitten tracks ${total} childcare centres in ${esc(s.name)}, ${s.region}.${confirmed ? ` ${confirmed} ${confirmed === 1 ? 'has' : 'have'} confirmed their current availability;` : ''} centres marked <strong>Accepting</strong> have confirmed open spots, <strong>Waitlist</strong> means a waitlist is open, and <strong>Unconfirmed</strong> means the centre hasn&rsquo;t reported its current availability — call them directly to check.`],
+    [`How is this ${s.name} childcare list kept up to date?`, `Every status is set by the daycare itself through a free Mitten listing, so a confirmed status reflects exactly what the centre reported. The page shows the date of the most recent update.`],
+    [`I run a daycare in ${s.name} — how do I show up as accepting?`, `<a href="/signup?claim=${s.slug}">Claim your free listing</a> and set your status to Accepting with your open-spot count. It takes about a minute, there&rsquo;s no charge, and ${esc(s.name)} families searching right now will see your openings.`],
+    [`What does &ldquo;Unconfirmed&rdquo; mean on this board?`, `It means the centre is a real ${esc(s.name)} daycare we&rsquo;ve listed, but it hasn&rsquo;t set its current availability with us yet. It is <strong>not</strong> a statement that the centre is full or closed — please contact the centre to confirm.`],
+  ]
+  const heroHtml = `<section class="dchero">
+<video class="bg" autoplay muted loop playsinline preload="none" poster="/cinema/hero-poster.webp"><source src="/cinema/hero-loop.mp4" type="video/mp4"></video>
+<div class="in">
+<span class="eyebrow">${esc(s.region)} · Live childcare board</span>
+<h1>Daycares accepting enrolments in ${esc(s.name)}</h1>
+<p class="sub">A free, live board of ${esc(s.name)} daycares and their open spots — kept current by the centres themselves.</p>
+<div class="stats">
+<div class="stat"><b>${total}</b><div class="lbl">centres tracked</div></div>
+<div class="stat"><b>${DIRECTORY.length}</b><div class="lbl">BC areas live</div></div>
+<div class="stat"><b>Free</b><div class="lbl">to list &amp; claim</div></div>
+</div>
+<div class="acts">
+<a class="btn btn-primary" href="/signup?claim=${s.slug}">Claim your free listing →</a>
+<a class="btn btn-ghost" href="#board">See who has space</a>
+</div>
+</div></section>`
+  const body = DIR_CSS + `
+<script>document.documentElement.classList.add('js')</script>
+<div class="trust">
+<span><b>Built in BC</b></span>
+<span><span class="tk">●</span> Updated ${updated}</span>
+<span>Owner-verified statuses</span>
+<span><b>${DIRECTORY.length}</b> areas tracked across BC</span>
+</div>
+<p class="reveal">As of <strong>${updated}</strong>, Mitten tracks <strong>${total}</strong> childcare centres in <strong>${esc(s.name)}</strong>, ${s.region}${confirmed ? `, of which <strong>${confirmed}</strong> ${confirmed === 1 ? 'has' : 'have'} confirmed current availability` : ''}. Each centre sets its own status: <strong>Accepting</strong> = confirmed open spots, <strong>Waitlist</strong> = a waitlist is open, <strong>Unconfirmed</strong> = not reported yet (call to check). A free, parent-friendly board, kept current by the daycares themselves.</p>
+<p class="reveal" style="margin:.3rem 0 0;font-size:.95rem;color:var(--slate-5)">💡 ${esc(s.name)} childcare costs less than the sticker price for most families — see <a href="/childcare-subsidies/${s.slug}">child care subsidies in ${esc(s.name)}</a> (CCFRI, Affordable Child Care Benefit & $10-a-day), or jump to the <a href="/tools/bc-child-care-subsidy-calculator">subsidy calculator</a>.</p>
+<div class="vtrio">
+<div class="vcard reveal"><div class="ic">🔗</div><span class="pin">helps you rank</span><h3>A free listing + a real backlink</h3><p>Claim your spot and we link straight to your website — a genuine follow link from a fast, Google-indexed page. Free SEO that helps ${esc(s.name)} families find you, not just here.</p></div>
+<div class="vcard reveal"><div class="ic">🧸</div><span class="pin">free to try</span><h3>Free childcare software</h3><p>Your listing doubles as a Mitten account — daily photos, parent messaging, sign-in/out, billing and payroll prep. Free for your first 5 children, no per-child fees, no card.</p></div>
+<div class="vcard reveal"><div class="ic">📍</div><span class="pin">live</span><h3>Found by parents now</h3><p>Set your status to Accepting with your open-spot count and families searching ${esc(s.name)} childcare <em>today</em> see your openings first — while they&rsquo;re deciding.</p></div>
+</div>
+<div class="boardhead" id="board"><h2>${esc(s.name)} daycares &amp; their openings</h2></div>
+<p style="margin:.1rem 0 0;font-size:.84rem;color:var(--slate-4)">Updated ${updated} · statuses are owner-set · always call the centre to confirm before you visit.</p>
+<div class="board"><table>
+<thead><tr><th>Daycare</th><th>Status</th><th>Open spots</th><th></th></tr></thead>
+<tbody>
+${rows.map((d) => dcRow(d, s.slug)).join('\n')}
+</tbody>
+</table></div>
+<p class="live-note" data-live-note><span class="live-dot"></span> Live — <span data-live-count></span> status<span data-live-plural></span> below set by the daycares themselves<span data-live-asof></span>.</p>
+<p class="note"><strong>Is this your daycare?</strong> <a href="/signup?claim=${s.slug}">Claim your free listing</a> and set your real status — parents searching ${esc(s.name)} see &ldquo;Accepting&rdquo; centres first. <strong>&ldquo;Unconfirmed&rdquo; only means a centre hasn&rsquo;t updated us yet — it is not a statement that they&rsquo;re full.</strong> Parents: please call the centre to confirm.</p>
+<div class="showcase reveal">
+<div>
+<span class="eyebrow" style="color:#bcd9ee">The app behind the board</span>
+<h2>Not just a list — a full childcare platform</h2>
+<p>Mitten is a modern, made-in-BC app daycares run their whole day on. Claiming your ${esc(s.name)} listing gives you the lot, free to start:</p>
+<ul><li>Daily photos &amp; reports parents love</li><li>Two-way messaging &amp; sign-in/out</li><li>Tuition billing + payroll prep</li><li>Your data stays yours — never sold</li></ul>
+<a class="btn btn-primary" href="/app">See the live demo →</a>
+</div>
+<div class="phone" aria-hidden="true"><div class="scr">
+<div class="ptop">🧸 Mitten · ${esc(s.name)}</div>
+<div class="pcard"><div class="pphoto" style="background-image:url('/cinema/cubs.webp')"></div><div class="pname">Today at a glance</div><div class="pmeta">12 checked in · 3 napping · 2 new photos</div></div>
+<div class="pcard"><div class="pmsg"><div class="pbub">Ava had a great morning! 🎨 Photo sent.</div></div></div>
+<div class="pcard"><span class="ppill">Accepting · 3 spots</span> <span class="pmeta">your public listing</span></div>
+</div></div>
+</div>
+<div class="cta"><h3>Run a daycare in ${esc(s.name)}? Claim your free listing.</h3>
+<p>Set your enrolment status and open spots so ${esc(s.name)} parents searching <em>right now</em> find you first — it&rsquo;s free and takes a minute. Claiming also unlocks Mitten&rsquo;s free parent app (daily photos, reports, messaging) whenever you want it.</p>
+<a class="btn" href="/signup?claim=${s.slug}">Claim your free listing →</a></div>
+<h2>How the ${esc(s.name)} board works</h2>
+<div class="steps">
+<div class="s reveal"><div class="n">1</div><strong>Claim your listing</strong><p style="font-size:.88rem;color:var(--slate-5);margin:.2rem 0 0">Free, one minute — just confirm it&rsquo;s your centre.</p></div>
+<div class="s reveal"><div class="n">2</div><strong>Set your status</strong><p style="font-size:.88rem;color:var(--slate-5);margin:.2rem 0 0">Accepting, waitlist or full — and how many spots are open.</p></div>
+<div class="s reveal"><div class="n">3</div><strong>Parents find you</strong><p style="font-size:.88rem;color:var(--slate-5);margin:.2rem 0 0">Families searching ${esc(s.name)} childcare see your openings, live.</p></div>
+</div>
+${faqBlock(faqs)}
+<h2>Other areas</h2>
+<div class="subs">${DIRECTORY.filter((x) => x.slug !== s.slug).map((x) => `<a href="/childcare/${x.slug}">${esc(x.name)}</a>`).join('')}<a href="/childcare">All areas →</a></div>
+<script>(function(){
+var AREA=${JSON.stringify(s.slug)},SITE=${JSON.stringify(CONVEX_SITE)};
+function norm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function pill(st){var m={accepting:['Accepting','st-acc'],waitlist:['Waitlist open','st-wait'],full:['Full','st-full'],unconfirmed:['Unconfirmed','st-unc']};var x=m[st]||m.unconfirmed;var sp=document.createElement('span');sp.className='st '+x[1];sp.textContent=x[0];return sp;}
+function spotsTxt(l){return l.status==='accepting'?(l.spots?l.spots+' open':'Yes'):(l.status==='full'?'0':'—');}
+function hasDetail(l){return (l.programs&&l.programs.length)||(l.about&&(''+l.about).trim())||(l.paymentMethods&&l.paymentMethods.length)||(l.agesServed&&(''+l.agesServed).trim())||l.website||l.phone;}
+function buildDetail(l){var d=document.createElement('div');d.className='dc-info';
+if(l.agesServed){var a=document.createElement('div');a.innerHTML='<strong>Ages:</strong> ';a.appendChild(document.createTextNode(l.agesServed));d.appendChild(a);}
+if(l.programs&&l.programs.length){var pw=document.createElement('div');pw.innerHTML='<strong>Programs &amp; spaces:</strong>';var ul=document.createElement('ul');l.programs.forEach(function(p){var li=document.createElement('li');var t=p.name||'';if(p.capacity!=null&&p.capacity!=='')t+=' — '+p.capacity+' spaces';if(p.opensAt)t+=' · opens '+p.opensAt;li.textContent=t;ul.appendChild(li);});pw.appendChild(ul);d.appendChild(pw);}
+if(l.paymentMethods&&l.paymentMethods.length){var pm=document.createElement('div');pm.innerHTML='<strong>Payments:</strong> ';pm.appendChild(document.createTextNode(l.paymentMethods.join(', ')));d.appendChild(pm);}
+if(l.about&&(''+l.about).trim()){var ab=document.createElement('p');ab.className='dc-about';ab.textContent=l.about;d.appendChild(ab);}
+if(l.phone||l.website){var lk=document.createElement('div');lk.className='dc-links';if(l.phone)lk.appendChild(document.createTextNode('☎ '+l.phone+'   '));if(l.website){var u=''+l.website;if(u.slice(0,4)!=='http')u='https://'+u;var w=document.createElement('a');w.href=u;w.target='_blank';w.rel='noopener noreferrer';w.textContent='Website ↗';lk.appendChild(w);}d.appendChild(lk);}
+return d;}
+function attachDetails(tr,l){if(!hasDetail(l)||tr.getAttribute('data-detailed')||tr.querySelector('.dc-d'))return;var cell=tr.firstElementChild;if(!cell)return;var det=document.createElement('details');det.className='dc-d';var sum=document.createElement('summary');sum.textContent='Programs, payments & more';det.appendChild(sum);det.appendChild(buildDetail(l));cell.appendChild(det);}
+try{fetch(SITE+'/directory?area='+encodeURIComponent(AREA)).then(function(r){return r.json();}).then(function(d){
+var live=(d&&d.listings)||[];if(!live.length)return;
+var table=document.querySelector('.board table');if(!table)return;
+var rows=[].slice.call(table.querySelectorAll('tr[data-name]'));
+var byName={};rows.forEach(function(tr){byName[tr.getAttribute('data-name')]=tr;});
+var n=0,maxTs=0;
+live.forEach(function(l){if(l.updatedAt&&l.updatedAt>maxTs)maxTs=l.updatedAt;});
+live.forEach(function(l){
+var key=norm(l.name);var tr=byName[key];
+if(!tr){rows.forEach(function(r){if(tr)return;var k=r.getAttribute('data-name');if(k&&(k.indexOf(key)===0||key.indexOf(k)===0))tr=r;});}
+if(tr){var sc=tr.querySelector('[data-cell=status]');if(sc){sc.innerHTML='';sc.appendChild(pill(l.status));}var pc=tr.querySelector('[data-cell=spots]');if(pc)pc.textContent=spotsTxt(l);tr.setAttribute('data-live','1');attachDetails(tr,l);n++;}
+else{var ntr=document.createElement('tr');ntr.setAttribute('data-name',key);var t1=document.createElement('td');var b=document.createElement('strong');b.textContent=l.name||'';t1.appendChild(b);var t2=document.createElement('td');t2.setAttribute('data-cell','status');t2.appendChild(pill(l.status));var t3=document.createElement('td');t3.setAttribute('data-cell','spots');t3.textContent=spotsTxt(l);var t4=document.createElement('td');ntr.appendChild(t1);ntr.appendChild(t2);ntr.appendChild(t3);ntr.appendChild(t4);(table.querySelector('tbody')||table).appendChild(ntr);attachDetails(ntr,l);n++;}
+});
+if(n){var note=document.querySelector('[data-live-note]');if(note){var c=note.querySelector('[data-live-count]');if(c)c.textContent=n;var pl=note.querySelector('[data-live-plural]');if(pl)pl.textContent=n===1?'':'es';var as=note.querySelector('[data-live-asof]');if(as&&maxTs){try{as.textContent=' · as of '+new Date(maxTs).toLocaleDateString(undefined,{month:'short',day:'numeric'});}catch(e){}}note.style.display='flex';}}
+}).catch(function(){});}catch(e){}
+})();</script>
+<script>(function(){try{var els=document.querySelectorAll('.reveal');if(!('IntersectionObserver' in window)){for(var i=0;i<els.length;i++)els[i].classList.add('in');return;}var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}});},{threshold:.12,rootMargin:'0px 0px -8% 0px'});els.forEach(function(e){io.observe(e);});}catch(e){var l=document.querySelectorAll('.reveal');for(var i=0;i<l.length;i++)l[i].classList.add('in');}})();</script>`
+  return layout({
+    path, wide: false, heroHtml,
+    title: `Daycares Accepting Enrolments in ${s.name} — Live Openings | Mitten`,
+    desc: `See which ${s.name} daycares are accepting enrolments and how many spots are open — a free live childcare board, updated by the centres themselves.`,
+    h1: `Daycares accepting enrolments in ${s.name}`,
+    sub: `A free, live board of ${s.name} daycares and their openings — kept current by the centres themselves.`,
+    tag: `${s.region} · Childcare board`,
+    jsonld: [
+      {
+        '@context': 'https://schema.org', '@type': 'CollectionPage',
+        name: `Daycares accepting enrolments in ${s.name}`,
+        description: `A free board of ${total} childcare centres in ${s.name}, ${s.region}, with enrolment status set by each centre.`,
+        url: `${DOMAIN}${path}`,
+        dateModified: TODAY,
+        inLanguage: 'en-CA',
+        isPartOf: { '@type': 'WebSite', name: 'Mitten', url: DOMAIN },
+        about: { '@type': 'Thing', name: `Childcare in ${s.name}, ${s.region}` },
+      },
+      {
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: DOMAIN },
+          { '@type': 'ListItem', position: 2, name: 'Find a daycare', item: `${DOMAIN}/childcare` },
+          { '@type': 'ListItem', position: 3, name: s.name, item: `${DOMAIN}${path}` },
+        ],
+      },
+      {
+        '@context': 'https://schema.org', '@type': 'ItemList',
+        name: `${s.name} childcare centres`,
+        numberOfItems: total,
+        itemListOrder: 'https://schema.org/ItemListUnordered',
+        itemListElement: rows.map((d, i) => ({
+          '@type': 'ListItem', position: i + 1,
+          item: childCareLd(d, s.name, s.region, path),
+        })),
+      },
+      faqLd(faqs),
+    ],
+    body,
+  })
+}
+// Per-area subsidy page — local-intent SEO ("childcare subsidies in <area>"),
+// wired to that area's live board + the calculator + the subsidy guides.
+function subsidyAreaPage(s) {
+  const path = `/childcare-subsidies/${s.slug}`
+  const n = s.daycares.length
+  const faqs = [
+    [`How much is the child care subsidy in ${s.name}?`, `${esc(s.name)} families get the same BC subsidies as the rest of the province. At a participating centre, CCFRI lowers fees automatically — up to $900/month for infants and toddlers and $545 for 3-years-to-Kindergarten (group rates). The income-tested Affordable Child Care Benefit (household income up to about $111,000) can reduce your fee further, and $10-a-day sites cap full-time fees at roughly $200/month.`],
+    [`Do ${s.name} daycares offer CCFRI and $10-a-day?`, `Most licensed ${esc(s.name)} centres take part in CCFRI, and a growing number are $10-a-day (CWELCC) sites. Check each centre on our <a href="/childcare/${s.slug}">${esc(s.name)} childcare board</a> or ask the centre directly.`],
+    [`How do I apply for child care subsidy in ${s.name}?`, `CCFRI is automatic at a participating centre — there's nothing to apply for. For the Affordable Child Care Benefit you apply through My Family Services and submit a CF2798 Child Care Arrangement form with your provider — see our <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">step-by-step guide</a>.`],
+  ]
+  const body = DIR_CSS + `
+<p>Child care in <strong>${esc(s.name)}</strong>, ${s.region} costs far less than the sticker price once subsidies are applied. ${esc(s.name)} families have access to the same three BC programs as everyone in the province — here's how each one works, what you'll actually pay, and how to claim them.</p>
+<div class="vtrio">
+<div class="vcard"><div class="ic">🧾</div><span class="pin">automatic</span><h3>CCFRI fee reduction</h3><p>Your centre opts in and the reduction lands on your invoice automatically — no application, no income test. Up to $900/month for under-3s.</p></div>
+<div class="vcard"><div class="ic">💸</div><span class="pin">income-tested</span><h3>Affordable Child Care Benefit</h3><p>You apply and renew yearly; household income up to ~$111,000 qualifies. Stacks on top of CCFRI — for lower incomes it can reach close to $0.</p></div>
+<div class="vcard"><div class="ic">🔟</div><span class="pin">at $10/day sites</span><h3>$10-a-day (CWELCC)</h3><p>At participating ${esc(s.name)} sites, full-time fees are capped at about $200/month ($10/day).</p></div>
+</div>
+<h2>CCFRI fee reductions (2025–26)</h2>
+<table>
+<thead><tr><th>Age category</th><th>Group / centre</th><th>Family / in-home</th></tr></thead>
+<tbody>
+<tr><td>Infant (0–18 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>Toddler (18–36 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>3 years to Kindergarten</td><td>$545</td><td>$500</td></tr>
+<tr><td>Kindergarten</td><td>$320</td><td>$320</td></tr>
+<tr><td>Grade 1 to age 12</td><td>$115</td><td>$145</td></tr>
+<tr><td>Preschool (part-day)</td><td>$95</td><td>—</td></tr>
+</tbody>
+</table>
+<p class="note"><strong>What will you actually pay in ${esc(s.name)}?</strong> Enter your numbers in the free <a href="/tools/bc-child-care-subsidy-calculator">BC child care subsidy calculator</a> — it estimates your CCFRI reduction, ACCB eligibility and the $10-a-day cap in one go.</p>
+<h2>How ${esc(s.name)} families apply</h2>
+<ol>
+<li><strong>CCFRI — nothing to do.</strong> Ask your ${esc(s.name)} centre if they're a CCFRI participant (most are); the reduction shows on your invoice.</li>
+<li><strong>Affordable Child Care Benefit — apply online</strong> via <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">My Family Services</a>, with your SIN, CRA Notice of Assessment, your child's birth certificate and banking details. Full walkthrough: <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">how to apply for the ACCB</a>.</li>
+<li><strong>Complete the CF2798</strong> with your provider — our free <a href="/tools/cf2798-child-care-arrangement-form">CF2798 helper</a> fills most of it for you.</li>
+<li><strong>Renew every year</strong> so your reduction doesn't lapse.</li>
+</ol>
+<div class="cta"><h3>Find a ${esc(s.name)} daycare with space</h3>
+<p>We track <strong>${n}</strong> ${esc(s.name)} centres on a free, live board — many take CCFRI and subsidy. See who's accepting enrolments right now.</p>
+<a class="btn" href="/childcare/${s.slug}">See ${esc(s.name)} openings →</a></div>
+<h2>Learn more</h2>
+<div class="subs"><a href="/guides/ccfri-explained-for-parents">CCFRI explained</a><a href="/guides/how-to-apply-affordable-child-care-benefit-bc">Applying for the ACCB</a><a href="/tools/cf2798-child-care-arrangement-form">CF2798 helper</a><a href="/tools/bc-child-care-subsidy-calculator">Subsidy calculator</a><a href="/childcare/${s.slug}">${esc(s.name)} daycare board</a></div>
+${faqBlock(faqs)}`
+  return layout({
+    path, wide: false,
+    title: `Child Care Subsidies in ${s.name}, BC — CCFRI, ACCB & $10/Day (2026)`,
+    desc: `How much child care costs in ${s.name} after subsidies: CCFRI fee reductions by age, Affordable Child Care Benefit eligibility, $10-a-day sites, and how ${s.name} families apply. Free calculator.`,
+    h1: `Child care subsidies in ${s.name}`,
+    sub: `What ${s.name} families actually pay after CCFRI, the Affordable Child Care Benefit and $10-a-day — and how to claim each one.`,
+    tag: `${s.region} · Subsidies`,
+    jsonld: [
+      { '@context': 'https://schema.org', '@type': 'WebPage', name: `Child care subsidies in ${s.name}`, url: `${DOMAIN}${path}`, dateModified: TODAY, inLanguage: 'en-CA', isPartOf: { '@type': 'WebSite', name: 'Mitten', url: DOMAIN }, about: { '@type': 'Thing', name: `Child care subsidies in ${s.name}, ${s.region}` } },
+      { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: DOMAIN },
+        { '@type': 'ListItem', position: 2, name: 'Find a daycare', item: `${DOMAIN}/childcare` },
+        { '@type': 'ListItem', position: 3, name: `${s.name} subsidies`, item: `${DOMAIN}${path}` },
+      ] },
+      faqLd(faqs),
+    ],
+    body,
+  })
+}
+function directoryIndex() {
+  const body = DIR_CSS + `
+<p>Mitten&rsquo;s free childcare boards show which daycares are <strong>accepting enrolments</strong> — and how many spots are open — area by area, kept current by the centres themselves. Pick your area:</p>
+<div class="grid">${DIRECTORY.map((s) => `<a class="tile" href="/childcare/${s.slug}"><span class="tag">${esc(s.region)}</span><h3>${esc(s.name)}</h3><p>${s.daycares.length} daycares · live openings</p></a>`).join('')}</div>
+<div class="cta"><h3>Run a daycare? Claim your free listing.</h3><p>Set your enrolment status and open spots so local parents find you first — free, one minute. Plus Mitten&rsquo;s parent app whenever you want it.</p><a class="btn" href="/signup">Claim your free listing →</a></div>
+<p class="note">Statuses are set by the daycares themselves. &ldquo;Unconfirmed&rdquo; centres haven&rsquo;t updated their availability with us yet — always call to confirm. Are you an owner? <a href="/signup">Claim your listing</a> to set yours.</p>`
+  return layout({
+    path: '/childcare', wide: true,
+    title: 'Daycares Accepting Enrolments Near You — Live Childcare Boards | Mitten',
+    desc: 'Find daycares accepting enrolments by area across BC — live openings and open-spot counts, updated by the centres themselves. Free childcare boards for parents.',
+    h1: 'Find daycares accepting enrolments',
+    sub: 'Live local boards of which daycares have space — kept current by the centres themselves.',
+    tag: 'Childcare boards',
+    jsonld: [
+      {
+        '@context': 'https://schema.org', '@type': 'CollectionPage',
+        name: 'Mitten Childcare Boards', url: `${DOMAIN}/childcare`,
+        description: `Free childcare boards across ${DIRECTORY.length} BC areas — which daycares are accepting enrolments, set by the centres themselves.`,
+        dateModified: TODAY, inLanguage: 'en-CA',
+        isPartOf: { '@type': 'WebSite', name: 'Mitten', url: DOMAIN },
+      },
+      {
+        '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: DOMAIN },
+          { '@type': 'ListItem', position: 2, name: 'Find a daycare', item: `${DOMAIN}/childcare` },
+        ],
+      },
+      {
+        '@context': 'https://schema.org', '@type': 'ItemList',
+        name: 'Childcare boards by area', numberOfItems: DIRECTORY.length,
+        itemListElement: DIRECTORY.map((s, i) => ({
+          '@type': 'ListItem', position: i + 1, name: `${s.name} daycares`, url: `${DOMAIN}/childcare/${s.slug}`,
+        })),
+      },
+    ],
+    body,
   })
 }
 
@@ -1762,9 +2455,38 @@ write('research/index.html', researchHub())
 
 write('resources/index.html', hubPage())
 
+urls.push('/childcare')
+write('childcare/index.html', directoryIndex())
+// Fetch live owner-claimed listings and bake them into the static board pages, so
+// crawlers + AI see real statuses/profiles. Resilient: on any error, fall back to
+// the pre-list (all "Unconfirmed"). The client overlay still keeps it fresh between rebuilds.
+async function fetchLive(slug) {
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 8000)
+    const r = await fetch(`${CONVEX_SITE}/directory?area=${encodeURIComponent(slug)}`, { signal: ctrl.signal })
+    clearTimeout(t)
+    if (!r.ok) return []
+    const d = await r.json()
+    return Array.isArray(d?.listings) ? d.listings : []
+  } catch {
+    return []
+  }
+}
+const liveByArea = {}
+await Promise.all(DIRECTORY.map(async (s) => { liveByArea[s.slug] = await fetchLive(s.slug) }))
+const claimedTotal = Object.values(liveByArea).reduce((n, arr) => n + arr.length, 0)
+for (const s of DIRECTORY) {
+  urls.push(`/childcare/${s.slug}`)
+  write(`childcare/${s.slug}.html`, suburbPage(s, liveByArea[s.slug]))
+  urls.push(`/childcare-subsidies/${s.slug}`)
+  write(`childcare-subsidies/${s.slug}.html`, subsidyAreaPage(s))
+}
+console.log(`  ↳ baked ${claimedTotal} live claimed listing(s) into the childcare boards`)
+
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `<url><loc>${DOMAIN}${u}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}
 </urlset>`)
 
-console.log(`✓ content built: ${RESEARCH.length} research papers, ${GUIDES.length} guides, ${COMPETITORS.length + 1} competitor pages, ${TOOLS.length} tools, hub + sitemap (${urls.length} URLs)`)
+console.log(`✓ content built: ${RESEARCH.length} research papers, ${GUIDES.length} guides, ${COMPETITORS.length + 1} competitor pages, ${TOOLS.length} tools, ${DIRECTORY.length} childcare boards, hub + sitemap (${urls.length} URLs)`)

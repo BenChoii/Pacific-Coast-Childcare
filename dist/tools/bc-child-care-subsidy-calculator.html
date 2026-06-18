@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>BC Child Care Subsidy Calculator (2026) — CCFRI, Affordable Child Care Benefit &amp; $10/Day</title>
+<meta name="description" content="Free BC child care subsidy calculator: see your CCFRI fee reduction by age, check Affordable Child Care Benefit (ACCB) eligibility, and estimate what you’ll actually pay for daycare after subsidies. No signup." />
+<link rel="canonical" href="https://mitten.care/tools/bc-child-care-subsidy-calculator" />
+<meta property="og:type" content="article" /><meta property="og:title" content="BC Child Care Subsidy Calculator (2026) — CCFRI, Affordable Child Care Benefit &amp; $10/Day" />
+<meta property="og:description" content="Free BC child care subsidy calculator: see your CCFRI fee reduction by age, check Affordable Child Care Benefit (ACCB) eligibility, and estimate what you’ll actually pay for daycare after subsidies. No signup." /><meta property="og:url" content="https://mitten.care/tools/bc-child-care-subsidy-calculator" />
+<meta property="og:site_name" content="Mitten" /><meta name="twitter:card" content="summary" />
+<meta name="theme-color" content="#F4F8FB" />
+<link rel="icon" type="image/svg+xml" href="/brand/mitten-mark.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+:root{--ink:#0E4E80;--brand:#0E74C1;--brand-50:#EAF4FB;--slate:#334155;--slate-4:#94a3b8;--slate-5:#64748b;--line:#e2e8f0;--mint:#2eb88a;--coral:#e8604c;--tint:#F4F8FB;--grape:#7c5cbf}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Geist',ui-sans-serif,system-ui,-apple-system,sans-serif;color:var(--slate);background:#fff;line-height:1.65;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:-.01em;color:var(--ink);line-height:1.15}
+h1{font-size:clamp(2rem,5vw,3rem);margin:.4em 0 .3em}
+h2{font-size:clamp(1.5rem,3.4vw,2rem);margin:1.6em 0 .4em}
+h3{font-size:1.25rem;margin:1.3em 0 .3em}
+p,li{font-size:1.02rem}
+a{color:var(--brand)}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate-4);font-weight:500}
+.aurora{background:radial-gradient(55rem 55rem at 12% -8%,rgba(191,216,230,.55),transparent 55%),radial-gradient(48rem 48rem at 100% 4%,rgba(242,198,204,.5),transparent 55%),linear-gradient(180deg,#fff,#F4F8FB)}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem}
+.wrap-wide{max-width:64rem;margin:0 auto;padding:0 1.25rem}
+nav.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);box-shadow:inset 0 -.5px 0 rgba(15,23,42,.12)}
+nav.top .in{max-width:64rem;margin:0 auto;display:flex;align-items:center;gap:1.2rem;padding:.7rem 1.25rem}
+nav.top a{font-size:.88rem;font-weight:600;color:var(--slate-5);text-decoration:none}
+nav.top a:hover{color:var(--brand)}
+nav.top .logo{display:flex;align-items:center;gap:.5rem;font-family:'Instrument Serif',serif;font-size:1.35rem;color:var(--ink);margin-right:auto}
+nav.top img{height:30px;width:30px}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.6rem 1.3rem;font-size:.9rem;font-weight:600;text-decoration:none;transition:.2s}
+.btn-primary{background:var(--brand);color:#fff!important}
+.btn-primary:hover{background:#8ec8ed;color:var(--ink)!important;transform:translateY(-2px)}
+.btn-ghost{border:1px solid var(--line);background:#fff;color:var(--ink)!important}
+.hero{padding:3.5rem 0 2.5rem;text-align:center}
+.hero p.sub{max-width:38rem;margin:0 auto;color:var(--slate-5);font-size:1.08rem}
+article{padding:1rem 0 3rem}
+article ul,article ol{padding-left:1.3rem}
+article li{margin:.35rem 0}
+table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:.6rem .75rem;text-align:left;vertical-align:top}
+th{background:var(--tint);font-weight:700;color:var(--ink)}
+.card{background:#fff;border:1px solid var(--line);border-radius:1.4rem;box-shadow:0 10px 30px -18px rgba(14,78,128,.25);padding:1.4rem}
+.cta{background:linear-gradient(135deg,#0E74C1,#7c5cbf);color:#fff;border-radius:1.6rem;padding:1.8rem;margin:2.2rem 0}
+.cta h3{color:#fff;margin-top:0}
+.cta p{color:rgba(255,255,255,.92)}
+.cta a.btn{background:#fff;color:var(--ink)!important}
+.note{background:#FFF8E7;border:1px solid #F4D88A;border-radius:1rem;padding:.9rem 1.1rem;font-size:.92rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))}
+.tile{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:1.3rem;padding:1.2rem;background:#fff;transition:.18s;box-shadow:0 8px 24px -18px rgba(14,78,128,.25)}
+.tile:hover{transform:translateY(-3px);border-color:#bcd9ee}
+.tile h3{margin:.2rem 0 .3rem;font-size:1.15rem}
+.tile p{font-size:.88rem;color:var(--slate-5);margin:0}
+.tag{display:inline-block;border-radius:999px;background:var(--brand-50);color:var(--brand);font-size:.7rem;font-weight:700;padding:.18rem .65rem;margin-bottom:.4rem}
+footer.site{background:#0f172a;color:#94a3b8;margin-top:3rem;padding:2.5rem 0;text-align:center;font-size:.85rem}
+footer.site a{color:#cbd5e1;text-decoration:none;margin:0 .6rem}
+footer.site a:hover{color:#fff}
+.faq dt{font-weight:700;color:var(--ink);margin-top:1rem}
+.faq dd{margin:0.3rem 0 0}
+label.f{display:block;font-family:'Geist Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--slate-4);margin:.9rem 0 .25rem}
+input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);background:var(--tint);border-radius:.8rem;padding:.7rem .9rem;font:inherit;font-size:.95rem;color:var(--slate)}
+input.f:focus,select.f:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(14,116,193,.12)}
+.result{background:var(--tint);border-radius:1.2rem;padding:1.2rem;margin-top:1.2rem}
+.big{font-family:'Instrument Serif',serif;font-size:2.2rem;color:var(--brand)}
+.bar{height:.7rem;border-radius:999px;background:#e2e8f0;overflow:hidden;margin:.3rem 0 .8rem}
+.bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0E74C1,#7c5cbf);transition:width .6s ease}
+.mono{font-family:'Geist Mono',monospace;font-size:.8rem}
+.plan-output{white-space:pre-wrap;background:var(--tint);border-radius:1.2rem;padding:1.3rem;font-size:.95rem;display:none}
+.spin{display:inline-block;width:1rem;height:1rem;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media print{nav.top,footer.site,.cta{display:none}}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BC child care subsidy calculator","url":"https://mitten.care/tools/bc-child-care-subsidy-calculator","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"publisher":{"@type":"Organization","name":"Mitten"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much is the CCFRI fee reduction in BC?","acceptedAnswer":{"@type":"Answer","text":"For 2025–26, the maximum monthly reduction at participating centres is $900 for infants and toddlers (under 36 months), $545 for 3-years-to-Kindergarten, $320 for Kindergarten, $115 for Grade 1 to age 12, and $95 for preschool (group/centre rates; family/in-home rates differ). Fees are never reduced below $200/month ($10/day)."}},{"@type":"Question","name":"What is the income limit for the Affordable Child Care Benefit?","acceptedAnswer":{"@type":"Answer","text":"Families with household income up to roughly $111,000 may qualify; the amount is income-tested and also depends on family size, the child’s age and the type of care. You apply and renew every year through My Family Services."}},{"@type":"Question","name":"Do I have to apply for CCFRI?","acceptedAnswer":{"@type":"Answer","text":"No — families don’t apply for CCFRI. The child care provider opts the facility in, and the savings are passed to you automatically each month as a reduced fee. The Affordable Child Care Benefit is the one you apply for yourself."}},{"@type":"Question","name":"What is the CF2798 / Child Care Arrangement form?","acceptedAnswer":{"@type":"Answer","text":"It’s the form that records your child care arrangement for an Affordable Child Care Benefit application — it needs both your details and your provider’s, plus the provider’s signature. Some daycares (those on Mitten) can give you a pre-filled head-start to save time."}}]}</script>
+</head>
+<body>
+<nav class="top"><div class="in">
+<a class="logo" href="/"><img src="/brand/mitten-mark.svg" alt="Mitten" />Mitten</a>
+<a href="/childcare">Find a daycare</a><a href="/resources">Resources</a><a href="/resources#tools">Free tools</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a>
+<a class="btn btn-primary" href="/signup">Start free</a>
+</div></nav>
+<div class="aurora"><div class="wrap hero">
+<span class="eyebrow">Free tool</span>
+<h1>BC child care subsidy calculator</h1>
+<p class="sub">Estimate your CCFRI fee reduction, the $10-a-day cap and Affordable Child Care Benefit eligibility — and what you’ll actually pay each month. Free, no signup.</p>
+</div></div>
+<main class="wrap"><article>
+
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))">
+<div><label class="f" for="ctype">Care type</label><select class="f" id="ctype"><option value="group" selected>Group / centre care</option><option value="family">Family / in-home care</option></select></div>
+<div><label class="f" for="age">Child's age category</label><select class="f" id="age"><option value="infant">Infant (0–18 months)</option><option value="toddler">Toddler (18–36 months)</option><option value="g3k" selected>3 years to Kindergarten</option><option value="kinder">Kindergarten</option><option value="grade">Grade 1 to age 12</option><option value="pre">Preschool (part-day)</option></select></div>
+<div><label class="f" for="fee">Your current monthly fee ($)</label><input class="f" id="fee" type="number" value="1200" min="0" /></div>
+<div><label class="f" for="inc">Household income ($/year)</label><input class="f" id="inc" type="number" value="90000" min="0" /></div>
+</div>
+<label style="display:flex;align-items:center;gap:.5rem;margin-top:.9rem;font-size:.92rem;font-weight:600;color:var(--slate)"><input type="checkbox" id="ten" /> My centre is a $10-a-day (CWELCC) site</label>
+<div class="result" id="sout"></div>
+</div>
+<p class="note" style="margin-top:1rem">Estimates only, not an eligibility decision. CCFRI amounts assume your centre opted in (most licensed centres have). The Affordable Child Care Benefit is income-tested and depends on your full circumstances — confirm your amount and apply at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>.</p>
+
+<h2>How BC childcare subsidies stack</h2>
+<p>BC has three layers of help, and they combine. <strong>CCFRI</strong> (the Child Care Fee Reduction Initiative) lowers your fee automatically at a participating centre — you don't apply, the savings just show up. <strong>The Affordable Child Care Benefit (ACCB)</strong> is income-tested (household income up to about $111,000), you apply and renew yearly, and it stacks <em>on top</em> of CCFRI — for lower incomes it can bring your fee close to $0. At <strong>$10-a-day (CWELCC)</strong> sites, your fee is capped at about $200/month ($10/day) for full-time care.</p>
+
+<h3>CCFRI maximum monthly fee reductions (2025–26)</h3>
+<table>
+<thead><tr><th>Age category</th><th>Group / centre</th><th>Family / in-home</th></tr></thead>
+<tbody>
+<tr><td>Infant (0–18 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>Toddler (18–36 months)</td><td>$900</td><td>$600</td></tr>
+<tr><td>3 years to Kindergarten</td><td>$545</td><td>$500</td></tr>
+<tr><td>Kindergarten</td><td>$320</td><td>$320</td></tr>
+<tr><td>Grade 1 to age 12</td><td>$115</td><td>$145</td></tr>
+<tr><td>Preschool (part-day)</td><td>$95</td><td>—</td></tr>
+</tbody>
+</table>
+<p style="font-size:.9rem;color:var(--slate-5)">Full-time amounts; CCFRI won't reduce a fee below $200/month ($10/day), or $140/month for preschool. Source: BC Ministry of Education and Child Care, CCFRI Funding Guidelines 2025–26.</p>
+
+<h2>How to apply (the steps)</h2>
+<ol>
+<li><strong>CCFRI — nothing to do.</strong> Ask your centre if they're a CCFRI participant (most are). If so, the reduction is already on your invoice.</li>
+<li><strong>Affordable Child Care Benefit — apply online.</strong> Use <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">My Family Services</a> (here's our <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">step-by-step ACCB guide</a>). Have your SIN, your CRA Notice of Assessment, your child's birth certificate and your banking details ready.</li>
+<li><strong>Complete the Child Care Arrangement form (CF2798) with your provider.</strong> It needs both your details and the provider's — and the provider's signature. Use our free <a href="/tools/cf2798-child-care-arrangement-form">CF2798 helper</a> to fill it in, then submit the official form with your application.</li>
+<li><strong>Renew every year.</strong> The ACCB lapses annually — diarize it so your reduction doesn't stop.</li>
+</ol>
+<p>Looking for a centre with space? Browse our free <a href="/childcare">BC childcare boards</a> — many list whether they take CCFRI/subsidy. Running a daycare? <a href="/">Mitten</a> tracks each child's CCFRI/ACCB and nets it off invoices automatically, and generates the CF2798 for your families — free for your first 5 children.</p>
+<script>
+var CCFRI={group:{infant:900,toddler:900,g3k:545,kinder:320,grade:115,pre:95},family:{infant:600,toddler:600,g3k:500,kinder:320,grade:145,pre:0}};
+var $=function(id){return document.getElementById(id);};var fmt=function(n){return '$'+Math.round(n).toLocaleString();};
+function scalc(){
+var ct=$('ctype').value,age=$('age').value,fee=+$('fee').value||0,inc=+$('inc').value||0,ten=$('ten').checked;
+var red=(CCFRI[ct]||{})[age]||0;var floor=(age==='pre')?140:200;
+var net,ccfri;
+if(ten){net=Math.min(fee,200);ccfri=Math.max(0,fee-net);}
+else{net=(fee<=floor)?fee:Math.max(fee-red,floor);ccfri=fee-net;}
+var elig=inc>0&&inc<111000;var savings=Math.max(0,fee-net);
+var noFamPre=(ct==='family'&&age==='pre');
+$('sout').innerHTML='<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))">'
++'<div><div class="eyebrow">CCFRI fee reduction</div><div class="big" style="color:#2eb88a">'+(noFamPre?'n/a':fmt(ccfri)+'/mo')+'</div></div>'
++'<div><div class="eyebrow">'+(ten?'$10-a-day capped fee':'Fee after CCFRI')+'</div><div class="big">'+fmt(net)+'/mo</div></div>'
++'<div><div class="eyebrow">Monthly saving</div><div class="big" style="color:#0E74C1">'+fmt(savings)+'</div></div></div>'
++'<p style="margin:.9rem 0 0">'+(elig
+?'<strong style="color:#2eb88a">You likely qualify for the Affordable Child Care Benefit</strong> — your household income is under the ~$111,000 ceiling. The ACCB is income-tested and stacks on top of the above, so your real fee could be <strong>lower than '+fmt(net)+'</strong> — for lower incomes, potentially close to $0. Estimate your exact amount and apply at <a href="https://gov.bc.ca/affordablechildcarebenefit" target="_blank" rel="noopener">gov.bc.ca/affordablechildcarebenefit</a>.'
+:(inc>=111000?'Your household income is at or above the ~$111,000 ceiling, so you likely won\'t receive the income-tested Affordable Child Care Benefit — but the CCFRI reduction above still applies automatically at a participating centre.':'Enter your household income to check Affordable Child Care Benefit eligibility.'))
++'</p>'+(noFamPre?'<p style="color:#a9791b;font-weight:600;margin:.6rem 0 0">Preschool isn\'t a family-care category — pick Group / centre care for preschool.</p>':'');}
+['ctype','age','fee','inc','ten'].forEach(function(id){var e=$(id);e.addEventListener('input',scalc);e.addEventListener('change',scalc);});scalc();
+</script>
+<div class="cta"><h3>Run your daycare on Mitten — free to start</h3>
+<p>Mitten does everything in this guide — daily reports, photos, messaging, billing, even payroll prep — free for your first 5 children, then just $20/mo + $2 per child.</p>
+<a class="btn" href="/signup">Start free — no card needed →</a>&nbsp;&nbsp;<a class="btn" style="background:rgba(255,255,255,.18);color:#fff!important" href="/app">See the live demo</a></div>
+<h2>Frequently asked questions</h2><dl class="faq">
+<dt>How much is the CCFRI fee reduction in BC?</dt><dd>For 2025–26, the maximum monthly reduction at participating centres is $900 for infants and toddlers (under 36 months), $545 for 3-years-to-Kindergarten, $320 for Kindergarten, $115 for Grade 1 to age 12, and $95 for preschool (group/centre rates; family/in-home rates differ). Fees are never reduced below $200/month ($10/day).</dd>
+<dt>What is the income limit for the Affordable Child Care Benefit?</dt><dd>Families with household income up to roughly $111,000 may qualify; the amount is income-tested and also depends on family size, the child’s age and the type of care. You apply and renew every year through My Family Services.</dd>
+<dt>Do I have to apply for CCFRI?</dt><dd>No — families don’t apply for CCFRI. The child care provider opts the facility in, and the savings are passed to you automatically each month as a reduced fee. The Affordable Child Care Benefit is the one you apply for yourself.</dd>
+<dt>What is the CF2798 / Child Care Arrangement form?</dt><dd>It’s the form that records your child care arrangement for an Affordable Child Care Benefit application — it needs both your details and your provider’s, plus the provider’s signature. Some daycares (those on Mitten) can give you a pre-filled head-start to save time.</dd></dl>
+</article></main>
+<footer class="site"><div class="wrap-wide">
+<p><strong style="color:#fff;font-family:'Instrument Serif',serif;font-size:1.2rem">Mitten</strong> — the childcare app built in BC. Free for your first 5 children.</p>
+<p><a href="/">Home</a><a href="/childcare">Find a daycare</a><a href="/resources">Resources</a><a href="/research">Research</a><a href="/about">About</a><a href="/#pricing">Pricing</a><a href="/app">Live demo</a><a href="/signup">Start free</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></p>
+<p>Mitten · 83–7947 209 St, Langley, BC V2Y 0Y6 · <a href="mailto:info@oktd.ca">info@oktd.ca</a></p>
+</div></footer>
+</body></html>
