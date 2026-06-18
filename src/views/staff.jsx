@@ -30,7 +30,10 @@ export function StaffHome() {
   const present = roster.filter((r) => r.status === 'checked-in' || r.status === 'napping').length
   const absent = roster.filter((r) => r.status === 'absent').length
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
-  const firstName = (viewer?.name || 'Ms. Dana').split(' ')[0]
+  // Educators often go by "Ms./Mr. <First>" — greet with the actual first name,
+  // not the title, so it never reads "Hi, Ms.".
+  const nameParts = (viewer?.name || 'Ms. Dana').trim().split(/\s+/)
+  const firstName = /^(ms|mr|mrs|mx|dr|miss)\.?$/i.test(nameParts[0]) && nameParts[1] ? nameParts[1] : nameParts[0]
 
   const apply = (r, status, label, emoji, tone) => {
     setAttendance(r.id, status)
