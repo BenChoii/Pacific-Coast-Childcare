@@ -18,6 +18,11 @@ const SMTP_USER = process.env.MITTEN_SMTP_USER || 'ben@mitten.care'
 const SMTP_PASS = process.env.MITTEN_SMTP_PASSWORD
 const FROM_EMAIL = process.env.MITTEN_FROM || SMTP_USER
 const OWNER_EMAIL = process.env.OWNER_EMAIL || 'info@pacificcoastchildcareacademy.ca'
+// Also drop the lead onto the daycare's director CRM (Mitten dashboard). Routed
+// by facility slug; set MITTEN_FACILITY_SLUG to the daycare's Mitten slug to turn
+// it on (when unset, we just email — no CRM capture).
+const CONVEX_SITE = process.env.MITTEN_CONVEX_SITE || 'https://glad-rooster-439.convex.site'
+const FACILITY_SLUG = process.env.MITTEN_FACILITY_SLUG || ''
 
 const ACADEMY = {
   name: 'Pacific Coast Childcare Academy',
@@ -141,6 +146,25 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('book-tour send failed:', err?.message || err)
     return res.status(502).json({ error: 'We could not send your confirmation just now. Please call us at ' + ACADEMY.phone + '.' })
+  }
+
+  // Best-effort: also drop the lead onto the daycare's director CRM (Mitten
+  // dashboard) so the same booking that emails them is there to follow up.
+  if (FACILITY_SLUG) {
+    try {
+      await fetch(`${CONVEX_SITE}/inquiries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          facilitySlug: FACILITY_SLUG,
+          source: d.reason === 'tour' ? 'book-tour' : 'contact-form',
+          reason: d.reason, name: d.name, email: d.email, phone: d.phone,
+          age: d.age, slot: d.slot, message: d.message,
+        }),
+      })
+    } catch (e) {
+      console.error('book-tour CRM capture failed:', e?.message || e)
+    }
   }
 
   return res.status(200).json({ ok: true })
