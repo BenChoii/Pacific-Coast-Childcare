@@ -157,4 +157,54 @@ http.route({
   }),
 })
 
+// ── Website inquiry capture (director CRM add-on) ──────────────────────────
+// The mitten.care/api/book-tour function (and a facility's contact form) POST a
+// lead here so the same submission that emails the daycare also lands in their
+// director CRM, routed to the facility by its slug. Best-effort — always 200 so
+// the caller's email flow never fails on a CRM hiccup.
+http.route({
+  path: '/inquiries',
+  method: 'OPTIONS',
+  handler: httpAction(async () => new Response(null, { status: 204, headers: CORS })),
+})
+
+http.route({
+  path: '/inquiries',
+  method: 'POST',
+  handler: httpAction(async (ctx, request) => {
+    let body
+    try {
+      body = await request.json()
+    } catch {
+      body = {}
+    }
+    const clip = (s, n) => (s == null || s === '' ? undefined : String(s).slice(0, n))
+    const slug = String(body.facilitySlug || body.slug || '').trim().toLowerCase().slice(0, 60)
+    const name = String(body.name || '').trim().slice(0, 120)
+    if (!slug || !name) {
+      return new Response(JSON.stringify({ ok: false, error: 'facilitySlug and name are required' }), {
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+      })
+    }
+    let res = { ok: false }
+    try {
+      res = await ctx.runMutation(internal.inquiries.createFromWeb, {
+        facilitySlug: slug,
+        source: clip(body.source, 40) || 'contact-form',
+        reason: clip(body.reason, 40),
+        name,
+        email: clip(body.email, 200),
+        phone: clip(body.phone, 40),
+        childAge: clip(body.age || body.childAge, 40),
+        preferredSlot: clip(body.slot || body.preferredSlot, 80),
+        message: clip(body.message, 2000),
+      })
+    } catch (e) {
+      res = { ok: false, error: 'capture-failed' }
+    }
+    return new Response(JSON.stringify(res), { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } })
+  }),
+})
+
 export default http

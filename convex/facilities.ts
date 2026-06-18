@@ -32,6 +32,11 @@ export const current = query({
       onboarded: !!f.onboardedAt,
       hasCard: !!f.hasCard,
       isOwner: !!uid && f.ownerUserId === uid,
+      // Paid add-ons — demo facilities get them all so the sales demo shows them off.
+      addons: {
+        crm: !!f.isDemo || !!(f.addons && f.addons.crm),
+        bookkeeping: !!f.isDemo || !!(f.addons && f.addons.bookkeeping),
+      },
       // invoicing & payments profile
       logoUrl: f.logoId ? await ctx.storage.getUrl(f.logoId) : null,
       address: f.address,
