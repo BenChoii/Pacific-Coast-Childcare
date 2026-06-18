@@ -1,7 +1,7 @@
 import {
   Home, ListChecks, Image, MessageCircle, CalendarDays, CreditCard, Baby,
   ClipboardList, BookOpen, LogIn, Users, Sprout, Wallet, DoorOpen, BarChart3, User,
-  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText, Landmark,
+  TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText, Landmark, Inbox,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useApp } from './context/AppContext.jsx'
@@ -29,6 +29,8 @@ import { IntakeDesk } from './views/intake.jsx'
 import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
 import { InvoicingStudio } from './views/invoicing.jsx'
 import { SubsidiesStudio } from './views/subsidies.jsx'
+import { Crm } from './views/crm.jsx'
+import { BookkeepingStudio } from './views/bookkeeping.jsx'
 
 function Loader() {
   return (
@@ -153,7 +155,9 @@ export default function App() {
       { id: 'invoices', label: 'Invoices', icon: ReceiptText, render: InvoicingStudio },
       { id: 'subsidies', label: 'Subsidies', icon: Landmark, render: SubsidiesStudio },
       { id: 'profit', label: 'Profitability', icon: TrendingUp, render: Profitability },
+      { id: 'books', label: 'Bookkeeping', icon: BookOpen, render: BookkeepingStudio },
       { id: 'families', label: 'Families', icon: UsersRound, render: Families, dock: true },
+      { id: 'inquiries', label: 'Inquiries', icon: Inbox, render: Crm },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
       { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null },
       { id: 'curriculum', label: 'Curriculum', icon: GraduationCap, render: DirectorCurriculum },

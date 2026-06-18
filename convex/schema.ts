@@ -59,6 +59,12 @@ export default defineSchema({
     about: v.optional(v.string()), // what their programs contain / what sets them apart
     agesServed: v.optional(v.string()), // e.g. "10 months – 5 years"
     website: v.optional(v.string()),
+    // Paid add-ons unlocked for this facility. Demo facilities get them all so the
+    // sales demo can show them off; real facilities unlock via the paid extra.
+    addons: v.optional(v.object({
+      crm: v.optional(v.boolean()),
+      bookkeeping: v.optional(v.boolean()),
+    })),
     createdAt: v.number(),
   })
     .index('by_slug', ['slug'])
@@ -402,4 +408,52 @@ export default defineSchema({
       }),
     ),
   }).index('by_facility', ['facilityId', 'createdAt']),
+
+  // ── CRM / inquiries (paid add-on) ──────────────────────────────────────────
+  // A lead from the daycare's own website (book-a-tour / contact form), the public
+  // directory, or added by hand. Directors work these on the Inquiries board.
+  inquiries: defineTable({
+    facilityId: v.id('facilities'),
+    source: v.string(), // 'book-tour' | 'contact-form' | 'directory' | 'manual'
+    reason: v.optional(v.string()), // 'tour' | 'package' | 'waitlist' | 'birthday' | 'faq'
+    name: v.string(),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    childAge: v.optional(v.string()),
+    preferredSlot: v.optional(v.string()),
+    message: v.optional(v.string()),
+    status: v.string(), // 'new' | 'contacted' | 'toured' | 'enrolled' | 'lost'
+    followUpAt: v.optional(v.number()),
+    notes: v.optional(v.array(v.object({ at: v.number(), text: v.string(), by: v.optional(v.string()) }))),
+    convertedChildId: v.optional(v.id('children')),
+    archivedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_facility', ['facilityId', 'status'])
+    .index('by_facility_created', ['facilityId', 'createdAt']),
+
+  // ── Bookkeeping (paid add-on) ──────────────────────────────────────────────
+  // An uploaded receipt/invoice the director files for tax. Manual entry first;
+  // AI extraction (vendor/amount/GST/category) fills these in later.
+  bookkeepingDocs: defineTable({
+    facilityId: v.id('facilities'),
+    storageId: v.optional(v.id('_storage')), // the uploaded file
+    fileName: v.optional(v.string()),
+    mimeType: v.optional(v.string()),
+    kind: v.string(), // 'receipt' | 'invoice' | 'statement' | 'other'
+    direction: v.optional(v.string()), // 'expense' | 'income'
+    vendor: v.optional(v.string()),
+    docDate: v.optional(v.string()), // 'YYYY-MM-DD'
+    amount: v.optional(v.number()), // total incl. tax
+    taxAmount: v.optional(v.number()), // GST/HST portion
+    category: v.optional(v.string()), // CRA-style expense category
+    status: v.string(), // 'unreviewed' | 'filed'
+    notes: v.optional(v.string()),
+    aiExtracted: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_facility', ['facilityId', 'status'])
+    .index('by_facility_date', ['facilityId', 'docDate']),
 })
