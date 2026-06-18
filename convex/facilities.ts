@@ -1,4 +1,4 @@
-import { query, mutation } from './_generated/server'
+import { query, mutation, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
 import {
@@ -50,6 +50,33 @@ export const current = query({
       connectStarted: !!f.stripeAccountId,
       ...billingSummary(kids.length, f.freeLimit ?? FREE_LIMIT),
     }
+  },
+})
+
+// Admin helper — turn the paid director add-ons (CRM, bookkeeping) on/off for a
+// facility by slug. Internal (not in the public client API), so it can only be
+// run from the Convex dashboard or `npx convex run … --prod`. Until Stripe wiring
+// flips these automatically, this is how a facility gets unlocked after they buy.
+//   npx convex run facilities:enableAddonsBySlug '{"slug":"<slug>"}' --prod
+export const enableAddonsBySlug = internalMutation({
+  args: { slug: v.string(), crm: v.optional(v.boolean()), bookkeeping: v.optional(v.boolean()) },
+  handler: async (ctx, { slug, crm, bookkeeping }) => {
+    const f = await ctx.db
+      .query('facilities')
+      .withIndex('by_slug', (q) => q.eq('slug', slug))
+      .first()
+    if (!f) return { ok: false, error: `No facility with slug "${slug}"` }
+    const addons = { ...(f.addons || {}) }
+    // No flags given → enable both (the common "they bought the bundle" case).
+    if (crm === undefined && bookkeeping === undefined) {
+      addons.crm = true
+      addons.bookkeeping = true
+    } else {
+      if (crm !== undefined) addons.crm = crm
+      if (bookkeeping !== undefined) addons.bookkeeping = bookkeeping
+    }
+    await ctx.db.patch(f._id, { addons })
+    return { ok: true, facility: f.name, addons }
   },
 })
 
