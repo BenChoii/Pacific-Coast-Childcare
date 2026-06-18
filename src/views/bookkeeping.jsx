@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { useQuery, useMutation, useAction } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
-import { BookOpen, Upload, X, FileText, Trash2, Download, Wand2, Receipt, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { BookOpen, Upload, X, FileText, Trash2, Download, Receipt, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { SectionHeader, StatCard, Pill, KnitEmpty } from '../components/ui.jsx'
 
@@ -43,36 +43,10 @@ export function BookkeepingStudio() {
   const add = useMutation(api.bookkeeping.add)
   const update = useMutation(api.bookkeeping.update)
   const remove = useMutation(api.bookkeeping.remove)
-  const scan = useAction(api.ai.scanReceipt)
   const fileInput = useRef(null)
   const [busy, setBusy] = useState(false)
   const [edit, setEdit] = useState(null)
   const [filter, setFilter] = useState('all')
-  const [scanning, setScanning] = useState(false)
-
-  const autofill = async () => {
-    if (!edit?.storageId) return
-    setScanning(true)
-    try {
-      const r = await scan({ storageId: edit.storageId })
-      if (r?.configured === false) pushToast('AI auto-fill isn’t set up yet.', { emoji: '⚠️', tone: 'coral' })
-      else if (r?.error) pushToast(r.error, { emoji: '⚠️', tone: 'coral' })
-      else if (r?.fields) {
-        const f = r.fields
-        setEdit((e) => ({
-          ...e,
-          vendor: f.vendor || e.vendor,
-          docDate: f.docDate || e.docDate,
-          amount: f.amount != null ? f.amount : e.amount,
-          taxAmount: f.taxAmount != null ? f.taxAmount : e.taxAmount,
-          category: f.category || e.category,
-          kind: f.kind || e.kind,
-        }))
-        pushToast('Read it — double-check the details ✨', { emoji: '✨', tone: 'mint' })
-      }
-    } catch { pushToast('Couldn’t scan that one.', { emoji: '⚠️', tone: 'coral' }) }
-    setScanning(false)
-  }
 
   if (!enabled) return <BooksLocked />
 
@@ -126,8 +100,8 @@ export function BookkeepingStudio() {
       </div>
 
       <div className="flex items-center gap-2 rounded-2xl border border-dashed border-brand-200 bg-brand-50/40 px-4 py-3 text-sm text-brand-600">
-        <Wand2 size={16} className="shrink-0" />
-        <span><strong>AI auto-fill is on</strong> — tap any receipt photo, then hit <em>AI auto-fill</em> and we’ll read the vendor, amount &amp; GST for you to confirm.</span>
+        <FileText size={16} className="shrink-0" />
+        <span>Upload your receipts &amp; invoices, then <strong>tap any one</strong> to add its vendor, amount &amp; GST and file it. Export the whole lot for your accountant anytime.</span>
       </div>
 
       {/* category filter */}
@@ -169,11 +143,6 @@ export function BookkeepingStudio() {
         <Modal title={edit.fileName || 'Document'} onClose={() => setEdit(null)}>
           <div className="space-y-3">
             {edit.fileUrl && (edit.mimeType || '').startsWith('image/') && <img src={edit.fileUrl} alt="" className="max-h-48 w-full rounded-2xl object-contain bg-slate-50" />}
-            {edit.storageId && (edit.mimeType || '').startsWith('image/') && (
-              <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-400 to-grape-500 py-2.5 font-bold text-white shadow-md transition hover:shadow-playful disabled:opacity-60" disabled={scanning} onClick={autofill}>
-                <Wand2 size={16} /> {scanning ? 'Reading the receipt…' : 'AI auto-fill from photo'}
-              </button>
-            )}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Vendor"><input className="input" value={edit.vendor} onChange={(e) => setEdit({ ...edit, vendor: e.target.value })} placeholder="Costco, BC Hydro…" /></Field>
               <Field label="Date"><input type="date" className="input" value={edit.docDate} onChange={(e) => setEdit({ ...edit, docDate: e.target.value })} /></Field>

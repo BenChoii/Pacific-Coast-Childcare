@@ -174,7 +174,14 @@ export default function App() {
     ],
   }
 
-  const nav = navConfig[role]
+  // Hide the paid director add-ons (CRM, bookkeeping) unless this facility has
+  // them (the demo gets them so the sales tour can show them off). Keeps every
+  // other daycare from seeing an upgrade CTA before billing is wired.
+  const nav = (navConfig[role] || []).filter((item) => {
+    if (item.id === 'inquiries') return !!facility?.addons?.crm
+    if (item.id === 'books') return !!facility?.addons?.bookkeeping
+    return true
+  })
   const active = nav.find((n) => n.id === view) || nav[0]
   const View = active.render
 
