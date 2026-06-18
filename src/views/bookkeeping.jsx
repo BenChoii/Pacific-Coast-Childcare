@@ -146,18 +146,18 @@ export function BookkeepingStudio() {
         <div className="overflow-hidden rounded-3xl border border-line bg-white/80 shadow-card">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
-              <tr><th className="px-4 py-3">Vendor</th><th className="px-3 py-3">Date</th><th className="px-3 py-3">Category</th><th className="px-3 py-3 text-right">Amount</th><th className="px-3 py-3 text-right">GST</th><th className="px-3 py-3">Status</th><th className="px-3 py-3"></th></tr>
+              <tr><th className="px-4 py-3">Vendor</th><th className="hidden px-3 py-3 sm:table-cell">Date</th><th className="px-3 py-3">Category</th><th className="px-3 py-3 text-right">Amount</th><th className="hidden px-3 py-3 text-right sm:table-cell">GST</th><th className="px-3 py-3">Status</th><th className="hidden px-3 py-3 sm:table-cell"></th></tr>
             </thead>
             <tbody className="divide-y divide-line">
               {shown.map((d) => (
                 <tr key={d.id} className="cursor-pointer hover:bg-brand-50/40" onClick={() => setEdit({ ...d, amount: d.amount ?? '', taxAmount: d.taxAmount ?? '', category: d.category || '', vendor: d.vendor || '', docDate: d.docDate || '', notes: d.notes || '', kind: d.kind || 'receipt' })}>
-                  <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.fileUrl ? <FileText size={15} className="text-brand-400" /> : null}{d.vendor || <span className="text-slate-300">Untitled</span>}</div></td>
-                  <td className="px-3 py-3 text-slate-500">{d.docDate || '—'}</td>
+                  <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.fileUrl ? <FileText size={15} className="shrink-0 text-brand-400" /> : null}<span className="min-w-0 truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div></td>
+                  <td className="hidden px-3 py-3 text-slate-500 sm:table-cell">{d.docDate || '—'}</td>
                   <td className="px-3 py-3">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : <span className="text-slate-300">—</span>}</td>
                   <td className="px-3 py-3 text-right font-semibold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</td>
-                  <td className="px-3 py-3 text-right text-slate-500">{d.taxAmount != null ? money(d.taxAmount) : '—'}</td>
+                  <td className="hidden px-3 py-3 text-right text-slate-500 sm:table-cell">{d.taxAmount != null ? money(d.taxAmount) : '—'}</td>
                   <td className="px-3 py-3">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-mint-600"><CheckCircle2 size={13} /> Filed</span> : <span className="text-xs font-semibold text-sunshine-600">To review</span>}</td>
-                  <td className="px-3 py-3 text-right">{d.fileUrl && <a href={d.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-brand-400 hover:text-brand-600">view</a>}</td>
+                  <td className="hidden px-3 py-3 text-right sm:table-cell">{d.fileUrl && <a href={d.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-brand-400 hover:text-brand-600">view</a>}</td>
                 </tr>
               ))}
             </tbody>
