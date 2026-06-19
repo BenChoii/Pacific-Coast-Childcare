@@ -91,7 +91,7 @@ export function Profitability() {
               </div>
               <div className="mb-2 flex items-end justify-between">
                 <div>
-                  <div className="text-2xl font-extrabold text-slate-800">${p.margin}k<span className="text-sm font-bold text-slate-400">/mo profit</span></div>
+                  <div className="serif-num text-2xl text-slate-800">${p.margin}k<span className="text-sm font-bold text-slate-400">/mo profit</span></div>
                   <div className="text-xs font-bold text-slate-400">{p.children} children · ${p.revenue}k rev · ${p.cost}k cost</div>
                 </div>
               </div>
@@ -517,11 +517,11 @@ function ChildProfile({ child, onBack }) {
           <div className="flex items-center justify-between rounded-xl bg-tint p-3">
             <div>
               <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Current balance</div>
-              <div className={`text-2xl font-extrabold ${child.balance > 0 ? 'text-coral-600' : 'text-mint-500'}`}>{money(child.balance)}</div>
+              <div className={`serif-num text-2xl ${child.balance > 0 ? 'text-coral-600' : 'text-mint-500'}`}>{money(child.balance)}</div>
             </div>
             <div className="text-right">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-400">Monthly tuition</div>
-              <div className="text-2xl font-extrabold text-slate-700">{money(child.tuition)}</div>
+              <div className="serif-num text-2xl text-slate-700">{money(child.tuition)}</div>
             </div>
           </div>
           <p className="mt-2 text-xs font-semibold text-slate-400">Enrolled since {child.enrolledSince} · DOB {child.dob}</p>
@@ -756,7 +756,7 @@ function EducatorProfile({ e, now, onBack }) {
         <Card>
           <H icon={Gauge} tone="text-grape-500">Weekly hours</H>
           <div className="mb-2 flex items-end justify-between">
-            <span className="text-3xl font-extrabold text-slate-800">{e.hoursWeek}<span className="text-base font-bold text-slate-400">/{e.hoursTarget}h</span></span>
+            <span className="serif-num text-3xl text-slate-800">{e.hoursWeek}<span className="text-base font-bold text-slate-400">/{e.hoursTarget}h</span></span>
             <Pill className="bg-mint-400/15 text-mint-500">{Math.round((e.hoursWeek / e.hoursTarget) * 100)}%</Pill>
           </div>
           <ProgressBar value={e.hoursWeek} max={e.hoursTarget} gradient="from-brand-400 to-grape-500" />

@@ -292,7 +292,7 @@ export function Attendance() {
             <Users size={26} />
           </div>
           <div>
-            <div className="text-3xl font-extrabold text-slate-800">{present}<span className="text-lg text-slate-400"> / {roster.length}</span></div>
+            <div className="serif-num text-3xl text-slate-800">{present}<span className="text-lg text-slate-400"> / {roster.length}</span></div>
             <div className="text-sm font-bold text-slate-400">Children present right now</div>
           </div>
         </Card>

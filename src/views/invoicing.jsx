@@ -57,7 +57,7 @@ export function InvoicingStudio() {
         ].map(([st, label, amt, g]) => (
           <button key={st} onClick={() => setFilter(filter === st ? 'all' : st)} className={`rounded-3xl p-4 text-left text-white shadow-sm transition bg-gradient-to-br ${g} ${filter === st ? 'ring-4 ring-brand-200' : ''}`}>
             <div className="text-[11px] font-bold uppercase tracking-wide text-white/80">{label}</div>
-            <div className="text-2xl font-extrabold">{money(amt)}</div>
+            <div className="serif-num text-2xl">{money(amt)}</div>
           </button>
         ))}
       </div>

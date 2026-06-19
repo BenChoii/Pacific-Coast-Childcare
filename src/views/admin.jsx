@@ -446,7 +446,7 @@ export function Rooms() {
                 </Pill>
               </div>
               <div className="mb-2 flex items-end justify-between">
-                <span className="text-2xl font-extrabold text-slate-800">{r.enrolled}<span className="text-base text-slate-400">/{r.capacity}</span></span>
+                <span className="serif-num text-2xl text-slate-800">{r.enrolled}<span className="text-base text-slate-400">/{r.capacity}</span></span>
                 <span className="text-sm font-bold text-slate-400">{r.staff} staff</span>
               </div>
               <ProgressBar value={pct} gradient={full ? 'from-coral-400 to-coral-600' : 'from-brand-400 to-grape-500'} />
