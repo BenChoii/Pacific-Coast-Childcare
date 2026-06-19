@@ -1212,7 +1212,7 @@ const COMPETITORS = [
   {
     slug: 'brightwheel-pricing-and-setup-guide',
     name: 'Brightwheel',
-    title: 'Brightwheel Pricing & Setup Guide (2026): Costs, How-To & Alternatives',
+    title: 'Brightwheel Pricing 2026: How Much Does Brightwheel Cost? (+ Setup & Alternatives)',
     desc: 'What Brightwheel costs, how setup works, what it does well, where owners get frustrated — and a cheaper, simpler Canadian alternative.',
     h1: 'Brightwheel: pricing, setup & what to know before you sign',
     price: 'Quote-based; centres commonly report roughly $150–$400+/mo depending on size and plan',
@@ -1228,7 +1228,7 @@ const COMPETITORS = [
   {
     slug: 'himama-lillio-pricing-and-setup-guide',
     name: 'Lillio (HiMama)',
-    title: 'HiMama / Lillio Pricing & Setup Guide (2026): Costs, How-To & Alternatives',
+    title: 'Lillio (HiMama) Pricing 2026: How Much Does Lillio Cost? (+ Setup & Alternatives)',
     desc: 'What Lillio (formerly HiMama) costs, how setup works, its strengths in documentation, common complaints — and a cheaper Canadian-built alternative.',
     h1: 'Lillio (HiMama): pricing, setup & what to know',
     price: 'Quote-based per classroom/centre; commonly reported around $100–$300+/mo',
@@ -1467,6 +1467,48 @@ $('type').addEventListener('change',rc);$('count').addEventListener('input',rc);
   ],
 }
 
+const TOOL_RATIO_ON = {
+  slug: 'ontario-daycare-ratio-calculator',
+  tag: 'Free tool',
+  title: 'Ontario Daycare Ratio Calculator (CCEYA Staff-to-Child Ratios, 2026)',
+  desc: 'Free Ontario daycare ratios calculator: pick your age group and enrolment to see the required educators under the CCEYA (O. Reg. 137/15), with maximum group sizes.',
+  h1: 'Ontario daycare ratio calculator',
+  sub: 'Pick your age group, enter enrolment — see the educators required and your maximum group size under Ontario’s CCEYA.',
+  body: `
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))">
+<div><label class="f" for="type">Age group</label><select class="f" id="type">
+<option value="infant">Infant — under 18 months</option>
+<option value="toddler">Toddler — 18 to 30 months</option>
+<option value="pre" selected>Preschool — 30 months to 6 years</option>
+<option value="kinder">Kindergarten — 44 months to 7 years</option>
+<option value="sa">School age — 6 to 12 years</option></select></div>
+<div><label class="f" for="count">Children attending</label><input class="f" id="count" type="number" value="16" min="1" /></div>
+</div>
+<div class="result" id="rout"></div>
+</div>
+<p class="note" style="margin-top:1rem">Summary of Ontario’s <em>Child Care and Early Years Act</em> (CCEYA / O. Reg. 137/15) for guidance only — ratios may reduce to two-thirds of these numbers during the first and last 1.5 hours of the day and during rest periods (infant rooms always stay 1:3), and a <strong>minimum of 2 staff</strong> is required whenever 6 or more children are present. Staff qualification rules (RECE) also apply, and regulations change. Always confirm with your licensing program advisor.</p>
+<h2>Behind the numbers</h2>
+<p>Full ratio tables, group-size rules and the nap-time reduction are in our <a href="/guides/ontario-daycare-ratios-and-group-sizes">Ontario daycare ratios & group sizes guide</a>. Planning a new centre? See <a href="/guides/how-to-start-a-daycare-in-ontario">how to start a daycare in Ontario</a>, then run the <a href="/tools/daycare-profitability-calculator">profitability calculator</a> to see what a staffing change does to your bottom line.</p>
+<script>
+const RULES={infant:{name:'Infant (under 18 months)',ratio:3,max:10},toddler:{name:'Toddler (18–30 months)',ratio:5,max:15},pre:{name:'Preschool (30 months–6 years)',ratio:8,max:24},kinder:{name:'Kindergarten (44 months–7 years)',ratio:13,max:26},sa:{name:'School age (6–12 years)',ratio:15,max:30}};
+const $=id=>document.getElementById(id);
+function rc(){const r=RULES[$('type').value];const n=+$('count').value||0;const need=Math.max(n>=6?2:1,Math.ceil(n/r.ratio));const over=n>r.max;
+$('rout').innerHTML='<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))">'
++'<div><div class="eyebrow">Educators required</div><div class="big">'+(over?'—':need)+'</div></div>'
++'<div><div class="eyebrow">Ratio</div><div class="big">1:'+r.ratio+'</div></div>'
++'<div><div class="eyebrow">Max group size</div><div class="big" style="color:'+(over?'#e8604c':'#2eb88a')+'">'+r.max+'</div></div></div>'
++(over?'<p style="color:#e8604c;font-weight:700;margin:.8rem 0 0">'+n+' children exceeds the maximum group size of '+r.max+' for '+r.name+' — this enrolment needs an additional licensed group/room.</p>'
+:'<p style="margin:.8rem 0 0">For <strong>'+n+'</strong> children in <strong>'+r.name+'</strong> care you need at least <strong>'+need+' educators</strong> present'+(n>=6&&Math.ceil(n/r.ratio)<2?' (a minimum of 2 staff applies once 6+ children attend)':'')+'. RECE qualification requirements apply.</p>');}
+$('type').addEventListener('change',rc);$('count').addEventListener('input',rc);rc();
+</script>`,
+  faqs: [
+    ['What is the infant ratio in Ontario?', 'Under the CCEYA (O. Reg. 137/15), infant rooms (children under 18 months) run at 1 staff to 3 children, with a maximum group size of 10. The infant ratio is never reduced — it stays 1:3 even during arrival/departure windows and rest periods.'],
+    ['What is the preschool ratio in Ontario?', 'Preschool (30 months to 6 years) runs at 1 staff to 8 children, with a maximum group size of 24. So 16 preschoolers need at least 2 qualified educators present, and you cannot exceed 24 children in a single preschool group.'],
+    ['Can daycare ratios be reduced during nap time in Ontario?', 'Yes — except for infants, the CCEYA permits ratios to drop to two-thirds of the standard number during rest periods and during the first and last 1.5 hours of the operating day. Infant rooms always stay at 1:3, and a minimum of 2 staff is required whenever 6 or more children are present.'],
+  ],
+}
+
 const TOOL_SUBSIDY = {
   slug: 'bc-child-care-subsidy-calculator',
   title: 'BC Child Care Subsidy Calculator (2026) — CCFRI, Affordable Child Care Benefit & $10/Day',
@@ -1612,7 +1654,7 @@ var w=window.open('','_blank','width=840,height=940');if(!w){alert('Please allow
   ],
 }
 
-const TOOLS = [TOOL_SUBSIDY, TOOL_CF2798, TOOL_PROFIT, TOOL_AI, TOOL_RATIO]
+const TOOLS = [TOOL_SUBSIDY, TOOL_CF2798, TOOL_PROFIT, TOOL_AI, TOOL_RATIO, TOOL_RATIO_ON]
 
 
 /* ───────────────────────────── research ─────────────────────────────
