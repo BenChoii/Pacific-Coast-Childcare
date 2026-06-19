@@ -91,13 +91,12 @@ export function ParentHome() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-400 via-brand-500 to-grape-500 p-6 text-white shadow-playful sm:p-8"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-1"
       >
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-        <div className="absolute right-8 top-6 hidden text-6xl opacity-90 sm:block animate-float">{child.emoji}</div>
-        <p className="text-sm font-bold text-white/80">{greeting}, {firstName} 👋</p>
-        <h2 className="mt-1 text-2xl font-extrabold sm:text-3xl">{child.first} is having a great day!</h2>
-        <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur">
+        <p className="eyebrow">{greeting}, {firstName}</p>
+        <h2 className="mt-2 text-4xl leading-[1.04] text-slate-800 sm:text-[3rem]">{child.first} is having a <span className="text-brand-600">great day</span></h2>
+        <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-mint-500">
           <CheckCircle2 size={16} /> {checkedIn ? `Checked in at ${child.checkInTime} · ${child.room} room` : `${child.room} room`}
         </div>
       </motion.div>

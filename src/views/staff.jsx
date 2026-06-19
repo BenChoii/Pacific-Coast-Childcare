@@ -44,9 +44,9 @@ export function StaffHome() {
 
   return (
     <div className="space-y-5">
-      <div>
+      <div className="pt-1">
         <p className="eyebrow">{today}</p>
-        <h2 className="text-3xl text-slate-800">Hi, {firstName} 👋</h2>
+        <h2 className="mt-2 text-4xl leading-[1.05] text-slate-800 sm:text-[2.75rem]">Hi, {firstName}</h2>
       </div>
 
       <ClockCard />
