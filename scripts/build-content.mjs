@@ -173,6 +173,48 @@ const articleLd = (path, title, desc) => ({
 
 const GUIDES = [
   {
+    slug: 'free-daycare-management-software',
+    tag: 'Software',
+    title: 'Free Daycare Management Software in Canada (2026): What’s Actually Free',
+    desc: 'An honest look at free daycare and childcare management software in Canada — what’s genuinely free vs a trial, the features a small program needs, and how Mitten compares to Brightwheel and Lillio.',
+    h1: 'Free daycare management software (Canada)',
+    sub: 'What’s truly free vs a 30-day trial, the features a small or home program actually needs, and where each tool quietly draws the paywall.',
+    faqs: [
+      ['Is there genuinely free daycare management software?', 'Yes, but read the fine print. Most “free” childcare apps are a 14–30-day trial or a freemium tier that paywalls the parts you need — billing, data export, or more than a handful of children. Mitten is the rare one with a real free tier: the full feature set free for up to 5 children, then $20/month plus $2 per child after that, published openly on the site.'],
+      ['What is the best free daycare management software in Canada?', 'For a small or home program (5 children or fewer) Mitten is free with everything included — attendance, daily reports with photos, parent messaging, invoicing, and Canadian subsidy and tax handling. Brightwheel and Lillio (formerly HiMama) have limited free or trial tiers but paywall billing and key exports, and neither is built around Canadian CWELCC and CRA requirements.'],
+      ['Is Brightwheel free?', 'Brightwheel has a limited free option and a trial, but the features most programs rely on — billing, premium reporting, integrations — sit on paid plans, and the price is quote-based rather than published. For a small Canadian program, a tool with a real free tier and published pricing is usually the better fit.'],
+      ['Are “free” daycare apps actually free, or just a free trial?', 'Often a trial. The tells: a credit card required up front, a child or staff cap lower than your room, “billing” or “export” greyed out, or pricing you can only get by booking a demo. A genuinely free tool states its limits and its paid pricing in the open.'],
+      ['Can I run a home daycare for free?', 'Yes — a home daycare with five children or fewer runs entirely free on Mitten, with no trial clock and no credit card. Attendance, daily reports, photos, parent messaging and invoicing are all included.'],
+    ],
+    body: `
+<p>Search <em>“free daycare management software”</em> and you’ll get a wall of apps that all say “free” — and a lot of them aren’t, quite. Here’s the honest version: what’s genuinely free, what’s a trial with a countdown, and what a small Canadian program actually needs. <em>Last reviewed June 2026.</em></p>
+<h2>“Free” usually means one of three things</h2>
+<ul>
+<li><strong>A free trial</strong> — full features for 14–30 days, then a paywall (and often a card required up front).</li>
+<li><strong>Freemium</strong> — free forever, but the parts you actually use (billing, data export, more than a few children) live on a paid plan.</li>
+<li><strong>Genuinely free for small programs</strong> — a real free tier with the everyday features included, and paid pricing published openly for when you grow. That’s the one worth finding.</li>
+</ul>
+<h2>The features a small program actually needs</h2>
+<p>Ignore the 200-row feature matrices. Day to day, an owner-operated or home daycare needs five things: <strong>attendance / check-in</strong>, <strong>daily reports with photos</strong> for parents, <strong>messaging</strong>, <strong>invoicing</strong> (with a real way to get paid), and — in Canada — <strong>subsidy and tax handling</strong>. If “free” means any of those are locked, it isn’t free <em>for you</em>.</p>
+<h2>How the main options compare</h2>
+<table>
+<thead><tr><th>Tool</th><th>Real free tier?</th><th>Built for Canada</th><th>Pricing</th></tr></thead>
+<tbody>
+<tr><td><strong>Mitten</strong></td><td>Yes — full features, up to 5 children</td><td>Yes — CWELCC, CCFRI, CRA receipts</td><td>Published: free ≤5 kids, then $20/mo + $2/child</td></tr>
+<tr><td>Brightwheel</td><td>Limited; billing &amp; premium reporting paywalled</td><td>US-first</td><td>Quote-based</td></tr>
+<tr><td>Lillio (HiMama)</td><td>Trial / limited</td><td>US-first</td><td>Quote-based</td></tr>
+<tr><td>A spreadsheet</td><td>Free</td><td>You build it</td><td>Free — but no parent app, billing or receipts</td></tr>
+</tbody>
+</table>
+<p style="font-size:.9rem;color:var(--slate-5)">Competitor tiers change often and pricing is quote-based — see our <a href="/guides/brightwheel-pricing-and-setup-guide">Brightwheel pricing breakdown</a> and <a href="/guides/himama-lillio-pricing-and-setup-guide">Lillio / HiMama pricing</a> for current detail, or the <a href="/guides/best-brightwheel-alternatives">full alternatives roundup</a>.</p>
+<h2>Why “built for Canada” matters more than it sounds</h2>
+<p>Most well-known childcare apps are US-first, and in Canada that shows up exactly where it costs you. They don’t model <a href="/guides/cwelcc-for-daycare-operators">CWELCC</a> fee caps and reporting, they don’t produce <a href="/guides/daycare-tax-receipts-cra-guide">CRA-ready tax receipts</a>, and they’re little help with <a href="/guides/ccfri-explained-for-parents">CCFRI</a> or the <a href="/guides/how-to-apply-affordable-child-care-benefit-bc">Affordable Child Care Benefit</a>. Mitten is built around them — approved subsidy reductions land on the invoice automatically, and clean attendance and enrolment records turn CWELCC reporting into an export instead of a reconstruction.</p>
+<h2>Free for home daycares — actually free</h2>
+<p>If you run a home daycare with <strong>five children or fewer</strong>, Mitten is free with the full feature set — attendance, daily reports, photos, parent messaging and invoicing — no trial clock, no credit card. Parents join with a link (no app-store download, and no login wall for grandparents on the photo feed). Grow past five and pricing is <strong>$20/month + $2/child</strong>, published up front — not a surprise at renewal.</p>
+<h2>Already paying for a tool you fight with?</h2>
+<p>Switching is lighter than it looks: Mitten imports your roster CSV directly and most programs are fully moved in an afternoon, with parents re-joining by link. Start with <a href="/guides/how-to-switch-daycare-software-without-losing-data">how to switch without losing data</a>. Want to size the economics of a program first? The <a href="/tools/daycare-profitability-calculator">free profitability calculator</a> and <a href="/guides/daycare-tuition-pricing-guide">tuition pricing guide</a> are a good place to start.</p>`,
+  },
+  {
     slug: 'how-to-apply-affordable-child-care-benefit-bc',
     tag: 'Subsidies',
     title: 'How to Apply for the Affordable Child Care Benefit in BC (2026)',
