@@ -383,51 +383,50 @@ export function ParentBilling() {
           key={inv.id}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-500 to-grape-600 p-6 text-white shadow-playful"
+          className="card p-6"
         >
-          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-bold text-white/80">Amount due · {inv.period}</p>
-              <p className="text-4xl font-extrabold">${inv.amount.toLocaleString()}</p>
-              <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur">
+              <p className="eyebrow">Amount due · {inv.period}</p>
+              <p className="serif-num mt-1 text-4xl text-slate-800">${inv.amount.toLocaleString()}</p>
+              <p className="pill pill-due mt-1.5 inline-flex items-center gap-1.5">
                 <Clock size={14} /> Due {inv.due}
               </p>
             </div>
             <div className="flex flex-col items-stretch gap-2">
-              <button onClick={() => handlePay(inv)} disabled={paying === inv.id} className="btn bg-white text-brand-700 shadow-lg hover:-translate-y-0.5">
+              <button onClick={() => handlePay(inv)} disabled={paying === inv.id} className="btn-primary">
                 {paying === inv.id ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />} Pay by card
               </button>
               {facility?.etransferEmail && (
-                <button onClick={() => setEtOpen(etOpen === inv.id ? null : inv.id)} className="btn bg-white/20 text-white backdrop-blur hover:bg-white/30">
+                <button onClick={() => setEtOpen(etOpen === inv.id ? null : inv.id)} className="btn-ghost">
                   <Send size={16} /> Pay by e-Transfer
                 </button>
               )}
-              <button onClick={() => openInvoicePrint(inv, facility)} className="btn bg-white/20 text-white backdrop-blur hover:bg-white/30">
+              <button onClick={() => openInvoicePrint(inv, facility)} className="btn-ghost">
                 <Download size={16} /> Invoice PDF
               </button>
             </div>
           </div>
           {inv.items && (
-            <div className="mt-5 space-y-2 border-t border-white/20 pt-4">
+            <div className="mt-5 space-y-2 border-t border-line pt-4">
               {inv.items.map((it) => (
-                <div key={it.label} className="flex items-center justify-between text-sm font-semibold text-white/90">
+                <div key={it.label} className="flex items-center justify-between text-sm font-medium text-slate-600">
                   <span>{it.label}</span>
-                  <span className="font-extrabold">${it.amt}</span>
+                  <span className="font-semibold text-slate-800">${it.amt}</span>
                 </div>
               ))}
             </div>
           )}
           {etOpen === inv.id && facility?.etransferEmail && (
-            <div className="mt-5 rounded-2xl bg-white/15 p-4 text-sm font-semibold backdrop-blur">
-              <p>Send <b>${inv.amount.toLocaleString()}</b> by Interac e-Transfer to <b>{facility.etransferEmail}</b> and put <b>{inv.id}</b> in the message.</p>
+            <div className="mt-5 rounded-2xl border border-line bg-tint p-4 text-sm font-medium text-slate-600">
+              <p>Send <b className="font-semibold text-slate-800">${inv.amount.toLocaleString()}</b> by Interac e-Transfer to <b className="font-semibold text-slate-800">{facility.etransferEmail}</b> and put <b className="font-semibold text-slate-800">{inv.id}</b> in the message.</p>
               <button
                 onClick={async () => {
                   await markEtransfer({ id: inv.id })
                   setEtOpen(null)
                   pushToast('Thanks! We marked your e-Transfer as sent — your daycare will confirm receipt.', { emoji: '📨', tone: 'mint' })
                 }}
-                className="btn mt-3 bg-white text-brand-700"
+                className="btn-primary mt-3"
               >
                 <CheckCircle2 size={16} /> I've sent it
               </button>

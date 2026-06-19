@@ -110,13 +110,13 @@ export function SubsidiesStudio() {
 
       <div className="grid grid-cols-3 gap-3">
         {[
-          ['Children covered', stats.coveredKids, 'from-mint-400 to-brand-500'],
-          ['Monthly reductions', money(stats.monthly), 'from-brand-400 to-grape-500'],
-          ['Renewals due', stats.expiring, 'from-coral-500 to-blush-400'],
-        ].map(([label, val, g]) => (
-          <div key={label} className={`rounded-3xl bg-gradient-to-br ${g} p-4 text-white shadow-sm`}>
-            <div className="text-[11px] font-bold uppercase tracking-wide text-white/80">{label}</div>
-            <div className="text-2xl font-extrabold">{val}</div>
+          ['Children covered', stats.coveredKids],
+          ['Monthly reductions', money(stats.monthly)],
+          ['Renewals due', stats.expiring],
+        ].map(([label, val]) => (
+          <div key={label} className="rounded-2xl border border-line bg-tint p-4">
+            <div className="eyebrow">{label}</div>
+            <div className="serif-num mt-1 text-2xl text-slate-800">{val}</div>
           </div>
         ))}
       </div>

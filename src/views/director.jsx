@@ -538,17 +538,14 @@ function FamilyProfile({ family, onBack }) {
     <div className="space-y-5">
       <Back onBack={onBack} />
       <Card className="overflow-hidden p-0">
-        <div className="relative bg-gradient-to-br from-brand-500 to-grape-600 p-6 text-white">
-          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-xl" />
-          <div className="flex items-center gap-4">
-            <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-white/25 text-3xl ring-4 ring-white/30">👪</span>
-            <div>
-              <h2 className="text-2xl">{family.name}</h2>
-              <p className="font-semibold text-white/85">{family.children.join(' & ')} · {family.plan}</p>
-            </div>
+        <div className="flex items-center gap-4 p-6">
+          <span className="flex h-16 w-16 items-center justify-center rounded-3xl bg-brand-50 text-3xl">👪</span>
+          <div>
+            <h2 className="text-3xl text-slate-800">{family.name}</h2>
+            <p className="text-sm font-medium text-slate-500">{family.children.join(' & ')} · {family.plan}</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3 p-4">
+        <div className="grid grid-cols-3 gap-3 border-t border-line p-4">
           <Mini label="Balance" value={money(family.balance)} tone={family.balance > 0 ? 'text-coral-600' : 'text-mint-500'} />
           <Mini label="Auto-pay" value={family.autopay ? 'On' : 'Off'} tone={family.autopay ? 'text-mint-500' : 'text-slate-400'} />
           <Mini label="Messages" value={String(family.comms)} tone="text-brand-600" />
@@ -711,23 +708,20 @@ function EducatorProfile({ e, now, onBack }) {
     <div className="space-y-5">
       <Back onBack={onBack} />
       <Card className="overflow-hidden p-0">
-        <div className="relative bg-gradient-to-br from-brand-500 to-grape-600 p-6 text-white">
-          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-xl" />
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <AvatarUpload src={e.imageUrl} fallback={e.emoji} size="h-20 w-20" gradient="from-white/30 to-white/10" onUpload={(f) => setEducatorPhoto(e.id, f)} />
-              <span className={`absolute bottom-0 right-0 h-4 w-4 rounded-full ring-2 ring-white ${live ? 'bg-mint-400' : 'bg-slate-300'}`} />
-            </div>
-            <div>
-              <h2 className="text-2xl">{e.name}</h2>
-              <p className="font-semibold text-white/85">{e.role} · {e.room}</p>
-              <span className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em]">
-                {live ? <><span className="h-2 w-2 animate-pulse rounded-full bg-mint-300" /> Clocked in · {today}</> : 'Clocked out'}
-              </span>
-            </div>
+        <div className="flex items-center gap-4 p-6">
+          <div className="relative">
+            <AvatarUpload src={e.imageUrl} fallback={e.emoji} size="h-20 w-20" gradient="from-brand-300 to-grape-400" onUpload={(f) => setEducatorPhoto(e.id, f)} />
+            <span className={`absolute bottom-0 right-0 h-4 w-4 rounded-full ring-2 ring-white ${live ? 'bg-mint-400' : 'bg-slate-300'}`} />
+          </div>
+          <div>
+            <h2 className="text-3xl text-slate-800">{e.name}</h2>
+            <p className="text-sm font-medium text-slate-500">{e.role} · {e.room}</p>
+            <span className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] ${live ? 'bg-mint-400/15 text-mint-600' : 'bg-slate-100 text-slate-500'}`}>
+              {live ? <><span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" /> Clocked in · {today}</> : 'Clocked out'}
+            </span>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3 p-4">
+        <div className="grid grid-cols-3 gap-3 border-t border-line p-4">
           <Mini label="Today" value={today} tone="text-brand-600" />
           <Mini label="This week" value={`${e.hoursWeek}h`} tone="text-grape-600" />
           <Mini label="PTO left" value={e.pto} tone="text-mint-500" />
