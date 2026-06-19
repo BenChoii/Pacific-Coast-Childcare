@@ -189,14 +189,13 @@ export function MemoryBook() {
 
       {/* Keepsake hero */}
       <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-blush-300 via-brand-400 to-grape-500 p-6 text-white shadow-playful sm:p-8">
-        <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/15 blur-2xl" />
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="pt-1">
         <div className="flex items-center gap-4">
-          <Avatar emoji={child.emoji} gradient="from-white/30 to-white/10" src={child.imageUrl} size="h-16 w-16" />
+          <Avatar emoji={child.emoji} gradient={child.color} src={child.imageUrl} size="h-16 w-16" />
           <div>
-            <p className="inline-flex items-center gap-1.5 text-sm font-bold text-white/85"><BookHeart size={15} /> Memory Book</p>
-            <h2 className="text-2xl font-extrabold sm:text-3xl">{child.first}'s journey</h2>
-            <p className="mt-1 text-sm font-semibold text-white/85">{childMilestones.length} milestones · {mastered} mastered · {childPhotos.length} photos</p>
+            <p className="eyebrow inline-flex items-center gap-1.5"><BookHeart size={13} /> Memory Book</p>
+            <h2 className="mt-1 text-3xl leading-tight text-slate-800 sm:text-4xl">{child.first}'s journey</h2>
+            <p className="mt-1 text-sm font-medium text-slate-500">{childMilestones.length} milestones · {mastered} mastered · {childPhotos.length} photos</p>
           </div>
         </div>
       </motion.div>

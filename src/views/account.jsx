@@ -148,13 +148,13 @@ function ListingPanel() {
     <div className="space-y-5">
       <motion.div
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-sky-500 via-brand-600 to-grape-500 p-6 text-white shadow-playful"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-1"
       >
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-        <Pill className="bg-white/20 text-white backdrop-blur"><MapPin size={13} className="mr-1 inline" /> Free local listing</Pill>
-        <h2 className="mt-3 text-2xl font-extrabold">Get found by parents searching your area</h2>
-        <p className="mt-1 max-w-md text-sm font-semibold text-white/85">
-          Mitten runs free public boards of which daycares are accepting enrolments. Set your status and parents searching <strong>{areaName}</strong> see your openings — live.
+        <Pill className="pill-info"><MapPin size={13} className="mr-1 inline" /> Free local listing</Pill>
+        <h2 className="mt-3 text-3xl leading-tight text-slate-800 sm:text-4xl">Get found by parents searching your area</h2>
+        <p className="mt-2 max-w-md text-sm font-medium text-slate-500">
+          Mitten runs free public boards of which daycares are accepting enrolments. Set your status and parents searching <strong className="font-semibold text-slate-700">{areaName}</strong> see your openings — live.
         </p>
       </motion.div>
 
@@ -315,20 +315,20 @@ function PlanPanel() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-500 via-brand-600 to-grape-500 p-6 text-white shadow-playful"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-1"
       >
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
-        <Pill className="bg-white/20 text-white backdrop-blur">{planLabel}</Pill>
-        <h2 className="mt-3 text-3xl font-extrabold">
-          {billable ? `$${monthly.toFixed(2)}` : '$0'}<span className="text-lg font-bold text-white/80">/mo</span>
+        <Pill className="pill-info">{planLabel}</Pill>
+        <h2 className="mt-3 text-5xl text-slate-800">
+          {billable ? `$${monthly.toFixed(2)}` : '$0'}<span className="text-xl text-slate-400">/mo</span>
         </h2>
-        <p className="mt-1 text-sm font-semibold text-white/85">
+        <p className="mt-1 text-sm font-medium text-slate-500">
           {childCount} {childCount === 1 ? 'child' : 'children'} enrolled
           {!billable && remainingFree > 0 && ` · ${remainingFree} more free`}
         </p>
         <div className="mt-4 max-w-sm">
-          <ProgressBar value={Math.min(100, Math.round((childCount / Math.max(freeLimit, 1)) * 100))} gradient="from-white/70 to-white" />
-          <p className="mt-1.5 text-xs font-bold text-white/70">
+          <ProgressBar value={Math.min(100, Math.round((childCount / Math.max(freeLimit, 1)) * 100))} />
+          <p className="mt-1.5 text-xs font-semibold text-slate-400">
             {billable ? 'Billed monthly · adjusts automatically as your roster changes' : `Free up to ${freeLimit} children`}
           </p>
         </div>

@@ -219,22 +219,22 @@ function ClockCard() {
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-brand-500 via-brand-600 to-brand-700 p-5 text-white shadow-playful"
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="card relative overflow-hidden p-5"
     >
       {justIn > 0 && <YarnConfetti key={justIn} count={16} />}
-      <div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3.5">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Clock size={24} /></span>
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><Clock size={24} /></span>
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/80">{clockedIn ? 'Clocked in' : 'Clocked out'}</p>
-            <p className="font-display text-4xl leading-none">{clockedIn ? `${h}h ${m}m` : '—'}</p>
+            <p className="eyebrow">{clockedIn ? 'Clocked in' : 'Clocked out'}</p>
+            <p className="font-display text-4xl leading-none text-slate-800">{clockedIn ? `${h}h ${m}m` : '—'}</p>
           </div>
         </div>
         <motion.button
           whileTap={{ scale: 0.94 }}
           onClick={toggle}
-          className={`btn shadow-lg ${clockedIn ? 'bg-white text-coral-600' : 'bg-white text-mint-500'}`}
+          className={clockedIn ? 'btn-ghost !text-coral-600' : 'btn-primary'}
         >
           {clockedIn ? 'Clock Out' : 'Clock In'}
         </motion.button>

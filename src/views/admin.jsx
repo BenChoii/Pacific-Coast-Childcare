@@ -153,17 +153,16 @@ function RealAdminHome() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-mint-400 via-brand-500 to-grape-500 p-6 text-white shadow-playful sm:p-8"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-1"
       >
-        <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
-        <span className="absolute right-8 top-6 hidden text-6xl opacity-90 sm:block animate-float">🧸</span>
-        <p className="text-sm font-bold text-white/80">Welcome back · {facility?.name}</p>
-        <h2 className="mt-1 text-2xl font-extrabold sm:text-3xl">
-          {kids === 0 ? 'Let’s enroll your first child' : `${kids} ${kids === 1 ? 'child' : 'children'} enrolled`}
+        <p className="eyebrow">Welcome back · {facility?.name}</p>
+        <h2 className="mt-2 text-4xl leading-[1.04] text-slate-800 sm:text-[3rem]">
+          {kids === 0 ? 'Let’s enroll your first child' : <><span className="text-brand-600">{kids}</span> {kids === 1 ? 'child' : 'children'} enrolled</>}
         </h2>
-        <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur">
-          {facility?.billable ? <><CreditCard size={15} /> ${facility.monthly?.toFixed(2)}/mo plan</> : <><CheckCircle2 size={15} /> Free plan · {facility?.remainingFree} of {facility?.freeLimit} spots left</>}
-        </p>
+        <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
+          {facility?.billable ? <><CreditCard size={15} className="text-brand-500" /> ${facility.monthly?.toFixed(2)}/mo plan</> : <><CheckCircle2 size={15} className="text-mint-500" /> Free plan · {facility?.remainingFree} of {facility?.freeLimit} spots left</>}
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
