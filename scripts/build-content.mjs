@@ -215,6 +215,44 @@ const GUIDES = [
 <p>Switching is lighter than it looks: Mitten imports your roster CSV directly and most programs are fully moved in an afternoon, with parents re-joining by link. Start with <a href="/guides/how-to-switch-daycare-software-without-losing-data">how to switch without losing data</a>. Want to size the economics of a program first? The <a href="/tools/daycare-profitability-calculator">free profitability calculator</a> and <a href="/guides/daycare-tuition-pricing-guide">tuition pricing guide</a> are a good place to start.</p>`,
   },
   {
+    slug: 'free-daycare-bookkeeping-template',
+    tag: 'Free template',
+    title: 'Free Daycare Bookkeeping Template (Canada, 2026): Income & Expense Tracker',
+    desc: 'A free downloadable daycare bookkeeping spreadsheet for Canadian providers — log income and expenses, track mileage, and auto-total everything into a CRA-ready tax summary. No signup.',
+    h1: 'Free daycare bookkeeping template',
+    sub: 'A simple Excel / Google Sheets tracker for Canadian daycares — income, expenses, mileage, and an automatic CRA tax summary. No signup.',
+    faqs: [
+      ['Is there a free daycare bookkeeping template?', 'Yes — this one. It is a free Excel / Google Sheets workbook with tabs for income, expenses (with a category drop-down), mileage, and summaries that total everything automatically into a CRA-ready tax view. No email or signup required.'],
+      ['What records does a home daycare need to keep for taxes in Canada?', 'Keep a record of all income received and every business expense with its receipt, plus a mileage log for business driving. The CRA requires you to keep records and receipts for six years. Issuing child-care receipts to families — with your name, the child, the amount and your SIN — is also expected.'],
+      ['What daycare expenses are tax-deductible in Canada?', 'Food, toys and program supplies, a business-use share of rent or mortgage interest, utilities and home insurance, wages, professional and licensing fees, advertising, and vehicle costs are commonly deductible. The template groups these into the CRA T2125 lines your accountant expects.'],
+      ['Do I need accounting software for a small daycare?', 'A spreadsheet is enough to start, especially for a home daycare. You will likely want software once you are issuing many invoices, handling subsidy reductions, or reconciling card payments — at which point Mitten can do the bookkeeping as a by-product of running your day.'],
+    ],
+    body: `
+<p>Good books are the difference between a calm tax season and a shoebox of receipts in April. This free workbook gives a Canadian daycare — home or centre — a clean place to track every dollar, and it totals everything for you. <em>Last reviewed June 2026.</em></p>
+<p style="margin:1.5rem 0 .4rem"><a class="btn btn-primary" href="/downloads/daycare-bookkeeping-template.xlsx" download>⬇&nbsp; Download the free template (.xlsx)</a></p>
+<p style="font-size:.9rem;color:var(--slate-5);margin-top:0">Works in Excel, Numbers and Google Sheets. No email, no signup.</p>
+<h2>What’s inside</h2>
+<ul>
+<li><strong>Income</strong> — tuition, registration and subsidy payments, with a column for the subsidy portion.</li>
+<li><strong>Expenses</strong> — a dated log with a category drop-down so everything totals correctly.</li>
+<li><strong>Mileage</strong> — business driving (supply runs, field trips) with a running total.</li>
+<li><strong>Monthly summary</strong> — income, expenses and net for every month, calculated automatically.</li>
+<li><strong>Tax summary</strong> — your expense categories totalled for the year and mapped to the <a href="/guides/daycare-taxes-canada">CRA T2125</a> lines your accountant expects.</li>
+</ul>
+<h2>How to use it</h2>
+<ol>
+<li>Log money in on the <strong>Income</strong> tab as it arrives.</li>
+<li>Log money out on the <strong>Expenses</strong> tab — pick a category from the drop-down and note the receipt number.</li>
+<li>Let the <strong>summary</strong> tabs do the totalling. Don’t type in the grey total cells.</li>
+</ol>
+<h2>Keep receipts — and issue them too</h2>
+<p>The CRA wants records and receipts kept for <strong>six years</strong>. You also need to <em>issue</em> child-care receipts to families — with your name, the child’s name, the amount paid and your SIN or business number. Our <a href="/guides/daycare-tax-receipts-cra-guide">tax-receipts guide</a> has the exact format, and the <a href="/guides/child-care-expenses-deduction-canada">child care expenses deduction guide</a> covers what families can claim back.</p>
+<h2>What you can deduct</h2>
+<p>Home daycares in particular leave money on the table by under-claiming. A business-use share of rent or mortgage interest, utilities and home insurance is deductible, alongside food, supplies, wages, insurance, professional fees and vehicle costs. The full picture is in our <a href="/guides/daycare-taxes-canada">daycare taxes guide</a>, and the <a href="/guides/daycare-profit-margin-guide">profit-margin guide</a> shows where the money actually goes.</p>
+<h2>When the spreadsheet stops scaling</h2>
+<p>A spreadsheet is perfect to start. But once you’re issuing dozens of invoices a month, netting subsidy reductions, or reconciling card payments, manual entry gets old fast — that’s the point of Mitten’s bookkeeping add-on: receipts, invoicing, subsidy netting and CRA-ready reports come out of simply running your day, free for your first 5 children.</p>`,
+  },
+  {
     slug: 'how-to-apply-affordable-child-care-benefit-bc',
     tag: 'Subsidies',
     title: 'How to Apply for the Affordable Child Care Benefit in BC (2026)',
@@ -1509,6 +1547,49 @@ $('type').addEventListener('change',rc);$('count').addEventListener('input',rc);
   ],
 }
 
+const TOOL_RATIO_AB = {
+  slug: 'alberta-daycare-ratio-calculator',
+  tag: 'Free tool',
+  title: 'Alberta Daycare Ratio Calculator (Staff-to-Child Ratios + Group Sizes, 2026)',
+  desc: 'Free Alberta daycare ratios calculator: pick your age group and enrolment to see the educators required under Alberta’s Early Learning and Child Care Regulation, with maximum group sizes.',
+  h1: 'Alberta daycare ratio calculator',
+  sub: 'Pick your age group, enter enrolment — see the educators required and your maximum group size under Alberta’s ratios.',
+  body: `
+<div class="card">
+<div style="display:grid;gap:0 1.2rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))">
+<div><label class="f" for="type">Age group</label><select class="f" id="type">
+<option value="u12">Infants — under 12 months</option>
+<option value="m12">12 to under 19 months</option>
+<option value="m19">19 months to under 3 years</option>
+<option value="y3" selected>3 to under 4 years</option>
+<option value="y4">4 years to kindergarten age</option>
+<option value="sa">School age (grade 1+)</option></select></div>
+<div><label class="f" for="count">Children attending</label><input class="f" id="count" type="number" value="14" min="1" /></div>
+</div>
+<div class="result" id="rout"></div>
+</div>
+<p class="note" style="margin-top:1rem">Summary of Alberta’s <em>Early Learning and Child Care Regulation</em> for facility-based care, for guidance only — primary staff ratios may be <strong>halved while children are sleeping</strong> (supervision must still be met), licensed day homes follow different limits, and regulations change. Staff certification rules (Child Development Worker/Supervisor) also apply. Always confirm with your licensing officer.</p>
+<h2>Behind the numbers</h2>
+<p>The full ratio table, nap-time halving and mixed-age rules are in our <a href="/guides/alberta-daycare-ratios-and-group-sizes">Alberta daycare ratios &amp; group sizes guide</a>. Planning a new centre or day home? See <a href="/guides/how-to-start-a-daycare-in-alberta">how to start a daycare in Alberta</a>, then run the <a href="/tools/daycare-profitability-calculator">profitability calculator</a> to see what a staffing change does to your bottom line.</p>
+<script>
+const RULES={u12:{name:'Infants (under 12 months)',ratio:3,max:6},m12:{name:'12 to under 19 months',ratio:4,max:8},m19:{name:'19 months to under 3 years',ratio:6,max:12},y3:{name:'3 to under 4 years',ratio:8,max:16},y4:{name:'4 years to kindergarten age',ratio:10,max:20},sa:{name:'School age (grade 1+)',ratio:15,max:30}};
+const $=id=>document.getElementById(id);
+function rc(){const r=RULES[$('type').value];const n=+$('count').value||0;const need=Math.max(1,Math.ceil(n/r.ratio));const over=n>r.max;
+$('rout').innerHTML='<div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))">'
++'<div><div class="eyebrow">Educators required</div><div class="big">'+(over?'—':need)+'</div></div>'
++'<div><div class="eyebrow">Ratio</div><div class="big">1:'+r.ratio+'</div></div>'
++'<div><div class="eyebrow">Max group size</div><div class="big" style="color:'+(over?'#e8604c':'#2eb88a')+'">'+r.max+'</div></div></div>'
++(over?'<p style="color:#e8604c;font-weight:700;margin:.8rem 0 0">'+n+' children exceeds the maximum group size of '+r.max+' for '+r.name+' — this enrolment needs an additional licensed group/room.</p>'
+:'<p style="margin:.8rem 0 0">For <strong>'+n+'</strong> children in the <strong>'+r.name+'</strong> group you need at least <strong>'+need+' educators</strong> present. Staff certification requirements also apply.</p>');}
+$('type').addEventListener('change',rc);$('count').addEventListener('input',rc);rc();
+</script>`,
+  faqs: [
+    ['What is the infant ratio in Alberta daycares?', 'Under 12 months: 1 staff per 3 infants, with a maximum group of 6. From 12 to under 19 months it is 1:4 with a maximum group of 8. Infant spaces are the most staff-intensive, which is why they are the scarcest and priciest.'],
+    ['How many four-year-olds can one educator supervise in Alberta?', 'Children from 4 years to kindergarten age run at 1:10 with a maximum group size of 20. Three-year-olds run 1:8 (group of 16), and school-age children (grade 1+) run 1:15 (group of 30).'],
+    ['Can Alberta daycare ratios be reduced at nap time?', 'Yes — primary staff ratios may be halved while children are sleeping, provided supervision requirements are still met. It is commonly used to schedule staff lunch breaks; plan and document it deliberately.'],
+  ],
+}
+
 const TOOL_SUBSIDY = {
   slug: 'bc-child-care-subsidy-calculator',
   title: 'BC Child Care Subsidy Calculator (2026) — CCFRI, Affordable Child Care Benefit & $10/Day',
@@ -1654,7 +1735,7 @@ var w=window.open('','_blank','width=840,height=940');if(!w){alert('Please allow
   ],
 }
 
-const TOOLS = [TOOL_SUBSIDY, TOOL_CF2798, TOOL_PROFIT, TOOL_AI, TOOL_RATIO, TOOL_RATIO_ON]
+const TOOLS = [TOOL_SUBSIDY, TOOL_CF2798, TOOL_PROFIT, TOOL_AI, TOOL_RATIO, TOOL_RATIO_ON, TOOL_RATIO_AB]
 
 
 /* ───────────────────────────── research ─────────────────────────────
