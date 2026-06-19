@@ -188,13 +188,15 @@ export default function App() {
   return (
     <>
       <Shell nav={nav}>
-        {/* Native-feel view transition: keyed remount, soft slide-up + fade
-            (deliberately no AnimatePresence — mode="wait" deadlocks in StrictMode) */}
+        {/* Native-feel page transition: keyed remount — each page settles in with
+            a refined fade + slide + whisper of scale on every navigation, and its
+            cards cascade behind it. AnimatePresence (exit/cross-fade) is avoided:
+            in this app's StrictMode it leaves exiting pages mounted (they pile up). */}
         <motion.div
           key={active.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.32, 0.72, 0.33, 1] }}
+          initial={{ opacity: 0, y: 12, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         >
           <View />
         </motion.div>
