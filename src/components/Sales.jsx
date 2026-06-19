@@ -491,14 +491,14 @@ function DashScreen() {
       <div className="px-2.5">
         <div className="mb-0.5 font-mono text-[8px] uppercase tracking-wide text-slate-400">Wednesday · Jun 8</div>
         <div className="mb-2 text-sm font-display text-slate-800">Good afternoon 👋</div>
-        <div className="mb-2 flex items-center justify-between rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 p-2.5 text-white shadow-sm">
+        <div className="mb-2 flex items-center justify-between rounded-2xl border border-line bg-white p-2.5 shadow-sm">
           <div>
-            <div className="flex items-center gap-1 font-mono text-[7px] uppercase tracking-wider text-white/80">
-              <motion.span animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.4, repeat: Infinity }} className="h-1 w-1 rounded-full bg-mint-300" /> Clocked in
+            <div className="flex items-center gap-1 font-mono text-[7px] uppercase tracking-wider text-slate-400">
+              <motion.span animate={{ opacity: [1, 0.2, 1] }} transition={{ duration: 1.4, repeat: Infinity }} className="h-1 w-1 rounded-full bg-mint-500" /> Clocked in
             </div>
-            <div className="font-display text-xl leading-none">{h}h {m}m <span className="font-mono text-[9px] text-white/70">{String(s).padStart(2, '0')}s</span></div>
+            <div className="font-display text-xl leading-none text-slate-800">{h}h {m}m <span className="font-mono text-[9px] text-slate-400">{String(s).padStart(2, '0')}s</span></div>
           </div>
-          <div className="rounded-full bg-white px-2.5 py-1 text-[8px] font-bold text-coral-600">Clock Out</div>
+          <div className="rounded-full border border-line bg-white px-2.5 py-1 text-[8px] font-bold text-coral-600">Clock Out</div>
         </div>
         <div className="mb-2 grid grid-cols-4 gap-1.5">
           {DASH_TILES.map(([Icon, g], k) => (
@@ -651,12 +651,12 @@ const DESK_TABS = [
 
 function DeskStat({ label, value, delta, up = true, tone }) {
   return (
-    <div className="rounded-xl bg-white p-2 shadow-sm">
-      <div className="flex items-baseline gap-1">
-        <span className={`text-[15px] font-extrabold leading-none ${tone}`}>{value}</span>
-        {delta && <span className={`text-[8px] font-extrabold ${up ? 'text-mint-500' : 'text-coral-500'}`}>{up ? '▲' : '▼'}{delta}</span>}
+    <div className="rounded-xl border border-line bg-white p-2 shadow-sm">
+      <div className="text-[8px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
+      <div className="mt-0.5 flex items-baseline gap-1">
+        <span className={`font-display text-[19px] leading-none ${tone}`}>{value}</span>
+        {delta && <span className={`text-[8px] font-bold ${up ? 'text-mint-500' : 'text-coral-500'}`}>{up ? '▲' : '▼'}{delta}</span>}
       </div>
-      <div className="mt-0.5 text-[8px] font-bold uppercase tracking-wide text-slate-400">{label}</div>
     </div>
   )
 }
