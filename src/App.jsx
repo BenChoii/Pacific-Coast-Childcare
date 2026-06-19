@@ -4,6 +4,7 @@ import {
   TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText, Landmark, Inbox,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { useApp } from './context/AppContext.jsx'
 import { getEntry } from './routes.js'
 import Login from './components/Login.jsx'
@@ -198,7 +199,9 @@ export default function App() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         >
-          <View />
+          <ErrorBoundary resetKey={active.id}>
+            <View />
+          </ErrorBoundary>
         </motion.div>
       </Shell>
       <Toasts />

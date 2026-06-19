@@ -30,8 +30,9 @@ const blank = { childId: '', type: 'ccfri', status: 'tracking', monthlyAmount: '
 
 export function SubsidiesStudio() {
   const { childrenList, facility, pushToast } = useApp()
-  const subsidies = useQuery(api.subsidies.listByFacility) ?? []
-  const expiring = useQuery(api.subsidies.expiringSoon) ?? []
+  const isDemo = !!facility?.isDemo
+  const subsidies = useQuery(api.subsidies.listByFacility, isDemo ? 'skip' : {}) ?? []
+  const expiring = useQuery(api.subsidies.expiringSoon, isDemo ? 'skip' : {}) ?? []
   const upsert = useMutation(api.subsidies.upsert)
   const remove = useMutation(api.subsidies.remove)
   const [form, setForm] = useState(null) // null = closed; object = editing/creating

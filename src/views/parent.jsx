@@ -507,17 +507,15 @@ export function ParentProfile() {
       </div>
 
       <Card className="overflow-hidden p-0">
-        <div className={`relative bg-gradient-to-br ${child.color} p-6 text-white`}>
-          <div className="flex items-center gap-4">
-            <AvatarUpload src={child.imageUrl} fallback={child.emoji} size="h-20 w-20" gradient="from-white/30 to-white/10" onUpload={(f) => setChildPhoto(child.id, f)} />
-            <div>
-              <h2 className="text-2xl font-extrabold">{child.name}</h2>
-              <p className="font-bold text-white/80">{child.age} · {child.room} room</p>
-              <p className="mt-0.5 text-xs font-semibold text-white/70">Tap the photo to add one 📷</p>
-            </div>
+        <div className="flex items-center gap-4 p-6">
+          <AvatarUpload src={child.imageUrl} fallback={child.emoji} size="h-20 w-20" gradient={child.color} onUpload={(f) => setChildPhoto(child.id, f)} />
+          <div>
+            <h2 className="text-3xl text-slate-800">{child.name}</h2>
+            <p className="text-sm font-medium text-slate-500">{child.age} · {child.room} room</p>
+            <p className="mt-0.5 text-xs font-medium text-slate-400">Tap the photo to add one 📷</p>
           </div>
         </div>
-        <div className="grid gap-4 p-6 sm:grid-cols-2">
+        <div className="grid gap-4 border-t border-line p-6 sm:grid-cols-2">
           <Info label="Status" value="Enrolled" icon={CheckCircle2} tone="text-mint-500" />
           <Info label="Primary teacher" value={teacher} icon={Smile} tone="text-brand-500" />
           <Info label="Allergies" value={child.allergies.length ? child.allergies.join(', ') : 'None on file'} icon={AlertTriangle} tone={child.allergies.length ? 'text-coral-500' : 'text-slate-400'} />

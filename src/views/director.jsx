@@ -248,17 +248,14 @@ function RealChildProfile({ child, roster, onBack }) {
     <div className="space-y-5">
       <Back onBack={onBack} />
       <Card className="overflow-hidden p-0">
-        <div className={`relative bg-gradient-to-br ${child.color} p-6 text-white`}>
-          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-xl" />
-          <div className="flex items-center gap-4">
-            <AvatarUpload src={child.imageUrl} fallback={child.emoji} size="h-20 w-20" gradient="from-white/30 to-white/10" onUpload={(f) => setChildPhoto(child.id, f)} />
-            <div className="min-w-0">
-              <h2 className="text-2xl">{child.name}</h2>
-              <p className="font-semibold text-white/85">{child.age} · {child.room}</p>
-            </div>
+        <div className="flex items-center gap-4 p-6">
+          <AvatarUpload src={child.imageUrl} fallback={child.emoji} size="h-20 w-20" gradient={child.color} onUpload={(f) => setChildPhoto(child.id, f)} />
+          <div className="min-w-0">
+            <h2 className="text-3xl text-slate-800">{child.name}</h2>
+            <p className="text-sm font-medium text-slate-500">{child.age} · {child.room}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 border-t border-line p-4 sm:grid-cols-4">
           <Mini label="Status" value={live?.status === 'checked-in' ? 'In' : live?.status === 'napping' ? 'Napping' : live?.status === 'absent' ? 'Absent' : 'Out'} tone="text-mint-500" />
           <Mini label="Mood" value={live?.mood && live.mood !== '—' ? live.mood : '—'} tone="text-grape-600" />
           <Mini label="Tuition" value={child.monthlyTuition ? money(child.monthlyTuition) : '—'} tone="text-brand-600" />
@@ -366,21 +363,18 @@ function ChildProfile({ child, onBack }) {
       <Back onBack={onBack} />
       {/* Header */}
       <Card className="overflow-hidden p-0">
-        <div className={`relative bg-gradient-to-br ${child.color} p-6 text-white`}>
-          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/15 blur-xl" />
-          <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/25 text-4xl ring-4 ring-white/30">{child.emoji}</div>
-            <div className="min-w-0">
-              <h2 className="text-2xl">{child.name}</h2>
-              <p className="font-semibold text-white/85">{child.age} · {child.program}</p>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                <span className="pill bg-white/20 text-white">{child.status}</span>
-                <span className="pill bg-white/20 text-white">{child.schedule}</span>
-              </div>
+        <div className="flex items-center gap-4 p-6">
+          <div className={`flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${child.color} text-4xl text-white`}>{child.emoji}</div>
+          <div className="min-w-0">
+            <h2 className="text-3xl text-slate-800">{child.name}</h2>
+            <p className="text-sm font-medium text-slate-500">{child.age} · {child.program}</p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <span className="pill pill-info">{child.status}</span>
+              <span className="pill bg-slate-100 text-slate-500">{child.schedule}</span>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 border-t border-line p-4 sm:grid-cols-4">
           <Mini label="Attendance" value={`${child.attendanceRate}%`} tone="text-mint-500" />
           <Mini label="Avg nap" value={`${napAvg}m`} tone="text-grape-600" />
           <Mini label="Avg meal" value={`${mealAvg}%`} tone="text-coral-600" />
