@@ -1,21 +1,25 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 
+/* Atelier metric: mono label, small accent icon, big editorial serif number. */
 export function StatCard({ icon: Icon, label, value, sub, gradient = 'from-brand-400 to-brand-600', delay = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="card relative overflow-hidden p-5 sm:p-6"
+      transition={{ delay, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="card p-5 transition-shadow duration-300 hover:shadow-playful sm:p-6"
     >
-      <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br ${gradient} opacity-20 blur-xl`} />
-      <div className={`mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-lg sm:h-12 sm:w-12`}>
-        <Icon size={20} strokeWidth={2.4} />
+      <div className="flex items-start justify-between gap-3">
+        <span className="eyebrow pt-1">{label}</span>
+        {Icon && (
+          <span className={`inline-flex h-8 w-8 flex-none items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white`}>
+            <Icon size={15} strokeWidth={2.4} />
+          </span>
+        )}
       </div>
-      <div className="text-2xl font-extrabold tracking-tight text-slate-800 sm:text-3xl">{value}</div>
-      <div className="text-sm font-bold text-slate-500">{label}</div>
-      {sub && <div className="mt-1 text-xs font-semibold text-slate-400">{sub}</div>}
+      <div className="serif-num mt-3 text-[2.1rem] leading-none text-slate-800 sm:text-[2.6rem]">{value}</div>
+      {sub && <div className="mt-2 text-xs font-semibold text-slate-400">{sub}</div>}
     </motion.div>
   )
 }

@@ -42,15 +42,20 @@ export function AdminHome() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-gradient-to-br from-mint-400 via-brand-500 to-grape-500 p-6 text-white shadow-playful sm:p-8"
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-1"
       >
-        <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
-        <span className="absolute right-8 top-6 hidden text-6xl opacity-90 sm:block animate-float">🏫</span>
-        <p className="text-sm font-bold text-white/80">Center overview · Saturday, Jun 7</p>
-        <h2 className="mt-1 text-2xl font-extrabold sm:text-3xl">{totalEnrolled} enrolled · {Math.round((totalEnrolled / capacity) * 100)}% capacity</h2>
-        <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur">
-          <TrendingUp size={16} /> Revenue up 12% vs. last quarter
-        </p>
+        <p className="eyebrow">Center overview · Saturday, Jun 7</p>
+        <h2 className="mt-2 text-4xl leading-[1.04] text-slate-800 sm:text-[3.25rem]">
+          <span className="text-brand-600">{totalEnrolled}</span> enrolled <span className="text-slate-300">·</span> {Math.round((totalEnrolled / capacity) * 100)}% capacity
+        </h2>
+        <div className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-1 text-sm font-medium text-slate-500">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-mint-500"><TrendingUp size={15} /> Revenue up 12% vs. last quarter</span>
+          <span className="text-slate-300">·</span>
+          <span>all rooms in ratio</span>
+          <span className="text-slate-300">·</span>
+          <span>3 tours this week</span>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
