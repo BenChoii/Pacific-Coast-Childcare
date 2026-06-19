@@ -91,7 +91,7 @@ export function Crm() {
         eyebrow="Director CRM"
         title="Inquiries 📨"
         subtitle="Every lead from your website — follow up and fill your spots."
-        action={<button className="btn-primary px-4 py-2" onClick={() => setForm({ ...blank })}><Plus size={16} /> Add lead</button>}
+        action={<button className="btn-primary whitespace-nowrap px-4 py-2" onClick={() => setForm({ ...blank })}><Plus size={16} /> Add lead</button>}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
@@ -115,8 +115,8 @@ export function Crm() {
               <div className="space-y-2.5">
                 {byStage[id].map((q) => (
                   <button key={q.id} onClick={() => setSel(q.id)} className="w-full rounded-2xl border border-line bg-white/90 p-3 text-left shadow-card transition hover:shadow-playful">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-bold text-slate-700">{q.name}</span>
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="min-w-0 flex-1 font-bold leading-tight text-slate-700">{q.name}</span>
                       <span className="shrink-0 text-[10px] font-semibold text-slate-400">{timeAgo(q.createdAt)}</span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1">

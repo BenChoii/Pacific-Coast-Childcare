@@ -117,26 +117,49 @@ export function BookkeepingStudio() {
       {docs.length === 0 ? (
         <KnitEmpty image="/cinema/spots/letter.webp" title="No documents yet" hint="Upload a receipt or invoice (photo or PDF) and we’ll help you file it." action={<button className="btn-primary px-5 py-2.5" onClick={() => fileInput.current?.click()}><Upload size={16} /> Upload your first</button>} />
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-line bg-white/80 shadow-card">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
-              <tr><th className="px-4 py-3">Vendor</th><th className="hidden px-3 py-3 sm:table-cell">Date</th><th className="px-3 py-3">Category</th><th className="px-3 py-3 text-right">Amount</th><th className="hidden px-3 py-3 text-right sm:table-cell">GST</th><th className="px-3 py-3">Status</th><th className="hidden px-3 py-3 sm:table-cell"></th></tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {shown.map((d) => (
-                <tr key={d.id} className="cursor-pointer hover:bg-brand-50/40" onClick={() => setEdit({ ...d, amount: d.amount ?? '', taxAmount: d.taxAmount ?? '', category: d.category || '', vendor: d.vendor || '', docDate: d.docDate || '', notes: d.notes || '', kind: d.kind || 'receipt' })}>
-                  <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.fileUrl ? <FileText size={15} className="shrink-0 text-brand-400" /> : null}<span className="min-w-0 truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div></td>
-                  <td className="hidden px-3 py-3 text-slate-500 sm:table-cell">{d.docDate || '—'}</td>
-                  <td className="px-3 py-3">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-3 py-3 text-right font-semibold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</td>
-                  <td className="hidden px-3 py-3 text-right text-slate-500 sm:table-cell">{d.taxAmount != null ? money(d.taxAmount) : '—'}</td>
-                  <td className="px-3 py-3">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-mint-600"><CheckCircle2 size={13} /> Filed</span> : <span className="text-xs font-semibold text-sunshine-600">To review</span>}</td>
-                  <td className="hidden px-3 py-3 text-right sm:table-cell">{d.fileUrl && <a href={d.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-brand-400 hover:text-brand-600">view</a>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Phone: card list — a multi-column table can't fit a phone without clipping */}
+          <div className="space-y-2.5 sm:hidden">
+            {shown.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setEdit({ ...d, amount: d.amount ?? '', taxAmount: d.taxAmount ?? '', category: d.category || '', vendor: d.vendor || '', docDate: d.docDate || '', notes: d.notes || '', kind: d.kind || 'receipt' })}
+                className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white/80 p-3.5 text-left shadow-card transition active:scale-[0.99]"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-700">{d.fileUrl ? <FileText size={14} className="shrink-0 text-brand-400" /> : null}<span className="truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : null}{d.docDate ? <span className="text-xs text-slate-400">{d.docDate}</span> : null}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="font-bold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</div>
+                  <div className="mt-0.5">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-mint-600"><CheckCircle2 size={12} /> Filed</span> : <span className="text-[11px] font-semibold text-sunshine-600">To review</span>}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Tablet / desktop: full table */}
+          <div className="hidden overflow-hidden rounded-3xl border border-line bg-white/80 shadow-card sm:block">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-400">
+                <tr><th className="px-4 py-3">Vendor</th><th className="px-3 py-3">Date</th><th className="px-3 py-3">Category</th><th className="px-3 py-3 text-right">Amount</th><th className="px-3 py-3 text-right">GST</th><th className="px-3 py-3">Status</th><th className="px-3 py-3"></th></tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {shown.map((d) => (
+                  <tr key={d.id} className="cursor-pointer hover:bg-brand-50/40" onClick={() => setEdit({ ...d, amount: d.amount ?? '', taxAmount: d.taxAmount ?? '', category: d.category || '', vendor: d.vendor || '', docDate: d.docDate || '', notes: d.notes || '', kind: d.kind || 'receipt' })}>
+                    <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.fileUrl ? <FileText size={15} className="shrink-0 text-brand-400" /> : null}<span className="min-w-0 truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div></td>
+                    <td className="px-3 py-3 text-slate-500">{d.docDate || '—'}</td>
+                    <td className="px-3 py-3">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : <span className="text-slate-300">—</span>}</td>
+                    <td className="px-3 py-3 text-right font-semibold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</td>
+                    <td className="px-3 py-3 text-right text-slate-500">{d.taxAmount != null ? money(d.taxAmount) : '—'}</td>
+                    <td className="px-3 py-3">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-mint-600"><CheckCircle2 size={13} /> Filed</span> : <span className="text-xs font-semibold text-sunshine-600">To review</span>}</td>
+                    <td className="px-3 py-3 text-right">{d.fileUrl && <a href={d.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-brand-400 hover:text-brand-600">view</a>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {edit && (
