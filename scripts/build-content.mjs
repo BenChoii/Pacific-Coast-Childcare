@@ -2241,7 +2241,7 @@ function dcRow(d, areaSlug) {
   const spots = d.status === 'accepting' ? (d.spots ? `${d.spots} open` : 'Yes') : (d.status === 'full' ? '0' : '—')
   const key = d.key || dnorm(d.name)
   const claimed = d.status && d.status !== 'unconfirmed'
-  const lastCell = claimed ? '' : `<a class="claim" href="${areaSlug ? `/signup?claim=${areaSlug}` : '/signup'}">Claim →</a>`
+  const lastCell = claimed ? '' : `<a class="claim" href="${areaSlug ? `/signup?claim=${areaSlug}&amp;name=${encodeURIComponent(d.name)}` : '/signup'}">Claim →</a>`
   const det = dcDetail(d)
   return `<tr id="dc-${key}" data-name="${key}"${det ? ' data-detailed="1"' : ''}><td><strong>${esc(d.name)}</strong>${d.area ? `<br><span class="mono" style="color:var(--slate-4)">${esc(d.area)}</span>` : ''}${det}</td><td data-cell="status"><span class="st ${cls}">${label}</span></td><td data-cell="spots">${spots}</td><td>${lastCell}</td></tr>`
 }

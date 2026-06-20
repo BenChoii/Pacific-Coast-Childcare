@@ -29,10 +29,20 @@ export function AppProvider({ children }) {
       return sessionStorage.getItem('mitten_claim_area') || null
     } catch { return null }
   })
+  // The specific centre being claimed (from /signup?claim=<area>&name=<daycare>),
+  // so the listing panel pre-fills their exact name — not just the area.
+  const [claimName, setClaimName] = useState(() => {
+    try {
+      const n = new URLSearchParams(window.location.search).get('name')
+      if (n) { sessionStorage.setItem('mitten_claim_name', n); return n }
+      return sessionStorage.getItem('mitten_claim_name') || null
+    } catch { return null }
+  })
   const claimRoutedRef = useRef(false)
   const clearClaimArea = useCallback(() => {
     setClaimArea(null)
-    try { sessionStorage.removeItem('mitten_claim_area') } catch {}
+    setClaimName(null)
+    try { sessionStorage.removeItem('mitten_claim_area'); sessionStorage.removeItem('mitten_claim_name') } catch {}
   }, [])
   const [activeChildId, setActiveChildId] = useState('c1')
   const [toasts, setToasts] = useState([])
@@ -339,6 +349,7 @@ export function AppProvider({ children }) {
     view,
     setView,
     claimArea,
+    claimName,
     clearClaimArea,
     activeChildId,
     setActiveChildId,

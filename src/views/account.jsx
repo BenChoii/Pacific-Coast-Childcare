@@ -66,8 +66,9 @@ const PAYMENT_METHODS = ['e-Transfer', 'Credit/debit card', 'Cheque', 'Cash', 'P
 function ListingPanel() {
   const data = useQuery(api.directory.myListing)
   const upsert = useMutation(api.directory.upsertMyListing)
-  const { pushToast, claimArea, clearClaimArea } = useApp()
+  const { pushToast, claimArea, claimName, clearClaimArea } = useApp()
   const claimAreaRef = useRef(claimArea) // captured before it's cleared
+  const claimNameRef = useRef(claimName)
   const [form, setForm] = useState(null)
   const [busy, setBusy] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -79,7 +80,7 @@ function ListingPanel() {
     if (!data) return
     setForm((prev) => prev ?? {
       area: claimAreaRef.current || data.listing?.area || 'north-vancouver',
-      name: data.listing?.name || data.facilityName || '',
+      name: claimNameRef.current || data.listing?.name || data.facilityName || '',
       status: data.listing?.status || 'accepting',
       spots: data.listing?.spots ?? '',
       visible: data.listing?.visible ?? true,
