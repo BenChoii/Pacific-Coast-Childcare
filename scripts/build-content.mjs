@@ -1245,6 +1245,42 @@ const GUIDES = [
 <h2>For providers benchmarking against this page</h2>
 <p>If you're pricing a program, the question isn't the average — it's your costs under your ratios. The <a href="/guides/daycare-tuition-pricing-guide">tuition pricing guide</a> and <a href="/tools/daycare-profitability-calculator">profitability calculator</a> do the work, and Mitten's analytics keep margins visible per room once you're running.</p>`,
   },
+  {
+    slug: 'himama-is-now-lillio',
+    tag: 'Software help',
+    title: 'HiMama Is Now Lillio (2026): What Changed + Best Alternatives',
+    desc: 'HiMama rebranded to Lillio in November 2023 — same Toronto company, same app and login. What changed, what Lillio costs now, and the best free and Canadian alternatives for daycares.',
+    h1: 'HiMama is now Lillio: what changed',
+    sub: 'Same company, new name — the rebrand explained, what it costs now, and the alternatives worth comparing.',
+    faqs: [
+      ['Why did HiMama change its name to Lillio?', 'HiMama announced it was becoming Lillio in November 2023, after a year-long rebrand. The Toronto-based company said the name "HiMama" had come to feel narrow as the product grew beyond parent messaging into full centre management, curriculum, and educator training. The app, your account, and your login stayed the same — only the name changed.'],
+      ['Is Lillio the same app as HiMama?', 'Yes. Lillio is HiMama, renamed — same company, same team, same product. If you had a HiMama account it is now your Lillio account, with the same login and your data and history intact.'],
+      ['Does Lillio (formerly HiMama) have a free plan?', 'Lillio offers a free trial without a credit card, but it does not publish an ongoing free plan and does not list its pricing online — you request a demo for a quote based on your child and user counts. If a genuinely free starting tier matters, Mitten is free for your first 5 children.'],
+      ['What is the best Canadian alternative to Lillio / HiMama?', 'For small and home-based programs, Mitten is built in Canada and free for your first 5 children, with attendance, invoicing, parent messaging, and CCFRI/CWELCC subsidy support included. Brightwheel and Storypark are larger alternatives, though both use quote-based pricing.'],
+    ],
+    body: `
+<p class="note"><strong>Updated June 2026.</strong> <strong>HiMama is now Lillio.</strong> The Toronto-based childcare-app company announced the rebrand in <strong>November 2023</strong> — it is the same product and the same login, just a new name. If you are a current user, nothing broke: your account simply says Lillio now. If you are weighing the app, here is what changed, what it costs, and the alternatives worth a look (including a free-to-start Canadian one).</p>
+<h2>What changed — and what didn't</h2>
+<p>After a year-long rebrand, HiMama became <strong>Lillio</strong> in November 2023. The company said the "HiMama" name had come to feel narrow as the product grew from parent messaging into full centre management, curriculum, and educator training. Essentially the name and logo changed; the rest stayed put:</p>
+<ul>
+<li><strong>Same company and team</strong> — the Toronto-based business, not a sale or merger.</li>
+<li><strong>Same app and login</strong> — existing HiMama accounts became Lillio accounts, with data and history intact.</li>
+<li><strong>Same core product</strong> — daily reports, attendance, parent communication, and centre management.</li>
+</ul>
+<p>So "is HiMama gone?" — no. It is the same software under a new name. (Lillio's own <a href="https://www.lillio.com/resources/himama-is-now-lillio" rel="nofollow">name-change explainer</a> has the official version.)</p>
+<h2>What Lillio costs now</h2>
+<p>Lillio <strong>does not publish its pricing</strong> — you request a demo for a quote, and the cost scales with your child and user counts. There is a <strong>free trial</strong> (no credit card required) but <strong>no ongoing free plan</strong>. For smaller centres and home-based providers on tight margins, that per-child model is the usual sticking point. We keep a separate <a href="/guides/himama-lillio-pricing-and-setup-guide">Lillio / HiMama pricing breakdown</a> with the current detail.</p>
+<h2>Free and Canadian alternatives</h2>
+<p>If the rebrand has you reconsidering, these are worth comparing — especially if free-to-start or transparent pricing matters:</p>
+<ul>
+<li><strong>Mitten</strong> — built in Canada, <strong>free for your first 5 children</strong>, then simple flat pricing. Attendance, invoicing with e-Transfer, parent messaging, and Canadian subsidy (CCFRI / ACCB / CWELCC) and ratio support are included, with no per-feature paywalls. The fit if you want a genuinely free start and pricing you can see up front. <a href="/signup">Try Mitten free</a>.</li>
+<li><strong>Brightwheel</strong> — a large, US-first platform with broad features and quote-based pricing. See our <a href="/guides/brightwheel-pricing-and-setup-guide">Brightwheel pricing breakdown</a>.</li>
+<li><strong>Storypark, Procare and others</strong> — common comparisons; our <a href="/guides/best-brightwheel-alternatives">alternatives roundup</a> covers the wider field.</li>
+</ul>
+<p>The right pick depends on your size and whether free-to-start, Canadian subsidy handling, and transparent pricing matter. For the "free" question specifically, see <a href="/guides/free-daycare-management-software">free daycare management software in Canada</a>.</p>
+<h2>Switching from Lillio / HiMama</h2>
+<p>If you do move, export your records <strong>while your subscription is active</strong> — roster and contacts, attendance, billing and payment history (keep six years for the CRA), daily-report documentation, and photos. Our <a href="/guides/how-to-export-your-data-from-lillio-himama">Lillio / HiMama export guide</a> has the full checklist so nothing is left behind.</p>`,
+  },
 ]
 
 /* ───────────────────────── competitor guides ───────────────────────── */
