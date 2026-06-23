@@ -815,8 +815,8 @@ const GUIDES = [
   {
     slug: 'ontario-daycare-ratios-and-group-sizes',
     tag: 'Rules & ratios',
-    title: 'Ontario Daycare Ratios & Group Sizes (2026): Schedule 1 Explained',
-    desc: 'Ontario staff-to-child ratios and maximum group sizes under O. Reg. 137/15 Schedule 1 — infants 3:10, toddlers 1:5, preschool 1:8 — plus reduced-ratio windows and mixed-age rules.',
+    title: 'Ontario Daycare Ratios 2026: Infant, Toddler & Preschool (CCEYA)',
+    desc: 'Ontario staff-to-child ratios and maximum group sizes under O. Reg. 137/15 — infant 3:10, toddler 1:5, preschool 1:8, kindergarten 1:13 — plus reduced-ratio nap/open-close windows and mixed-age rules.',
     h1: 'Ontario daycare ratios & group sizes',
     sub: 'Schedule 1 in plain English: the numbers, the reduced-ratio windows, and the mixed-age rules.',
     faqs: [
@@ -826,16 +826,19 @@ const GUIDES = [
       ['How many children can an unlicensed home daycare have?', 'Five children under 13 maximum (counting the provider’s own children under four), with at most three under two. Licensed agency home providers may have six.'],
     ],
     body: `
+<p class="note"><strong>Updated June 2026.</strong> Quick answer — licensed Ontario centres run at <strong>infant 3:10, toddler 1:5, preschool 1:8, kindergarten 1:13</strong> and primary school-age 1:15. The full Schedule 1 table, plus the reduced-ratio nap and open/close windows, is below.</p>
 <p>Ratios are the load-bearing rule of Ontario child care: they set your staffing, your room layout, and most of your cost structure. Here is <strong>Schedule 1 of O. Reg. 137/15</strong> (under the CCEYA), translated. <em>(Authoritative source: the <a href="https://www.ontario.ca/document/child-care-centre-licensing-manual/part-3-ratios-and-group-size" rel="nofollow">ministry licensing manual, Part 3</a>.)</em></p>
-<h2>The core table (licensed centres)</h2>
-<ul>
-<li><strong>Infant</strong> (under 18 months) — <strong>3 staff : 10 children</strong>, max group <strong>10</strong>.</li>
-<li><strong>Toddler</strong> (18 months to under 30 months) — <strong>1 : 5</strong>, max group <strong>15</strong>.</li>
-<li><strong>Preschool</strong> (30 months to under 6 years) — <strong>1 : 8</strong>, max group <strong>24</strong>.</li>
-<li><strong>Kindergarten</strong> (44 months+, in a kindergarten group) — <strong>1 : 13</strong>, max group <strong>26</strong>.</li>
-<li><strong>Primary/junior school age</strong> (68 months+) — <strong>1 : 15</strong>, max group <strong>30</strong>.</li>
-<li><strong>Junior school age</strong> (9–12 years) — <strong>1 : 20</strong>, max group <strong>20</strong>.</li>
-</ul>
+<h2>The core ratio table (licensed centres)</h2>
+<table style="width:100%;border-collapse:collapse;margin:.4rem 0 1.1rem;font-size:.97rem">
+<thead><tr style="text-align:left;border-bottom:2px solid currentColor"><th style="padding:.5rem .6rem">Age group</th><th style="padding:.5rem .6rem">Staff-to-child ratio</th><th style="padding:.5rem .6rem">Max group size</th></tr></thead>
+<tbody>
+<tr style="border-bottom:1px solid rgba(120,120,120,.22)"><td style="padding:.5rem .6rem"><strong>Infant</strong> (under 18 months)</td><td style="padding:.5rem .6rem">3 staff : 10 children</td><td style="padding:.5rem .6rem">10</td></tr>
+<tr style="border-bottom:1px solid rgba(120,120,120,.22)"><td style="padding:.5rem .6rem"><strong>Toddler</strong> (18–30 months)</td><td style="padding:.5rem .6rem">1 : 5</td><td style="padding:.5rem .6rem">15</td></tr>
+<tr style="border-bottom:1px solid rgba(120,120,120,.22);background:rgba(46,184,138,.10)"><td style="padding:.5rem .6rem"><strong>Preschool</strong> (30 months–6 years)</td><td style="padding:.5rem .6rem"><strong>1 : 8</strong></td><td style="padding:.5rem .6rem">24</td></tr>
+<tr style="border-bottom:1px solid rgba(120,120,120,.22)"><td style="padding:.5rem .6rem"><strong>Kindergarten</strong> (44 months+)</td><td style="padding:.5rem .6rem">1 : 13</td><td style="padding:.5rem .6rem">26</td></tr>
+<tr style="border-bottom:1px solid rgba(120,120,120,.22)"><td style="padding:.5rem .6rem"><strong>Primary / junior school age</strong> (68 months+)</td><td style="padding:.5rem .6rem">1 : 15</td><td style="padding:.5rem .6rem">30</td></tr>
+<tr><td style="padding:.5rem .6rem"><strong>Junior school age</strong> (9–12 years)</td><td style="padding:.5rem .6rem">1 : 20</td><td style="padding:.5rem .6rem">20</td></tr>
+</tbody></table>
 <p>Within each group, qualification rules apply (e.g., RECE requirements per group), and group sizes are hard caps per licensed room — a 26th preschooler doesn't mean one more educator, it means another licensed group.</p>
 <h2>The flexibility windows (and their limits)</h2>
 <ul>
@@ -1486,7 +1489,7 @@ const TOOL_RATIO = {
 </div>
 <p class="note" style="margin-top:1rem">Summary of the BC <em>Child Care Licensing Regulation</em> for guidance only — certification requirements (ECE / ITE / Responsible Adult) also apply, and rules change. Always confirm with your health authority licensing officer.</p>
 <h2>Behind the numbers</h2>
-<p>Full ratio tables and certification notes are in our <a href="/guides/bc-daycare-staff-ratios">BC staff ratios guide</a>. To see what a staffing change does to your bottom line, run the <a href="/tools/daycare-profitability-calculator">profitability calculator</a> next.</p>
+<p>Full ratio tables and certification notes are in our <a href="/guides/bc-daycare-staff-ratios">BC staff ratios guide</a>. Outside BC? See the <a href="/guides/ontario-daycare-ratios-and-group-sizes">Ontario daycare &amp; preschool ratios</a> guide. To see what a staffing change does to your bottom line, run the <a href="/tools/daycare-profitability-calculator">profitability calculator</a> next.</p>
 <script>
 const RULES={it:{name:'Group under 36 months',ratio:4,max:12},g35:{name:'Group 30 months–school age',ratio:8,max:25},pre:{name:'Preschool',ratio:10,max:20},sa:{name:'Group school age',ratio:12,max:30},ma:{name:'Multi-Age',ratio:8,max:8}};
 const $=id=>document.getElementById(id);
