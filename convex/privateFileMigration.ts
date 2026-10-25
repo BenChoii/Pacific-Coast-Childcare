@@ -284,3 +284,34 @@ export const cryptoPreflight = internalAction({
     } catch (error) { return { ok: false, stage, errorCode: errorCode(error, stage) } }
   },
 })
+
+// Metadata/reference proof after a completed rotation. This never constructs a
+// public storage URL or reads blob contents, filenames or document descriptions.
+export const verifyCompleted = internalQuery({
+  args: { jobIds: v.array(v.id('privateFileRotations')) },
+  handler: async (ctx, { jobIds }) => {
+    if (!jobIds.length || jobIds.length > 25 || new Set(jobIds).size !== jobIds.length) throw new Error('Choose one to twenty-five distinct migration job IDs.')
+    const results = []
+    for (const jobId of jobIds) {
+      const job = await ctx.db.get(jobId)
+      if (!job) {
+        results.push({ jobId, status: 'not_found', sourcePresent: null, replacementPresent: null, sourceReferenceCount: null, replacementReferenceCount: null, registryCorrect: false, verified: false })
+        continue
+      }
+      const source = await ctx.db.system.get(job.sourceId)
+      const replacement = job.replacementId ? await ctx.db.system.get(job.replacementId) : null
+      const originalRefs = await references(ctx, job.sourceId, job.facilityId)
+      const replacementRefs = job.replacementId ? await references(ctx, job.replacementId, job.facilityId) : null
+      const sourceReferenceCount = originalRefs.blocked ? null : originalRefs.refs.length
+      const replacementReferenceCount = !replacementRefs || replacementRefs.blocked ? null : replacementRefs.refs.length
+      const registryCorrect = !originalRefs.blocked && !originalRefs.upload && !!replacementRefs && !replacementRefs.blocked &&
+        !!replacementRefs.upload && replacementRefs.upload.facilityId === job.facilityId && replacementRefs.upload.storageId === job.replacementId && PRIVATE_PURPOSES.includes(replacementRefs.upload.purpose)
+      const verified = job.status === 'revoked' && !source && !!replacement && sourceReferenceCount === 0 &&
+        replacementReferenceCount !== null && replacementReferenceCount > 0 && registryCorrect
+      results.push({ jobId, status: job.status, sourcePresent: !!source, replacementPresent: !!replacement,
+        sourceReferenceCount, replacementReferenceCount, registryCorrect, verified,
+        sourceReferenceCheckClear: !originalRefs.blocked, replacementReferenceCheckClear: !!replacementRefs && !replacementRefs.blocked })
+    }
+    return { checked: results.length, allVerified: results.every(result => result.verified), results }
+  },
+})

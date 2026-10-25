@@ -174,3 +174,22 @@ test('private open/seal entry points consume each incoming stream once and retur
  assert.equal(await original.text(),await opened.text())
  await assert.rejects(api.materializePrivateBlob({size:8*1024*1024+513,arrayBuffer:()=>{throw Error('Must refuse before allocating')}}),/size limit/)
 })
+
+test('completed verification proves source metadata gone and updated private references/registry without fetching bytes or URLs',async()=>{
+ const ctx=fixture(),rotated=await api.rotateBatch.handler(ctx,{facilityId:'f',storageIds:['legacy'],dryRun:false})
+ const jobId=rotated.results[0].jobId
+ ctx.storage.get=async()=>{throw new Error('Metadata verification must not read file bytes')}
+ ctx.storage.getUrl=async()=>{throw new Error('Metadata verification must not construct public URLs')}
+ const proof=await api.verifyCompleted.handler(ctx,{jobIds:[jobId]})
+ assert.equal(proof.allVerified,true)
+ assert.deepEqual({status:proof.results[0].status,sourcePresent:proof.results[0].sourcePresent,replacementPresent:proof.results[0].replacementPresent,sourceReferenceCount:proof.results[0].sourceReferenceCount,replacementReferenceCount:proof.results[0].replacementReferenceCount,registryCorrect:proof.results[0].registryCorrect},
+ {status:'revoked',sourcePresent:false,replacementPresent:true,sourceReferenceCount:0,replacementReferenceCount:1,registryCorrect:true})
+ const serialized=JSON.stringify(proof);assert.equal(serialized.includes('customer-private-bytes'),false);assert.equal(serialized.includes('storageUrl'),false)
+ const job=ctx.rows.get(jobId);ctx.files.delete(job.replacementId)
+ assert.equal((await api.verifyCompleted.handler(ctx,{jobIds:[jobId]})).allVerified,false)
+ ctx.files.set(job.replacementId,new Blob(['replacement']))
+ ctx.rows.set('public-ref',{_id:'public-ref',table:'users',imageId:'legacy'})
+ const shared=await api.verifyCompleted.handler(ctx,{jobIds:[jobId]})
+ assert.equal(shared.allVerified,false);assert.equal(shared.results[0].sourceReferenceCount,null)
+ await assert.rejects(api.verifyCompleted.handler(ctx,{jobIds:[jobId,jobId]}),/distinct/)
+})
