@@ -14,6 +14,7 @@ import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { Card, SectionHeader, Pill, Avatar, ProgressBar, StatCard } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
+import { MembershipManager, ChildEnrollmentControls, ReleasedChildren } from '../components/AccessManagement.jsx'
 import { financials, childProfiles, families } from '../data/mockData.js'
 
 const tip = {
@@ -236,6 +237,8 @@ function RealFamilies() {
           ))}
         </div>
       )}
+      <MembershipManager audience="parent" />
+      <ReleasedChildren />
     </div>
   )
 }
@@ -262,6 +265,8 @@ function RealChildProfile({ child, roster, onBack }) {
           <Mini label="Allergies" value={child.allergies?.length ? String(child.allergies.length) : '0'} tone={child.allergies?.length ? 'text-coral-500' : 'text-slate-400'} />
         </div>
       </Card>
+
+      <ChildEnrollmentControls key={child.id} child={child} onReleased={onBack} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -653,6 +658,7 @@ export function EducatorsAdmin() {
       <SectionHeader eyebrow="Team" title="Educators 🧑‍🏫" subtitle={`${onFloor} clocked in · live time tracking`} />
 
       <InviteEmployee />
+      <MembershipManager audience="staff" />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard icon={Users} label="On the floor" value={onFloor} gradient="from-mint-400 to-mint-500" />

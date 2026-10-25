@@ -1,4 +1,4 @@
-import { mutation } from './_generated/server'
+import { internalMutation } from './_generated/server'
 import { v } from 'convex/values'
 import { FREE_LIMIT } from './lib'
 
@@ -12,7 +12,7 @@ const DATA_TABLES = [
 
 // Idempotent seed — only populates when the demo facility doesn't exist yet.
 // Run with: npx convex run seed:init
-export const init = mutation({
+export const init = internalMutation({
   args: {},
   handler: async (ctx) => {
     const demo = await ctx.db.query('facilities').withIndex('by_slug', (q) => q.eq('slug', 'demo')).first()
@@ -23,7 +23,7 @@ export const init = mutation({
 })
 
 // Wipe (orphans + demo) and re-seed the demo facility. Run: npx convex run seed:reset
-export const reset = mutation({
+export const reset = internalMutation({
   args: {},
   handler: async (ctx) => {
     const demos = await ctx.db.query('facilities').withIndex('by_slug', (q) => q.eq('slug', 'demo')).collect()
@@ -42,7 +42,7 @@ export const reset = mutation({
 
 // Admin utility: fully delete a (non-demo) facility and all its scoped data.
 // Used to clean up throwaway test facilities. Run: npx convex run seed:purgeFacilityBySlug '{"slug":"..."}' --prod
-export const purgeFacilityBySlug = mutation({
+export const purgeFacilityBySlug = internalMutation({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
     if (slug === 'demo') return { skipped: 'refusing to delete the demo facility' }
@@ -66,7 +66,7 @@ export const purgeFacilityBySlug = mutation({
 // the current FREE_LIMIT constant. Idempotent. Run after changing the free tier:
 //   npx convex run seed:normalizeFreeLimits --prod
 // The demo facility (freeLimit 999) is deliberately left untouched.
-export const normalizeFreeLimits = mutation({
+export const normalizeFreeLimits = internalMutation({
   args: {},
   handler: async (ctx) => {
     const facilities = await ctx.db.query('facilities').collect()

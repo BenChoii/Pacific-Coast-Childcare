@@ -1,6 +1,8 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
-import { resolveFacilityId, requireFacility } from './lib'
+import { resolveFacilityId, requireAdmin, requireStaff, requireRecord } from './lib'
+import { recordOwnerEvent } from './notifications'
+import { getAuthUserId } from '@convex-dev/auth/server'
 
 export const list = query({
   args: {},
@@ -12,7 +14,9 @@ export const list = query({
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
       .collect()
     const out = []
-    for (const d of docs) {
+    const uid = await getAuthUserId(ctx)
+    const user = uid ? await ctx.db.get(uid) : null
+    for (const d of docs.filter((educator) => !user || user.role === 'admin' || (user.role === 'staff' && educator.userId === uid))) {
       const { _id, _creationTime, facilityId, order, imageId, ...rest } = d
       out.push({ id: _id, ...rest, imageUrl: imageId ? await ctx.storage.getUrl(imageId) : null })
     }
@@ -30,7 +34,7 @@ export const add = mutation({
     certifications: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { facilityId } = await requireFacility(ctx)
+    const { facilityId } = await requireAdmin(ctx)
     const all = await ctx.db
       .query('educators')
       .withIndex('by_facility', (q) => q.eq('facilityId', facilityId))
@@ -59,8 +63,9 @@ export const add = mutation({
 export const clock = mutation({
   args: { id: v.id('educators'), time: v.string() },
   handler: async (ctx, { id, time }) => {
-    const e = await ctx.db.get(id)
-    if (!e) return
+    const { facilityId, user, userId } = await requireStaff(ctx)
+    const e = await requireRecord(ctx, id, facilityId)
+    if (user?.role === 'staff' && e.userId !== userId) throw new Error('You can only clock your own attendance.')
     if (e.status === 'out') {
       await ctx.db.patch(id, {
         status: 'in',
@@ -76,5 +81,6 @@ export const clock = mutation({
         punches: [...e.punches, { type: 'out', time }],
       })
     }
+    await recordOwnerEvent(ctx, { facilityId, actorId: userId || undefined, type: 'educator_attendance_changed', summary: `${e.name} clocked ${e.status === 'out' ? 'in' : 'out'}.` })
   },
 })

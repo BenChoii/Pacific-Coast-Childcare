@@ -346,14 +346,20 @@ export function Attendance() {
 
 /* ---------------- Log Activity ---------------- */
 export function LogActivity() {
-  const { roster, addActivity, pushToast, viewer, draftNote } = useApp()
+  const { roster, childrenList, addActivity, pushToast, viewer, draftNote } = useApp()
   const by = viewer?.name || 'Ms. Dana'
-  const kids = roster.filter((r) => r.status !== 'absent')
-  const [child, setChild] = useState(kids[0]?.name || '')
+  const kids = childrenList.filter((c) => {
+    const row = roster.find((r) => r.childId === c.id) || (childrenList.filter((other) => other.name === c.name).length === 1 ? roster.find((r) => r.name === c.name) : null)
+    return row?.status !== 'absent'
+  })
+  const [childId, setChildId] = useState('')
+  const selectedChild = kids.find((c) => c.id === childId)
+  const child = selectedChild?.name || ''
   const [type, setType] = useState('meal')
   const [detail, setDetail] = useState('')
   const [amount, setAmount] = useState(quickMeals[0])
   const [aiBusy, setAiBusy] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const draftWithAI = async () => {
     if (!child) { pushToast('Pick a child first.', { emoji: '🧒', tone: 'coral' }); return }
@@ -372,18 +378,26 @@ export function LogActivity() {
 
   const amountOptions = type === 'meal' ? quickMeals : type === 'diaper' ? diaperOptions : type === 'note' ? quickMoods : null
 
-  const submit = () => {
+  const submit = async () => {
+    if (!selectedChild || saving) return
     const meta = ACTIVITY_TYPES[type]
-    addActivity({
-      type,
-      time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
-      title: `${meta.label}${child ? ` · ${child.split(' ')[0]}` : ''}`,
-      detail: detail || `${meta.label} logged`,
-      amount: amountOptions ? amount : undefined,
-      by,
-    })
-    pushToast(`${meta.label} logged for ${child.split(' ')[0]} — family notified`, { emoji: meta.emoji, tone: 'mint' })
-    setDetail('')
+    setSaving(true)
+    try {
+      await addActivity({
+        childId: selectedChild.id,
+        childName: selectedChild.name,
+        type,
+        time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        title: `${meta.label} · ${selectedChild.first || child.split(' ')[0]}`,
+        detail: detail || `${meta.label} logged`,
+        amount: amountOptions ? amount : undefined,
+        by,
+      })
+      pushToast(`${meta.label} saved to ${child.split(' ')[0]}'s family log`, { emoji: meta.emoji, tone: 'mint' })
+      setDetail('')
+    } catch {
+      pushToast('The update could not be saved. Please try again.', { emoji: '📝', tone: 'coral' })
+    } finally { setSaving(false) }
   }
 
   return (
@@ -398,14 +412,14 @@ export function LogActivity() {
             {kids.map((k) => (
               <button
                 key={k.id}
-                onClick={() => setChild(k.name)}
+                onClick={() => setChildId(k.id)}
                 className={`flex items-center gap-2 rounded-2xl border-2 px-3 py-2 transition ${
-                  child === k.name ? 'border-brand-400 bg-brand-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                  childId === k.id ? 'border-brand-400 bg-brand-50' : 'border-slate-200 bg-white hover:border-slate-300'
                 }`}
               >
                 <span className="text-lg">{k.emoji}</span>
-                <span className="text-sm font-bold text-slate-700">{k.name.split(' ')[0]}</span>
-                {child === k.name && <Check size={15} className="text-brand-600" />}
+                <span className="text-sm font-bold text-slate-700">{k.name} · {k.room || 'Unassigned'}</span>
+                {childId === k.id && <Check size={15} className="text-brand-600" />}
               </button>
             ))}
           </div>
@@ -473,8 +487,8 @@ export function LogActivity() {
           />
         </div>
 
-        <button onClick={submit} disabled={!child} className="btn-primary w-full">
-          <Plus size={18} /> Post update to {child ? child.split(' ')[0] + "'s" : ''} family
+        <button onClick={submit} disabled={!selectedChild || saving} className="btn-primary w-full">
+          <Plus size={18} /> {saving ? 'Saving…' : 'Post update'} to {child ? child.split(' ')[0] + "'s" : ''} family
         </button>
       </Card>
     </div>

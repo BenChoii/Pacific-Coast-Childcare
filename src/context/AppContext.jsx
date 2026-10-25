@@ -26,7 +26,8 @@ export function AppProvider({ children }) {
     try {
       const c = new URLSearchParams(window.location.search).get('claim')
       if (c) { sessionStorage.setItem('mitten_claim_area', c); return c }
-      return sessionStorage.getItem('mitten_claim_area') || null
+      sessionStorage.removeItem('mitten_claim_area'); sessionStorage.removeItem('mitten_claim_name')
+      return null
     } catch { return null }
   })
   // The specific centre being claimed (from /signup?claim=<area>&name=<daycare>),
@@ -35,7 +36,7 @@ export function AppProvider({ children }) {
     try {
       const n = new URLSearchParams(window.location.search).get('name')
       if (n) { sessionStorage.setItem('mitten_claim_name', n); return n }
-      return sessionStorage.getItem('mitten_claim_name') || null
+      return null
     } catch { return null }
   })
   const claimRoutedRef = useRef(false)
@@ -56,20 +57,31 @@ export function AppProvider({ children }) {
   const role = isAuthenticated ? viewer?.role ?? null : demoRole
   const authResolving = authLoading || (isAuthenticated && viewerQ === undefined)
 
+  // A removed membership must never subscribe to workspace data, even with an old token.
+  const canReadWorkspace = !isAuthenticated || (!!viewer?.hasFacility && viewer?.accessStatus !== 'suspended' && viewer?.hasActiveChildren !== false)
+  useEffect(() => {
+    if (!isAuthenticated || !viewer?.id) return
+    setView('home')
+    if (!new URLSearchParams(window.location.search).get('claim')) {
+      try { sessionStorage.removeItem('cubby_fresh_auth') } catch {}
+      window.history.replaceState(null, '', '/app')
+    }
+  }, [isAuthenticated, viewer?.id])
+
   // --- Live data from Convex ---
-  const timelineQ = useQuery(api.activities.list)
-  const conversationsQ = useQuery(api.conversations.list)
-  const invoicesQ = useQuery(api.invoices.list)
-  const rosterQ = useQuery(api.roster.list)
-  const photosQ = useQuery(api.photos.list)
-  const educatorsQ = useQuery(api.educators.list)
-  const lessonPlanQ = useQuery(api.lessons.plan)
-  const lessonBlocksQ = useQuery(api.lessons.blocks)
-  const resourcesQ = useQuery(api.resources.list)
-  const facilityQ = useQuery(api.facilities.current)
-  const childrenQ = useQuery(api.children.list)
-  const invitesQ = useQuery(api.facilities.listInvites)
-  const milestonesQ = useQuery(api.milestones.list)
+  const timelineQ = useQuery(api.activities.list, canReadWorkspace ? {} : 'skip')
+  const conversationsQ = useQuery(api.conversations.list, canReadWorkspace ? {} : 'skip')
+  const invoicesQ = useQuery(api.invoices.list, canReadWorkspace ? {} : 'skip')
+  const rosterQ = useQuery(api.roster.list, canReadWorkspace ? {} : 'skip')
+  const photosQ = useQuery(api.photos.list, canReadWorkspace ? {} : 'skip')
+  const educatorsQ = useQuery(api.educators.list, canReadWorkspace ? {} : 'skip')
+  const lessonPlanQ = useQuery(api.lessons.plan, canReadWorkspace ? {} : 'skip')
+  const lessonBlocksQ = useQuery(api.lessons.blocks, canReadWorkspace ? {} : 'skip')
+  const resourcesQ = useQuery(api.resources.list, canReadWorkspace ? {} : 'skip')
+  const facilityQ = useQuery(api.facilities.current, canReadWorkspace ? {} : 'skip')
+  const childrenQ = useQuery(api.children.list, canReadWorkspace ? {} : 'skip')
+  const invitesQ = useQuery(api.facilities.listInvites, canReadWorkspace && role === 'admin' ? {} : 'skip')
+  const milestonesQ = useQuery(api.milestones.list, canReadWorkspace ? {} : 'skip')
 
   const timeline = timelineQ ?? []
   const conversations = conversationsQ ?? []
@@ -217,8 +229,9 @@ export function AppProvider({ children }) {
   // After an owner/parent signs up, finish wiring them to a facility once auth
   // has fully propagated (calling these inline right after signIn races the
   // token and fails with "Sign in first").
+  const pendingMembershipRef = useRef(null)
   useEffect(() => {
-    if (!isAuthenticated || !viewer || viewer.hasFacility) return
+    if (!isAuthenticated || !viewer || viewer.accessStatus === 'suspended') return
     let pendFac = null
     let pendJoin = null
     try {
@@ -226,9 +239,10 @@ export function AppProvider({ children }) {
       pendJoin = sessionStorage.getItem('cubby_pending_join')
     } catch {}
     if (pendJoin) {
-      try { sessionStorage.removeItem('cubby_pending_join') } catch {}
-      joinViaTokenMut({ token: pendJoin }).catch(() => {})
-    } else if (pendFac && viewer.role === 'admin') {
+      if (pendingMembershipRef.current === pendJoin) return
+      pendingMembershipRef.current = pendJoin
+      joinViaTokenMut({ token: pendJoin }).then(() => { sessionStorage.removeItem('cubby_pending_join'); setView('home'); window.history.replaceState(null, '', '/app') }).catch(() => { sessionStorage.removeItem('cubby_pending_join'); pushToast('Your invite could not be accepted. Ask the daycare for a new link.', { tone: 'coral' }) })
+    } else if (pendFac && !viewer.hasFacility && viewer.role === 'admin') {
       try { sessionStorage.removeItem('cubby_pending_facility') } catch {}
       createFacilityMut({ name: pendFac }).catch(() => {})
     }
@@ -267,10 +281,10 @@ export function AppProvider({ children }) {
 
   // --- Tenant / billing wrappers ---
   const createFacility = useCallback((name) => createFacilityMut({ name }), [createFacilityMut])
-  const completeOnboarding = useCallback(() => completeOnboardingMut({}), [completeOnboardingMut])
+  const completeOnboarding = useCallback(async () => { await completeOnboardingMut({}); setView('home'); clearClaimArea(); window.history.replaceState(null, '', '/app') }, [completeOnboardingMut, clearClaimArea])
   const generateInvite = useCallback((role, label, childId) => generateInviteMut({ role, label, childId }), [generateInviteMut])
   const revokeInvite = useCallback((id) => revokeInviteMut({ id }), [revokeInviteMut])
-  const joinFacility = useCallback((token) => joinViaTokenMut({ token }), [joinViaTokenMut])
+  const joinFacility = useCallback(async (token) => { const result = await joinViaTokenMut({ token }); setView('home'); window.history.replaceState(null, '', '/app'); return result }, [joinViaTokenMut])
   const addEducator = useCallback((fields) => addEducatorMut(fields), [addEducatorMut])
 
   // Enroll a child. Handles the freemium gate: when it crosses the free limit
@@ -320,9 +334,9 @@ export function AppProvider({ children }) {
   const setChildPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file); await setChildPhotoMut({ id, imageId }) }, [uploadImage, setChildPhotoMut])
   const setEducatorPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file); await setEducatorPhotoMut({ id, imageId }) }, [uploadImage, setEducatorPhotoMut])
   const postPhoto = useCallback(
-    async ({ file, caption, audience, childId, childName, emoji, gradient }) => {
+    async ({ file, caption, audience, childId, childName, emoji, gradient, room }) => {
       const imageId = file ? await uploadImage(file) : undefined
-      await addPhotoMut({ caption: caption || 'New moment', room: 'Main Room', emoji, gradient, imageId, audience, childId, childName })
+      await addPhotoMut({ caption: caption || 'New moment', room: room || 'Unassigned', emoji, gradient, imageId, audience, childId, childName })
     },
     [uploadImage, addPhotoMut],
   )

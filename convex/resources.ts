@@ -1,12 +1,16 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
-import { resolveFacilityId } from './lib'
+import { resolveFacilityId, requireStaff, requireRecord } from './lib'
+import { getAuthUserId } from '@convex-dev/auth/server'
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
     const fid = await resolveFacilityId(ctx)
     if (!fid) return []
+    const uid = await getAuthUserId(ctx)
+    const user = uid ? await ctx.db.get(uid) : null
+    if (user?.role === 'parent') return []
     const docs = await ctx.db
       .query('resources')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
@@ -18,8 +22,7 @@ export const list = query({
 export const add = mutation({
   args: { title: v.string(), url: v.string(), type: v.string(), note: v.string(), category: v.string() },
   handler: async (ctx, args) => {
-    const fid = await resolveFacilityId(ctx)
-    if (!fid) throw new Error('No facility')
+    const { facilityId: fid } = await requireStaff(ctx)
     const all = await ctx.db
       .query('resources')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
@@ -32,6 +35,8 @@ export const add = mutation({
 export const remove = mutation({
   args: { id: v.id('resources') },
   handler: async (ctx, { id }) => {
+    const { facilityId } = await requireStaff(ctx)
+    await requireRecord(ctx, id, facilityId)
     await ctx.db.delete(id)
   },
 })

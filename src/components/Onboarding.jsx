@@ -17,7 +17,7 @@ const FEATURES = [
   { icon: Image, title: 'Photos & moments', where: 'Photos', desc: 'Share the day’s magic — parents get a private feed.' },
   { icon: MessageCircle, title: 'Messaging', where: 'Messages', desc: 'Two-way chat with every family, all in one place.' },
   { icon: BookOpen, title: 'Lesson plans & training', where: 'Curriculum', desc: 'Build time-based plans and share staff training links.' },
-  { icon: Share2, title: 'Family links', where: 'Account → Family links', desc: 'Invite parents & staff with one shareable link.' },
+  { icon: Share2, title: 'Family links', where: 'Account → Family links', desc: 'Create a separate invitation for each parent or educator.' },
   { icon: CreditCard, title: 'Plan & billing', where: 'Account → Plan', desc: 'See your plan, usage and manage your card.' },
 ]
 
@@ -25,14 +25,23 @@ export default function Onboarding() {
   const { facility, enrollChild, generateInvite, completeOnboarding, pushToast } = useApp()
   const [step, setStep] = useState(0)
   const [celebrating, setCelebrating] = useState(false)
+  const [finishError, setFinishError] = useState('')
   const steps = ['welcome', 'child', 'team', 'families', 'tour']
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1))
   const back = () => setStep((s) => Math.max(s - 1, 0))
   // Send-off moment first, then flip onboarded → the dashboard appears under it.
   const finish = async () => {
+    if (celebrating) return
+    setFinishError('')
     setCelebrating(true)
-    await new Promise((r) => setTimeout(r, 1900))
-    await completeOnboarding()
+    try {
+      await new Promise((r) => setTimeout(r, 1900))
+      await completeOnboarding()
+    } catch {
+      setCelebrating(false)
+      setFinishError('Setup could not be completed. Your progress is saved. Try finishing setup again.')
+      pushToast('Setup could not be completed. Your progress is saved—please try again.', { emoji: '⚠️', tone: 'coral', duration: 6000 })
+    }
   }
 
   if (celebrating) {
@@ -62,6 +71,8 @@ export default function Onboarding() {
           <BrandLockup variant="nav" />
           <button onClick={finish} className="text-xs font-bold text-slate-400 hover:text-brand-600">Skip setup →</button>
         </div>
+
+        {finishError && <p role="alert" className="mb-5 rounded-2xl border border-coral-200 bg-coral-50 p-4 text-sm font-semibold text-coral-700">{finishError}</p>}
 
         {/* progress */}
         <div className="mb-6 flex gap-1.5">
@@ -149,15 +160,22 @@ function AddChildStep({ enrollChild, onNext, onBack }) {
 }
 
 function InviteStep({ role, title, icon, generateInvite, pushToast, facility, onNext, onBack }) {
+  const { childrenList } = useApp()
+  const [childId, setChildId] = useState('')
+  const [error, setError] = useState('')
+  const availableChildren = childrenList.filter((child) => !child.parentUserId)
   const [link, setLink] = useState('')
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
   const make = async () => {
-    setBusy(true)
+    const child = availableChildren.find((c) => c.id === childId)
+    if (role === 'parent' && !child) { setError('Select the child this parent is joining for.'); return }
+    setBusy(true); setError('')
     try {
-      const r = await generateInvite(role)
+      const r = await generateInvite(role, child?.name, role === 'parent' ? childId : undefined)
       setLink(`${origin()}/join?t=${r.token}`)
-    } finally { setBusy(false) }
+    } catch { setError('The invitation could not be created. Please try again.') }
+    finally { setBusy(false) }
   }
   const copy = (t) => { navigator.clipboard?.writeText(t); setCopied(true); pushToast('Link copied 📋', { emoji: '📋', tone: 'mint' }); setTimeout(() => setCopied(false), 1600) }
   const Icon = icon
@@ -166,11 +184,19 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
       <StepHead icon={Icon} eyebrow={role === 'staff' ? 'Step 2' : 'Step 3'} title={title} />
       <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
         {role === 'staff'
-          ? 'Generate a link and send it to each educator. They create an account and land straight in your classroom tools.'
-          : 'Send this link to parents. They sign up and immediately follow their child’s day.'}
+          ? 'Create a new invite link for each educator. Each link can be accepted once, and the educator lands in their dashboard after joining.'
+          : 'Select a child and create a new invite link for their parent. Each link can be accepted once and connects the parent directly to their child’s dashboard.'}
       </p>
+      {role === 'parent' && <label className="mt-4 block text-sm font-semibold text-slate-600">Child for this invitation
+        <select value={childId} onChange={(e) => { setChildId(e.target.value); setLink(''); setError('') }} className="input mt-2">
+          <option value="">Select child…</option>
+          {availableChildren.map((child) => <option key={child.id} value={child.id}>{child.name} · {child.room || 'Unassigned'}</option>)}
+        </select>
+        {!availableChildren.length && <span className="mt-2 block text-xs text-slate-500">Add a child first, or continue setup and invite their parent later from Account → Children.</span>}
+      </label>}
+      {error && <p role="alert" className="mt-3 text-sm font-semibold text-coral-700">{error}</p>}
       {!link ? (
-        <button onClick={make} disabled={busy} className="btn-primary mt-4">
+        <button onClick={make} disabled={busy || (role === 'parent' && !childId)} className="btn-primary mt-4">
           {busy ? <Loader2 size={16} className="animate-spin" /> : <><Share2 size={16} /> Create invite link</>}
         </button>
       ) : (
@@ -179,6 +205,8 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
           <button onClick={() => copy(link)} className="btn-primary !py-2 text-sm">{copied ? <Check size={15} /> : <Copy size={15} />} Copy</button>
         </div>
       )}
+      {link && <button type="button" onClick={make} disabled={busy} className="btn-ghost mt-3 !py-2 text-sm">{busy ? 'Creating…' : 'Create another invite link'}</button>}
+      <p className="mt-3 text-xs font-semibold text-slate-400">Use a different link for each person. Existing families and educators should sign in with their own accounts.</p>
       {role === 'parent' && facility && (
         <p className="mt-3 text-xs font-semibold text-slate-400">
           Tip: returning families can always sign in at <span className="font-mono">{origin().replace(/^https?:\/\//, '')}/{facility.slug}</span>

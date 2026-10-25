@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { ChildEnrollmentControls, ReleasedChildren } from '../components/AccessManagement.jsx'
 import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, CartesianGrid,
@@ -214,6 +216,8 @@ function RealAdminHome() {
 /* ---------------- Enrollment Pipeline ---------------- */
 export function Enrollment() {
   const { facility, childrenList } = useApp()
+  const [managingId, setManagingId] = useState(null)
+  const managingChild = childrenList.find((c) => c.id === managingId)
   if (facility && !facility.isDemo) {
     return (
       <div className="space-y-5">
@@ -234,11 +238,14 @@ export function Enrollment() {
                   <div className="text-xs font-bold text-slate-400">{c.age} · {c.room} · {c.parent}</div>
                 </div>
                 <Pill className="bg-mint-400/15 text-mint-500">Enrolled</Pill>
+                <button type="button" className="btn-ghost !px-3 !py-2 text-xs" onClick={() => setManagingId(managingId === c.id ? null : c.id)}>Manage</button>
               </div>
             ))}
           </Card>
         )}
-        <p className="text-xs font-semibold text-slate-400">A full inquiry → tour → enrolled pipeline is coming. For now, add enrolled children in Account → Children.</p>
+        {managingChild && <ChildEnrollmentControls key={managingChild.id} child={managingChild} onReleased={() => setManagingId(null)} />}
+        <ReleasedChildren />
+        <p className="text-xs font-semibold text-slate-400">Add new children in Account → Children. Use Manage to change a class assignment or release an enrolment.</p>
       </div>
     )
   }

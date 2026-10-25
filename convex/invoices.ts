@@ -36,6 +36,7 @@ export const list = query({
     const uid = await getAuthUserId(ctx)
     const me = uid ? await ctx.db.get(uid) : null
     const facility = await ctx.db.get(fid)
+    if (me?.role === 'staff') return []
     const docs = await ctx.db
       .query('invoices')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
@@ -59,6 +60,11 @@ export const getOne = query({
   handler: async (ctx, { id }) => {
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
     if (!doc) return null
+    const fid = await resolveFacilityId(ctx)
+    if (!fid || doc.facilityId !== fid) return null
+    const uid = await getAuthUserId(ctx)
+    const user = uid ? await ctx.db.get(uid) : null
+    if (user && (user.role === 'staff' || (user.role === 'parent' && doc.parentUserId !== uid))) return null
     return publicShape(doc)
   },
 })
@@ -75,7 +81,7 @@ export const families = query({
       .collect()
     const byParent = new Map<string, any>()
     for (const k of kids) {
-      if (!k.parentUserId) continue
+      if (!k.parentUserId || k.archivedAt) continue
       const key = String(k.parentUserId)
       if (!byParent.has(key)) {
         const parent = await ctx.db.get(k.parentUserId)
@@ -103,6 +109,7 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const { facilityId } = await requireAdmin(ctx)
+    if (args.parentUserId) { const parent = await ctx.db.get(args.parentUserId); if (!parent || parent.facilityId !== facilityId || parent.role !== 'parent') throw new Error('Family not found.') }
     const items = [...args.items]
 
     if (args.includeExtras && args.parentUserId) {
@@ -110,7 +117,7 @@ export const create = mutation({
         .query('children')
         .withIndex('by_facility', (q) => q.eq('facilityId', facilityId))
         .collect()
-      const myKids = kids.filter((k: any) => k.parentUserId === args.parentUserId)
+      const myKids = kids.filter((k: any) => !k.archivedAt && k.parentUserId === args.parentUserId)
       for (const kid of myKids) {
         const charges = await ctx.db
           .query('extraCharges')
@@ -160,12 +167,11 @@ export const create = mutation({
 export const markEtransferSent = mutation({
   args: { id: v.string(), ref: v.optional(v.string()) },
   handler: async (ctx, { id, ref }) => {
-    const uid = await getAuthUserId(ctx)
-    if (!uid) throw new Error('Sign in first.')
+    const { userId: uid, facilityId: fid } = await requireFacility(ctx)
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
-    if (!doc || doc.status === 'paid') return
+    if (!doc || doc.facilityId !== fid || doc.status === 'paid') return
     const facility = await ctx.db.get(doc.facilityId)
-    if (!facility?.isDemo && doc.parentUserId && doc.parentUserId !== uid) throw new Error('Not your invoice.')
+    if (!facility?.isDemo && doc.parentUserId !== uid) throw new Error('Not your invoice.')
     await ctx.db.patch(doc._id, { status: 'processing', method: 'etransfer', etransferRef: ref || doc.invId })
   },
 })
@@ -197,6 +203,9 @@ export const pay = mutation({
   handler: async (ctx, { id, paidOn }) => {
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
     if (!doc) return
+    const fid = await resolveFacilityId(ctx)
+    const facility = fid ? await ctx.db.get(fid) : null
+    if (!facility?.isDemo || doc.facilityId !== fid) throw new Error('Real payments must be verified by the payment service or director.')
     await ctx.db.patch(doc._id, { status: 'paid', paidOn, method: doc.method || 'card' })
   },
 })
@@ -254,7 +263,7 @@ export const generateMonthly = internalMutation({
       // group billable children by claiming parent
       const byParent = new Map<string, any[]>()
       for (const k of kids) {
-        if (!k.parentUserId) continue
+        if (!k.parentUserId || k.archivedAt) continue
         const key = String(k.parentUserId)
         if (!byParent.has(key)) byParent.set(key, [])
         byParent.get(key)!.push(k)
@@ -295,5 +304,15 @@ export const generateMonthly = internalMutation({
       }
     }
     return { created }
+  },
+})
+
+// Only the server's verified Stripe session may complete a real card payment.
+export const recordVerifiedPayment = internalMutation({
+  args: { id: v.string(), sessionId: v.string(), paidOn: v.string() },
+  handler: async (ctx, { id, sessionId, paidOn }) => {
+    const invoice = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
+    if (!invoice || invoice.stripeSessionId !== sessionId) throw new Error('Payment session does not match this invoice.')
+    await ctx.db.patch(invoice._id, { status: 'paid', paidOn, method: 'card' })
   },
 })

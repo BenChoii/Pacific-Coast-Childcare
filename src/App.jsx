@@ -30,6 +30,8 @@ import { IntakeDesk } from './views/intake.jsx'
 import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
 import { InvoicingStudio } from './views/invoicing.jsx'
 import { SubsidiesStudio } from './views/subsidies.jsx'
+import { DirectorCalendar } from './views/calendar.jsx'
+import OwnerActivity from './views/owner-activity.jsx'
 import { Crm } from './views/crm.jsx'
 import { BookkeepingStudio } from './views/bookkeeping.jsx'
 
@@ -91,7 +93,9 @@ export default function App() {
   const { role, view, conversations, authResolving, isAuthenticated, viewer, facility, claimArea } = useApp()
 
   if (authResolving) return <Loader />
+  if (isAuthenticated && viewer?.accessStatus === 'suspended') return <AccessNotice suspended />
   if (!role) return <Login />
+  if (isAuthenticated && viewer?.role === 'parent' && viewer?.hasActiveChildren === false && viewer?.hasFacility) return <AccessNotice />
 
   // ── Tenant gate (signed-in users) ──
   if (isAuthenticated && viewer) {
@@ -118,7 +122,7 @@ export default function App() {
       sessionStorage.removeItem('cubby_fresh_auth')
       window.history.replaceState(null, '', '/app')
     } else if (facility?.onboarded && !facility?.isDemo && !(claiming && entry.kind === 'owner')) {
-      return <AlreadySignedIn viewer={viewer} facility={facility} joining={entry.kind === 'join'} />
+      window.history.replaceState(null, '', '/app')
     }
   }
 
@@ -161,6 +165,8 @@ export default function App() {
       { id: 'inquiries', label: 'Inquiries', icon: Inbox, render: Crm },
       { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
       { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null },
+      { id: 'calendar', label: 'Calendar & closures', icon: CalendarDays, render: DirectorCalendar },
+      { id: 'alerts', label: 'Activity & alerts', icon: Inbox, render: OwnerActivity },
       { id: 'curriculum', label: 'Curriculum', icon: GraduationCap, render: DirectorCurriculum },
       { id: 'milestones', label: 'Milestones', icon: Sparkles, render: MilestoneTracker },
       { id: 'calm', label: 'Calm Corner', icon: Wind, render: CalmCorner },
@@ -207,4 +213,14 @@ export default function App() {
       <Toasts />
     </>
   )
+}
+
+function AccessNotice({ suspended = false }) {
+  const { logout } = useApp()
+  return <div className="aurora flex min-h-screen items-center justify-center px-5"><div className="max-w-lg rounded-3xl bg-white p-8 shadow-card">
+    <BrandLockup variant="nav" />
+    <h1 className="mt-6 text-3xl text-brand-700">{suspended ? 'Daycare access has ended' : 'Your family dashboard'}</h1>
+    <p className="mt-3 text-slate-600">{suspended ? 'Your daycare has suspended this account’s access. Contact the owner if you need help.' : 'Your account is ready. The daycare needs to link your child’s active enrolment before their schedule and updates appear.'}</p>
+    <button className="btn-primary mt-6" onClick={logout}>Sign out</button>
+  </div></div>
 }

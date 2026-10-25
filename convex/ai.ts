@@ -1,5 +1,6 @@
 import { action } from './_generated/server'
 import { v } from 'convex/values'
+import { internal } from './_generated/api'
 
 // Free OpenRouter models, tried in order (availability shifts over time, so we
 // fall through to the next if one is unavailable). Override with OPENROUTER_MODEL.
@@ -95,6 +96,7 @@ async function visionChat(imageUrl: string, prompt: string, maxTokens = 600) {
 export const scanIntake = action({
   args: { storageId: v.id('_storage') },
   handler: async (ctx, { storageId }) => {
+    await ctx.runQuery(internal.users.actionMembership, { staffOnly: true })
     const url = await ctx.storage.getUrl(storageId)
     if (!url) return { configured: true, error: 'Could not read the uploaded image.' }
     const res = await visionChat(
@@ -131,7 +133,8 @@ export const scanIntake = action({
 // parent-ready note in one tap.
 export const draftNote = action({
   args: { childName: v.string(), kind: v.string(), keywords: v.optional(v.string()) },
-  handler: async (_ctx, { childName, kind, keywords }) => {
+  handler: async (ctx, { childName, kind, keywords }) => {
+    await ctx.runQuery(internal.users.actionMembership, { staffOnly: true })
     const first = (childName || 'the child').split(' ')[0]
     return await chat([
       {
@@ -150,7 +153,8 @@ export const draftNote = action({
 // Parent: a warm "day in a glance" recap built from the day's activity log.
 export const dailyRecap = action({
   args: { childName: v.string(), activities: v.string() },
-  handler: async (_ctx, { childName, activities }) => {
+  handler: async (ctx, { childName, activities }) => {
+    await ctx.runQuery(internal.users.actionMembership, {})
     const first = (childName || 'your child').split(' ')[0]
     if (!activities.trim()) {
       return { configured: true, text: `${first} is having a lovely day! Check back soon — the educators will post updates as the day unfolds. 💙` }

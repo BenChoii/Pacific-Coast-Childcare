@@ -478,7 +478,7 @@ function ChildrenPanel() {
                 <div className="text-xs font-bold text-slate-400">{c.age} · {c.room} · {c.parent}</div>
               </div>
               {c.allergies?.length > 0 && <Pill className="bg-coral-400/15 text-coral-600">{c.allergies.join(', ')}</Pill>}
-              <button onClick={() => removeChild(c.id)} className="rounded-xl p-2 text-slate-300 transition hover:bg-coral-50 hover:text-coral-500">
+              <button aria-label={`Release ${c.name}`} onClick={() => { if (window.confirm(`Release ${c.name} from enrolment? Their records will be preserved. Parent access will be suspended if they have no other active children.`)) removeChild(c.id) }} className="rounded-xl p-2 text-slate-300 transition hover:bg-coral-50 hover:text-coral-500">
                 <Trash2 size={16} />
               </button>
             </div>
@@ -491,9 +491,10 @@ function ChildrenPanel() {
 
 /* ---------------- Family links ---------------- */
 function FamilyPanel() {
-  const { facility, invites, generateInvite, revokeInvite, pushToast } = useApp()
+  const { facility, invites, childrenList, generateInvite, revokeInvite, pushToast } = useApp()
   const [busy, setBusy] = useState('')
   const [copied, setCopied] = useState('')
+  const [inviteChildId, setInviteChildId] = useState('')
 
   const copy = (text, key) => {
     navigator.clipboard?.writeText(text)
@@ -504,7 +505,9 @@ function FamilyPanel() {
   const make = async (role) => {
     setBusy(role)
     try {
-      const r = await generateInvite(role)
+      const child = childrenList.find(c => c.id === inviteChildId)
+      if (role === 'parent' && !child) { pushToast('Choose the child this parent should be linked to.', { tone: 'coral' }); return }
+      const r = await generateInvite(role, child?.name, role === 'parent' ? child.id : undefined)
       const url = `${origin()}/join?t=${r.token}`
       copy(url, r.token)
     } finally { setBusy('') }
@@ -524,6 +527,8 @@ function FamilyPanel() {
         </div>
       </Card>
 
+      <p className="text-sm text-slate-600">Create a separate invite link for each person. Each link can be accepted once.</p>
+      <label className="block text-sm font-bold text-slate-600">Child for parent invitation<select className="input mt-2" value={inviteChildId} onChange={e => setInviteChildId(e.target.value)}><option value="">Choose child…</option>{childrenList.filter(c => !c.parentUserId).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
       <div className="grid gap-3 sm:grid-cols-2">
         <button onClick={() => make('parent')} disabled={busy === 'parent'} className="card flex items-center gap-3 p-4 text-left transition hover:shadow-playful">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blush-300 to-blush-500 text-white">{busy === 'parent' ? <Loader2 size={18} className="animate-spin" /> : <Users size={18} />}</span>

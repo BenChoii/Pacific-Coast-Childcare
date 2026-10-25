@@ -35,7 +35,7 @@ export default function Login() {
   // /portal is the families' door — e.g. a daycare's marketing site hands parents
   // off to mitten.care/portal?email=…. Drop them straight into the family sign-in
   // ("Welcome back"), not the owner-facing "start your daycare" landing.
-  if (currentPath() === '/portal') return <Auth intent={{ kind: 'default' }} onBack={go('/app')} />
+  if (['/portal', '/login', '/onboarding'].includes(currentPath())) return <Auth intent={{ kind: 'default' }} onBack={go('/app')} />
   return <DefaultLanding />
 }
 

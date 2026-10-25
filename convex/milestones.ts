@@ -1,7 +1,7 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { resolveFacilityId, requireFacility } from './lib'
+import { resolveFacilityId, requireStaff } from './lib'
 
 // Parents see only their own children's milestones; educators/directors see all.
 export const list = query({
@@ -19,7 +19,7 @@ export const list = query({
         .query('children')
         .withIndex('by_facility', (q) => q.eq('facilityId', fid))
         .collect()
-      myChildIds = new Set(kids.filter((c) => c.parentUserId === uid).map((c) => c._id))
+      myChildIds = new Set(kids.filter((c) => !c.archivedAt && c.parentUserId === uid).map((c) => c._id))
     }
 
     const docs = await ctx.db
@@ -43,9 +43,9 @@ export const add = mutation({
     note: v.optional(v.string()),
   },
   handler: async (ctx, { childId, domain, label, status, note }) => {
-    const { facilityId, user } = await requireFacility(ctx)
+    const { facilityId, user } = await requireStaff(ctx)
     const child = await ctx.db.get(childId)
-    if (!child || child.facilityId !== facilityId) throw new Error('Child not found')
+    if (!child || child.archivedAt || child.facilityId !== facilityId) throw new Error('Child not found')
     return await ctx.db.insert('milestones', {
       facilityId,
       childId,
@@ -64,7 +64,7 @@ export const add = mutation({
 export const remove = mutation({
   args: { id: v.id('milestones') },
   handler: async (ctx, { id }) => {
-    const { facilityId } = await requireFacility(ctx)
+    const { facilityId } = await requireStaff(ctx)
     const m = await ctx.db.get(id)
     if (m && m.facilityId === facilityId) await ctx.db.delete(id)
   },

@@ -13,6 +13,8 @@ export default function Photos({ canPost = false }) {
   const [caption, setCaption] = useState('')
   const [audience, setAudience] = useState('all') // 'all' | 'family'
   const [childId, setChildId] = useState('')
+  const [room, setRoom] = useState('')
+  const classRooms = [...new Set(childrenList.map((c) => c.room?.trim()).filter((name) => name && name !== 'Unassigned' && name !== 'All rooms'))].sort()
   const cameraRef = useRef(null)
   const libraryRef = useRef(null)
 
@@ -22,11 +24,13 @@ export default function Photos({ canPost = false }) {
     setFile(f)
     setPreview(URL.createObjectURL(f))
   }
-  const reset = () => { setFile(null); setPreview(''); setCaption(''); setAudience('all'); setChildId(''); setOpen(false) }
+  const reset = () => { setFile(null); setPreview(''); setCaption(''); setAudience('all'); setChildId(''); setRoom(''); setOpen(false) }
 
   const submit = async () => {
     if (!file) { pushToast('Choose a photo first.', { emoji: '📷', tone: 'coral' }); return }
     if (audience === 'family' && !childId) { pushToast('Pick which child this is for.', { emoji: '👶', tone: 'coral' }); return }
+    if (audience === 'all' && !classRooms.includes(room)) { pushToast('Choose the class to share this photo with.', { emoji: '🏫', tone: 'coral' }); return }
+    if (audience === 'family' && !childrenList.some((c) => c.id === childId)) { pushToast('That child is no longer in the active roster.', { tone: 'coral' }); return }
     setBusy(true)
     try {
       const child = childrenList.find((c) => c.id === childId)
@@ -34,11 +38,14 @@ export default function Photos({ canPost = false }) {
         file,
         caption: caption.trim(),
         audience,
+        room: audience === 'family' ? child?.room : room,
         childId: audience === 'family' ? childId : undefined,
         childName: audience === 'family' ? child?.name : undefined,
       })
-      pushToast(audience === 'family' ? `Shared with ${child?.first || 'the'} family 📸` : 'Shared with the whole class 📸', { emoji: '📸', tone: 'grape' })
+      pushToast(audience === 'family' ? `Shared with ${child?.first || 'the'} family 📸` : `Shared with ${room} families 📸`, { emoji: '📸', tone: 'grape' })
       reset()
+    } catch {
+      pushToast('The photo could not be shared. Your photo is still here—please try again.', { emoji: '📷', tone: 'coral' })
     } finally {
       setBusy(false)
     }
@@ -85,24 +92,33 @@ export default function Photos({ canPost = false }) {
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => setAudience('all')} className={`flex items-center gap-2 rounded-2xl border-2 p-3 text-left transition ${audience === 'all' ? 'border-brand-400 bg-brand-50' : 'border-line bg-white'}`}>
                 <Users size={18} className="text-brand-500" />
-                <div><div className="text-sm font-extrabold text-slate-700">Whole class</div><div className="text-[11px] font-semibold text-slate-400">All families see it</div></div>
+                <div><div className="text-sm font-extrabold text-slate-700">Whole class</div><div className="text-[11px] font-semibold text-slate-400">Families in the selected class</div></div>
               </button>
               <button onClick={() => setAudience('family')} className={`flex items-center gap-2 rounded-2xl border-2 p-3 text-left transition ${audience === 'family' ? 'border-brand-400 bg-brand-50' : 'border-line bg-white'}`}>
                 <Baby size={18} className="text-blush-500" />
                 <div><div className="text-sm font-extrabold text-slate-700">One child</div><div className="text-[11px] font-semibold text-slate-400">Only that family</div></div>
               </button>
             </div>
+            {audience === 'all' && (
+              <label className="mt-3 block text-sm font-semibold text-slate-600">Share with this class
+                <select className="input mt-2" value={room} onChange={(e) => setRoom(e.target.value)} required>
+                  <option value="">Select class…</option>
+                  {classRooms.map((name) => <option key={name} value={name}>{name}</option>)}
+                </select>
+                {!classRooms.length && <span className="mt-2 block text-xs text-slate-500">Assign an enrolled child to a class first, or share with one family.</span>}
+              </label>
+            )}
             {audience === 'family' && (
-              <select className="input mt-2" value={childId} onChange={(e) => setChildId(e.target.value)}>
+              <select aria-label="Child receiving this photo" className="input mt-2" value={childId} onChange={(e) => setChildId(e.target.value)}>
                 <option value="">Select child…</option>
-                {childrenList.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {childrenList.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.room || 'No class assigned'}</option>)}
               </select>
             )}
           </div>
 
           <div className="flex gap-2">
             <button onClick={reset} className="btn-ghost flex-1">Cancel</button>
-            <button onClick={submit} disabled={busy} className="btn-primary flex-1">
+            <button onClick={submit} disabled={busy || !file || (audience === 'all' ? !classRooms.includes(room) : !childId)} className="btn-primary flex-1">
               {busy ? <Loader2 size={18} className="animate-spin" /> : <><Camera size={16} /> Share</>}
             </button>
           </div>

@@ -65,7 +65,7 @@ export const listByFacility = query({
       .filter((s: any) => {
         if (!isParent) return true
         const kid: any = kidById.get(String(s.childId))
-        return kid && kid.parentUserId === uid
+        return kid && !kid.archivedAt && kid.parentUserId === uid
       })
       .map((s: any) => {
         const kid: any = kidById.get(String(s.childId))

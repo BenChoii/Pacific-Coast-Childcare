@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useMutation, useQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { FamilyLearningPlan } from './parent.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Clock, Check, ChevronDown, Plus, Pencil, Trash2, BookOpen, Video, FileText,
@@ -202,8 +205,8 @@ export function DirectorCurriculum() {
   return (
     <div className="space-y-5">
       <SectionHeader eyebrow="Curriculum studio" title="Lesson plans & training 🎓" subtitle="Build the week your educators run — and the materials that grow them" />
-      <Tabs tab={tab} setTab={setTab} items={[{ id: 'plan', label: 'Lesson builder' }, { id: 'training', label: 'Training library' }]} />
-      {tab === 'plan' ? (
+      <Tabs tab={tab} setTab={setTab} items={[{ id: 'plan', label: 'Lesson builder' }, { id: 'training', label: 'Training library' }, { id: 'family', label: 'Family plans' }]} />
+      {tab === 'family' ? <FamilyPlanManager /> : tab === 'plan' ? (
         <Builder
           plan={lessonPlan} blocks={lessonBlocks}
           setTheme={setLessonTheme} addBlock={addLessonBlock} updateBlock={updateLessonBlock} deleteBlock={deleteLessonBlock}
@@ -354,4 +357,62 @@ function TrainingManager({ resources, addResource, removeResource, pushToast }) 
 
 function Labeled({ label, children }) {
   return <label className="block"><span className="eyebrow mb-1.5 block">{label}</span>{children}</label>
+}
+
+const blankFamilyPlan = { title: '', period: 'week', startDate: '', endDate: '', room: '', overview: '', activities: '', goals: '' }
+function FamilyPlanManager() {
+  const plans = useQuery(api.lessons.familyPlans, {})
+  const save = useMutation(api.lessons.saveFamilyPlan)
+  const publish = useMutation(api.lessons.publishFamilyPlan)
+  const remove = useMutation(api.lessons.removeFamilyPlan)
+  const { lessonPlan, lessonBlocks, pushToast } = useApp()
+  const [form, setForm] = useState(null)
+  const [preview, setPreview] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const set = key => e => setForm({ ...form, [key]: e.target.value })
+  const submit = async e => {
+    e.preventDefault(); setBusy(true); setError('')
+    try {
+      const fields = Object.fromEntries(Object.keys(blankFamilyPlan).map(k => [k, k === 'room' ? form[k] || undefined : form[k]]))
+      await save({ ...fields, ...(form.id ? { id: form.id } : {}) })
+      setForm(null); pushToast('Draft saved. Publish when you’re ready for families to see it.', { emoji: '📚', tone: 'mint' })
+    } catch (err) { setError(err.message || 'Could not save the plan.') } finally { setBusy(false) }
+  }
+  const changePublish = async plan => {
+    setError(''); setBusy(true)
+    try { await publish({ id: plan.id, published: plan.status !== 'published' }); pushToast(plan.status === 'published' ? 'Plan returned to draft' : 'Plan is now visible to families', { emoji: '📚', tone: 'mint' }) }
+    catch (err) { setError(err.message || 'Could not update publication.') } finally { setBusy(false) }
+  }
+  const erase = async plan => {
+    if (!window.confirm(`Delete the family plan “${plan.title}”?`)) return
+    try { await remove({ id: plan.id }) } catch (err) { setError(err.message || 'Could not remove the plan.') }
+  }
+  const copy = async plan => {
+    try { await navigator.clipboard.writeText(`${plan.title}\n${plan.startDate} – ${plan.endDate}\n${plan.room || 'All rooms'}\n\n${plan.overview}\n\nActivities\n${plan.activities}\n\nLearning goals\n${plan.goals}`); pushToast('Plan copied for sharing', { emoji: '📋' }) }
+    catch { setError('Copy unavailable. Open the preview to select the plan text.') }
+  }
+  const useWorkingPlan = () => {
+    const activities = [...lessonBlocks].sort((a, b) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(a.day) - ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(b.day) || a.order - b.order).map(b => `${b.day} · ${b.title}\n${b.detail}`).join('\n\n')
+    const goals = [...new Set(lessonBlocks.flatMap(b => b.objectives || []))].join('\n')
+    setForm({ ...blankFamilyPlan, title: lessonPlan?.theme || '', room: lessonPlan?.room || '', activities, goals })
+    setError('')
+  }
+  return <div className="space-y-4">
+    <Card><h3 className="text-xl text-slate-800">Share the week or month with families</h3><p className="mt-2 text-sm text-slate-600">Write a simple overview of the learning ahead. Save a draft, preview it, then publish it to the family calendar. Educator completion notes and children’s names stay private. Saving edits returns a published plan to draft until you publish again.</p><div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary" onClick={() => { setForm({ ...blankFamilyPlan }); setError('') }}><Plus size={16} />New family plan</button><button className="btn-ghost" onClick={useWorkingPlan}>Start from current lesson plan</button></div></Card>
+    {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
+    {form && <Card><form className="space-y-3" onSubmit={submit}>
+      <div className="flex justify-between"><h3 className="text-xl">{form.id ? 'Edit family plan' : 'New family plan'}</h3><button type="button" aria-label="Close family plan editor" onClick={() => setForm(null)}><X size={18} /></button></div>
+      <label className="block text-sm font-semibold">Title<input className="input mt-1" required maxLength={160} value={form.title} onChange={set('title')} /></label>
+      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">Period<select className="input mt-1" value={form.period} onChange={set('period')}><option value="week">Weekly plan</option><option value="month">Monthly plan</option></select></label><label className="text-sm font-semibold">Room<input className="input mt-1" value={form.room} maxLength={100} onChange={set('room')} placeholder="Leave empty for all rooms" /></label></div>
+      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">From<input type="date" className="input mt-1" required value={form.startDate} onChange={set('startDate')} /></label><label className="text-sm font-semibold">Through<input type="date" className="input mt-1" required min={form.startDate} value={form.endDate} onChange={set('endDate')} /></label></div>
+      {[['overview', 'Overview for parents'], ['activities', 'Activities to look forward to'], ['goals', 'Learning goals']].map(([key, label]) => <label key={key} className="block text-sm font-semibold">{label}<textarea rows={key === 'activities' ? 6 : 3} maxLength={15000} className="input mt-1" value={form[key]} onChange={set(key)} /></label>)}
+      <button className="btn-primary" disabled={busy}><Save size={16} />{busy ? 'Saving…' : 'Save draft'}</button>
+    </form></Card>}
+    {plans === undefined ? <p className="text-sm text-slate-500">Loading plans…</p> : !plans.length ? <Card><p className="text-sm text-slate-600">No family plans yet. Create a weekly or monthly plan above.</p></Card> : plans.map(plan => <Card key={plan.id}>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><Pill className={plan.status === 'published' ? 'bg-mint-100 text-mint-700' : 'bg-slate-100 text-slate-500'}>{plan.status === 'published' ? 'Visible to families' : 'Draft · private'}</Pill><h3 className="mt-2 text-xl">{plan.title}</h3><p className="mt-1 text-sm text-slate-500">{plan.startDate} – {plan.endDate} · {plan.room || 'All rooms'}</p></div><button onClick={() => erase(plan)} className="p-2 text-coral-500" aria-label={`Delete ${plan.title}`}><Trash2 size={16} /></button></div>
+      <div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary !py-2 text-sm" disabled={busy} onClick={() => changePublish(plan)}>{plan.status === 'published' ? 'Unpublish' : 'Publish for families'}</button><button className="btn-ghost !py-2 text-sm" onClick={() => { setForm({ ...blankFamilyPlan, ...plan, room: plan.room || '' }); setError('') }}><Pencil size={14} />Edit</button><button className="btn-ghost !py-2 text-sm" onClick={() => setPreview(preview === plan.id ? null : plan.id)}>Preview</button><button className="btn-ghost !py-2 text-sm" onClick={() => copy(plan)}>Copy for sharing</button></div>
+      {preview === plan.id && <div className="mt-4 border-t border-line pt-4"><FamilyLearningPlan plan={plan} /></div>}
+    </Card>)}
+  </div>
 }

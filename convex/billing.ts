@@ -8,6 +8,7 @@ export const state = internalQuery({
   args: {},
   handler: async (ctx) => {
     const { facilityId, facility, user } = await requireFacility(ctx)
+    if (user.role !== 'admin') throw new Error('Directors only.')
     const kids = await ctx.db
       .query('children')
       .withIndex('by_facility', (q) => q.eq('facilityId', facilityId))
@@ -22,7 +23,7 @@ export const state = internalQuery({
       hasCard: !!facility.hasCard,
       plan: facility.plan,
       freeLimit: facility.freeLimit ?? FREE_LIMIT,
-      childCount: kids.length,
+      childCount: kids.filter(k => !k.archivedAt).length,
     }
   },
 })

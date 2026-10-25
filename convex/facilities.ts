@@ -4,17 +4,21 @@ import { getAuthUserId } from '@convex-dev/auth/server'
 import {
   resolveFacilityId,
   requireFacility,
+  requireAdmin,
   billingSummary,
   slugify,
   randomToken,
   FREE_LIMIT,
 } from './lib'
+import { recordOwnerEvent } from './notifications'
 
 // ── Read the current facility (the workspace the user is looking at) ──────
 export const current = query({
   args: {},
   handler: async (ctx) => {
-    const fid = await resolveFacilityId(ctx)
+    const uid = await getAuthUserId(ctx)
+    const member = uid ? await ctx.db.get(uid) : null
+    const fid = member && member.accessStatus !== 'suspended' ? member.facilityId : await resolveFacilityId(ctx)
     if (!fid) return null
     const f = await ctx.db.get(fid)
     if (!f) return null
@@ -22,7 +26,6 @@ export const current = query({
       .query('children')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
       .collect()
-    const uid = await getAuthUserId(ctx)
     return {
       id: f._id,
       name: f.name,
@@ -48,7 +51,7 @@ export const current = query({
       autoInvoice: !!f.autoInvoice,
       connectReady: !!f.stripeAccountReady,
       connectStarted: !!f.stripeAccountId,
-      ...billingSummary(kids.length, f.freeLimit ?? FREE_LIMIT),
+      ...billingSummary(kids.filter((child) => !child.archivedAt).length, f.freeLimit ?? FREE_LIMIT),
     }
   },
 })
@@ -127,7 +130,8 @@ export const inviteInfo = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const inv = await ctx.db.query('invites').withIndex('by_token', (q) => q.eq('token', token)).first()
-    if (!inv) return null
+    if (!inv || inv.used) return null
+    if (inv.childId) { const child = await ctx.db.get(inv.childId); if (!child || child.archivedAt) return null }
     const f = await ctx.db.get(inv.facilityId)
     if (!f) return null
     return { facilityName: f.name, slug: f.slug, role: inv.role }
@@ -141,6 +145,7 @@ export const createForCurrentUser = mutation({
     const uid = await getAuthUserId(ctx)
     if (!uid) throw new Error('Sign in first')
     const user = await ctx.db.get(uid)
+    if (user?.accessStatus === 'suspended') throw new Error('Contact your daycare owner to restore access.')
     if (user?.facilityId) {
       const existing = await ctx.db.get(user.facilityId)
       return { id: user.facilityId, slug: existing?.slug }
@@ -170,8 +175,10 @@ export const createForCurrentUser = mutation({
 export const completeOnboarding = mutation({
   args: {},
   handler: async (ctx) => {
-    const { facilityId } = await requireFacility(ctx)
+    const { facilityId, userId, facility } = await requireAdmin(ctx)
+    if (facility.onboardedAt) return
     await ctx.db.patch(facilityId, { onboardedAt: Date.now() })
+    await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: 'owner_onboarding_completed', summary: 'The daycare setup was completed.' })
   },
 })
 
@@ -179,11 +186,11 @@ export const completeOnboarding = mutation({
 export const generateInvite = mutation({
   args: { role: v.string(), label: v.optional(v.string()), childId: v.optional(v.id('children')) },
   handler: async (ctx, { role, label, childId }) => {
-    const { facilityId } = await requireFacility(ctx)
+    const { facilityId } = await requireAdmin(ctx)
     if (!['parent', 'staff', 'admin'].includes(role)) throw new Error('Bad role')
     if (childId) {
       const child = await ctx.db.get(childId)
-      if (!child || child.facilityId !== facilityId) throw new Error('Child not found')
+      if (!child || child.facilityId !== facilityId || child.archivedAt) throw new Error('Active child not found')
     }
     const token = randomToken()
     await ctx.db.insert('invites', {
@@ -204,20 +211,23 @@ export const listInvites = query({
   handler: async (ctx) => {
     const fid = await resolveFacilityId(ctx)
     if (!fid) return []
+    const uid = await getAuthUserId(ctx)
+    const member = uid ? await ctx.db.get(uid) : null
+    if (member && member.role !== 'admin') return []
     const docs = await ctx.db
       .query('invites')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
       .collect()
-    return docs.map((d) => ({ id: d._id, role: d.role, token: d.token, label: d.label ?? '' }))
+    return docs.filter((d) => !d.used).map((d) => ({ id: d._id, role: d.role, token: d.token, label: d.label ?? '' }))
   },
 })
 
 export const revokeInvite = mutation({
   args: { id: v.id('invites') },
   handler: async (ctx, { id }) => {
-    const { facilityId } = await requireFacility(ctx)
+    const { facilityId } = await requireAdmin(ctx)
     const inv = await ctx.db.get(id)
-    if (inv && inv.facilityId === facilityId) await ctx.db.delete(id)
+    if (inv && inv.facilityId === facilityId) await ctx.db.patch(id, { used: true })
   },
 })
 
@@ -229,8 +239,31 @@ export const joinViaToken = mutation({
     if (!uid) throw new Error('Sign in first')
     const inv = await ctx.db.query('invites').withIndex('by_token', (q) => q.eq('token', token)).first()
     if (!inv) throw new Error('This invite link is no longer valid.')
-    await ctx.db.patch(uid, { facilityId: inv.facilityId, role: inv.role })
     const user = await ctx.db.get(uid)
+    if (!user || user.accessStatus === 'suspended') throw new Error('Contact your daycare owner to restore access.')
+    if (user.facilityId && user.facilityId !== inv.facilityId) throw new Error('This account already belongs to another daycare.')
+    if (inv.used) {
+      const child = inv.childId ? await ctx.db.get(inv.childId) : null
+      if (user.facilityId === inv.facilityId && (inv.usedBy === uid || (child && !child.archivedAt && child.parentUserId === uid))) {
+        const facility = await ctx.db.get(inv.facilityId)
+        return { ok: true, slug: facility?.slug, role: user.role }
+      }
+      throw new Error('This invite link is no longer valid.')
+    }
+    if (inv.childId) {
+      const child = await ctx.db.get(inv.childId)
+      if (!child || child.archivedAt || child.facilityId !== inv.facilityId || (child.parentUserId && child.parentUserId !== uid)) throw new Error('Ask the owner for a new invitation for your child.')
+    }
+    // Existing members cannot use a shared token to change their own role.
+    if (user.facilityId && user.role !== inv.role) throw new Error('Ask the owner to manage your existing membership.')
+    if (user.facilityId === inv.facilityId && (!inv.childId || (await ctx.db.get(inv.childId))?.parentUserId === uid)) {
+      await ctx.db.patch(inv._id, { used: true, usedBy: uid })
+      await ctx.db.patch(uid, { joinedViaInviteId: inv._id })
+      const facility = await ctx.db.get(inv.facilityId)
+      return { ok: true, slug: facility?.slug, role: inv.role }
+    }
+    await ctx.db.patch(uid, { facilityId: inv.facilityId, role: inv.role, accessStatus: 'active', joinedViaInviteId: inv._id })
+    await ctx.db.patch(inv._id, { used: true, usedBy: uid })
     const fid = inv.facilityId
 
     // An invited educator becomes a real staff record (clock-in + director roster).
@@ -264,8 +297,9 @@ export const joinViaToken = mutation({
     // parent never browses the roster, they land already claimed to their kid.
     if (inv.role === 'parent' && inv.childId) {
       const child = await ctx.db.get(inv.childId)
-      if (child && child.facilityId === fid && (!child.parentUserId || child.parentUserId === uid)) {
+      if (child && !child.archivedAt && child.facilityId === fid && (!child.parentUserId || child.parentUserId === uid)) {
         await ctx.db.patch(inv.childId, { parentUserId: uid })
+        await ctx.db.patch(inv._id, { used: true, usedBy: uid })
       }
     }
 
@@ -290,6 +324,7 @@ export const joinViaToken = mutation({
     }
 
     const f = await ctx.db.get(fid)
+    await recordOwnerEvent(ctx, { facilityId: fid, actorId: uid, type: 'member_joined', summary: `${user.name || 'A new member'} joined as ${inv.role}.` })
     return { ok: true, slug: f?.slug, role: inv.role }
   },
 })

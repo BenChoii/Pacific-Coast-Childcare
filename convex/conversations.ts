@@ -1,7 +1,8 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { resolveFacilityId } from './lib'
+import { resolveFacilityId, requireStaff, requireRecord } from './lib'
+import { recordOwnerEvent } from './notifications'
 
 // Conversations are family↔staff threads. Parents see only their own thread;
 // educators/directors see every family thread. Each message is rendered from
@@ -59,10 +60,13 @@ export const list = query({
 export const send = mutation({
   args: { conversationId: v.id('conversations'), text: v.string(), time: v.string() },
   handler: async (ctx, { conversationId, text, time }) => {
-    const convo = await ctx.db.get(conversationId)
-    if (!convo) return
+    const fid = await resolveFacilityId(ctx)
+    if (!fid) throw new Error('Daycare access required.')
+    const convo = await requireRecord(ctx, conversationId, fid)
     const uid = await getAuthUserId(ctx)
     const me = uid ? await ctx.db.get(uid) : null
+    if (me?.role === 'parent' && convo.parentUserId !== uid) throw new Error('Not your family conversation.')
+    if (!text.trim() || text.length > 10000) throw new Error('Enter a message of up to 10,000 characters.')
     await ctx.db.insert('messages', {
       facilityId: convo.facilityId,
       conversationId,
@@ -76,12 +80,19 @@ export const send = mutation({
     // Bump the unread counter so the other side sees a badge; the reader zeroes
     // it when they open the thread (markRead).
     await ctx.db.patch(conversationId, { unread: (convo.unread || 0) + 1 })
+    if (uid && me?.role !== 'admin') await recordOwnerEvent(ctx, { facilityId: fid, actorId: uid, type: 'message_sent', summary: `${me?.name || 'A member'} sent a message in the family conversation.` })
   },
 })
 
 export const markRead = mutation({
   args: { conversationId: v.id('conversations') },
   handler: async (ctx, { conversationId }) => {
+    const fid = await resolveFacilityId(ctx)
+    if (!fid) throw new Error('Daycare access required.')
+    const convo = await requireRecord(ctx, conversationId, fid)
+    const uid = await getAuthUserId(ctx)
+    const user = uid ? await ctx.db.get(uid) : null
+    if (user?.role === 'parent' && convo.parentUserId !== uid) throw new Error('Not your family conversation.')
     await ctx.db.patch(conversationId, { unread: 0 })
   },
 })
@@ -90,8 +101,9 @@ export const markRead = mutation({
 export const startWithParent = mutation({
   args: { parentUserId: v.id('users'), name: v.string() },
   handler: async (ctx, { parentUserId, name }) => {
-    const fid = await resolveFacilityId(ctx)
-    if (!fid) throw new Error('No facility')
+    const { facilityId: fid } = await requireStaff(ctx)
+    const parent = await ctx.db.get(parentUserId)
+    if (!parent || parent.facilityId !== fid || parent.role !== 'parent' || parent.accessStatus === 'suspended') throw new Error('Active parent not found.')
     const existing = await ctx.db
       .query('conversations')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))

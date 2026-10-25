@@ -18,22 +18,56 @@ export async function getDemoFacilityId(ctx: any) {
 // else the demo facility. Returns null only if the demo hasn't been seeded.
 export async function resolveFacilityId(ctx: any) {
   const uid = await getAuthUserId(ctx)
-  if (uid) {
-    const u = await ctx.db.get(uid)
-    if (u?.facilityId) return u.facilityId
+  if (!uid) return await getDemoFacilityId(ctx)
+  const user = await ctx.db.get(uid)
+  // A signed-in account never falls through to a demo or another workspace.
+  if (!user?.facilityId || user.accessStatus === 'suspended') return null
+  const facility = await ctx.db.get(user.facilityId)
+  if (!facility) return null
+  if (user.role === 'parent') {
+    const children = await ctx.db.query('children').withIndex('by_facility', (q: any) => q.eq('facilityId', user.facilityId)).collect()
+    if (!children.some((child: any) => !child.archivedAt && child.parentUserId === uid)) return null
   }
-  return await getDemoFacilityId(ctx)
+  return user.facilityId
 }
 
-// For owner/admin operations that must act on a real (non-demo) facility.
+// Membership and roles are checked server-side, including for already-issued
+// sessions. Suspending a member immediately removes their data access.
 export async function requireFacility(ctx: any) {
   const uid = await getAuthUserId(ctx)
   if (!uid) throw new Error('Not authenticated')
   const user = await ctx.db.get(uid)
+  if (user?.accessStatus === 'suspended') throw new Error('Your daycare access has ended. Contact the owner.')
   if (!user?.facilityId) throw new Error('You are not part of a facility yet.')
   const facility = await ctx.db.get(user.facilityId)
   if (!facility) throw new Error('Facility not found.')
   return { userId: uid, user, facilityId: user.facilityId, facility }
+}
+
+export async function requireAdmin(ctx: any) {
+  const membership = await requireFacility(ctx)
+  if (membership.user.role !== 'admin') throw new Error('Only the owner/director can do this.')
+  return membership
+}
+
+// The public demo remains interactive, but only within its own seeded tenant.
+export async function requireStaff(ctx: any) {
+  const uid = await getAuthUserId(ctx)
+  if (!uid) {
+    const facilityId = await getDemoFacilityId(ctx)
+    const facility = facilityId ? await ctx.db.get(facilityId) : null
+    if (!facilityId || !facility?.isDemo) throw new Error('Not authenticated')
+    return { userId: null, user: null, facilityId, facility }
+  }
+  const membership = await requireFacility(ctx)
+  if (!['admin', 'staff'].includes(membership.user.role)) throw new Error('Educator or director access required.')
+  return membership
+}
+
+export async function requireRecord(ctx: any, id: any, facilityId: any) {
+  const record = await ctx.db.get(id)
+  if (!record || record.facilityId !== facilityId) throw new Error('Not found')
+  return record
 }
 
 // ── Pricing engine ───────────────────────────────────────────────────────

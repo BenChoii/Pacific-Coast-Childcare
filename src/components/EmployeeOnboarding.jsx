@@ -56,6 +56,7 @@ export default function EmployeeOnboarding({ token }) {
           <p className="max-w-sm text-sm font-medium text-slate-500">
             Thanks — your details were sent securely to {info.facilityName}. Nothing else to do. If something needs fixing, just let them know.
           </p>
+          <a className="btn-primary mt-4" href="/login">Continue to your dashboard</a>
         </div>
       </Shell>
     )

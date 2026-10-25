@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { authTables } from '@convex-dev/auth/server'
+import { notificationTables } from './notificationSchema'
 
 // Mitten — multi-tenant childcare portal data model.
 //
@@ -11,6 +12,7 @@ import { authTables } from '@convex-dev/auth/server'
 export default defineSchema({
   // ── Convex Auth tables, with role + facility membership on the user ──
   ...authTables,
+  ...notificationTables,
   users: defineTable({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
@@ -20,9 +22,14 @@ export default defineSchema({
     image: v.optional(v.string()),
     imageId: v.optional(v.id('_storage')), // uploaded profile photo
     isAnonymous: v.optional(v.boolean()),
+    accessStatus: v.optional(v.string()), // active (default) | suspended
+    accessChangedAt: v.optional(v.number()),
+    accessChangedBy: v.optional(v.id('users')),
+    accessReason: v.optional(v.string()),
+    joinedViaInviteId: v.optional(v.id('invites')),
     role: v.optional(v.string()), // 'parent' | 'staff' | 'admin'
     facilityId: v.optional(v.id('facilities')), // the daycare this user belongs to
-  }).index('email', ['email']),
+  }).index('email', ['email']).index('by_facility', ['facilityId']),
 
   // ── Tenants ──────────────────────────────────────────────────────────
   facilities: defineTable({
@@ -94,6 +101,7 @@ export default defineSchema({
     email: v.optional(v.string()),
     childId: v.optional(v.id('children')), // parent invite tied to one child → auto-claims on join
     used: v.boolean(),
+    usedBy: v.optional(v.id('users')),
     createdAt: v.number(),
   })
     .index('by_token', ['token'])
@@ -109,6 +117,9 @@ export default defineSchema({
     color: v.string(),
     parent: v.string(),
     parentUserId: v.optional(v.id('users')),
+    enrollmentDays: v.optional(v.array(v.string())), // Mon | Tue | Wed | Thu | Fri | Sat | Sun
+    archivedAt: v.optional(v.number()),
+    releasedBy: v.optional(v.id('users')),
     imageId: v.optional(v.id('_storage')), // uploaded child profile photo
     monthlyTuition: v.optional(v.number()), // what the daycare charges this family / month
     allergies: v.array(v.string()),
@@ -122,6 +133,7 @@ export default defineSchema({
 
   activities: defineTable({
     facilityId: v.id('facilities'),
+    childId: v.optional(v.id('children')),
     childName: v.optional(v.string()),
     type: v.string(),
     time: v.string(),
@@ -133,6 +145,7 @@ export default defineSchema({
 
   roster: defineTable({
     facilityId: v.id('facilities'),
+    childId: v.optional(v.id('children')),
     name: v.string(),
     emoji: v.string(),
     status: v.string(),
@@ -456,4 +469,22 @@ export default defineSchema({
   })
     .index('by_facility', ['facilityId', 'status'])
     .index('by_facility_date', ['facilityId', 'docDate']),
+
+  // Owner-managed closures, holidays and family events. Dates are local calendar dates.
+  calendarEvents: defineTable({
+    facilityId: v.id('facilities'), title: v.string(), startDate: v.string(), endDate: v.string(),
+    kind: v.union(v.literal('closure'), v.literal('holiday'), v.literal('event')),
+    description: v.string(), room: v.optional(v.string()), sourceKey: v.optional(v.string()), createdBy: v.id('users'),
+    createdAt: v.number(), updatedAt: v.number(),
+  }).index('by_facility', ['facilityId']),
+
+  // Published snapshots for families; educator working plans remain private.
+  parentPlans: defineTable({
+    facilityId: v.id('facilities'), title: v.string(), period: v.union(v.literal('week'), v.literal('month')),
+    startDate: v.string(), endDate: v.string(), room: v.optional(v.string()),
+    overview: v.string(), activities: v.string(), goals: v.string(),
+    status: v.union(v.literal('draft'), v.literal('published')),
+    publishedAt: v.optional(v.number()), sourceKey: v.optional(v.string()), createdBy: v.id('users'), createdAt: v.number(), updatedAt: v.number(),
+  }).index('by_facility', ['facilityId']),
+
 })

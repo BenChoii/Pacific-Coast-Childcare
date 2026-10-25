@@ -88,7 +88,9 @@ export const confirmCheckout = action({
     const session = await res.json()
     const sessionInv = session?.metadata?.invId || invId
     if (session?.payment_status === 'paid' && sessionInv) {
-      await ctx.runMutation(api.invoices.pay, { id: sessionInv, paidOn: todayLabel() })
+      const invoice = await ctx.runQuery(api.invoices.getOne, { id: sessionInv })
+      if (!invoice || (invId && invId !== sessionInv)) return { ok: false }
+      await ctx.runMutation(internal.invoices.recordVerifiedPayment, { id: sessionInv, sessionId, paidOn: todayLabel() })
       return { ok: true, invId: sessionInv }
     }
     return { ok: false }

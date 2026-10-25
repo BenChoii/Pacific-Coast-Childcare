@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { useAction, useMutation } from 'convex/react'
+import { useAction, useMutation, useQuery } from 'convex/react'
 import {
   Smile, Moon, Apple, Camera, MessageCircle, CalendarDays, CreditCard,
   Clock, ChevronRight, CheckCircle2, ShieldCheck, FileText, Phone, AlertTriangle, Download, Heart, Loader2, Sparkles, Send,
@@ -11,38 +11,16 @@ import { openInvoicePrint } from '../lib/invoiceDoc.js'
 import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton, KnitEmpty } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { ParentExtrasCard } from './finance.jsx'
-import { ACTIVITY_TYPES, calendarEvents } from '../data/mockData.js'
+import { CalendarEntry, localDateLabel } from './calendar.jsx'
+import { ACTIVITY_TYPES } from '../data/mockData.js'
 
-// The parent's own children: those linked to their account; until they've
-// claimed one we show the whole facility roster so they can pick theirs.
+// Families only see children linked by the daycare; demo data stays in the demo workspace.
 function useMyKids() {
-  const { childrenList, viewer } = useApp()
-  const mine = childrenList.filter((c) => c.parentUserId === viewer?.id)
-  const kids = mine.length ? mine : childrenList
-  const needClaim = !!viewer?.id && mine.length === 0 && childrenList.length > 0
-  return { kids, needClaim }
-}
-
-function ClaimBanner() {
-  const { childrenList, claimChild, pushToast } = useApp()
-  return (
-    <Card className="border-dashed">
-      <h3 className="font-extrabold text-slate-800">Which child is yours?</h3>
-      <p className="mb-3 text-sm font-semibold text-slate-400">Tap your child to link them to your account.</p>
-      <div className="flex flex-wrap gap-2">
-        {childrenList.map((c) => (
-          <button
-            key={c.id}
-            onClick={async () => { await claimChild(c.id); pushToast(`${c.first} is linked to your account 💙`, { emoji: '👶', tone: 'mint' }) }}
-            className="flex items-center gap-2 rounded-2xl border-2 border-line bg-white px-3 py-2 transition hover:border-brand-300"
-          >
-            <span className="text-lg">{c.emoji}</span>
-            <span className="text-sm font-bold text-slate-700">{c.name}</span>
-          </button>
-        ))}
-      </div>
-    </Card>
-  )
+  const { childrenList, viewer, isAuthenticated } = useApp()
+  const kids = isAuthenticated
+    ? childrenList.filter(c => c.parentUserId === viewer?.id && !c.archivedAt)
+    : childrenList
+  return { kids, needClaim: false }
 }
 
 /* ---------------- Parent Home ---------------- */
@@ -86,7 +64,7 @@ export function ParentHome() {
 
   return (
     <div className="space-y-6">
-      {needClaim && <ClaimBanner />}
+
       {/* Hero */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -309,35 +287,35 @@ export function ParentTimeline() {
 
 /* ---------------- Parent Calendar ---------------- */
 export function ParentCalendar() {
-  return (
-    <div className="space-y-5">
-      <SectionHeader title="Calendar & events 📅" subtitle="What’s coming up at Pacific Coast" />
-      <div className="grid gap-3">
-        {calendarEvents.map((e, i) => (
-          <motion.div
-            key={e.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="card flex items-center gap-4 p-4 transition hover:-translate-y-0.5 hover:shadow-card"
-          >
-            <div className="flex h-16 w-16 flex-col items-center justify-center rounded-2xl bg-slate-50 text-center">
-              <span className="text-xs font-extrabold uppercase text-slate-400">{e.day}</span>
-              <span className="text-lg font-extrabold text-slate-700">{e.date.split(' ')[1]}</span>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{e.emoji}</span>
-                <span className="font-extrabold text-slate-800">{e.title}</span>
-              </div>
-              <Pill className={`mt-1 ${e.color}`}>{e.tag}</Pill>
-            </div>
-            <button className="btn-ghost !py-2 text-sm">RSVP</button>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  )
+  const { activeChildId, setActiveChildId, facility } = useApp()
+  const { kids } = useMyKids()
+  const child = kids.find(c => c.id === activeChildId) || kids[0]
+  const events = useQuery(api.calendar.list, child ? { childId: child.id } : {})
+  const plans = useQuery(api.lessons.familyPlans, child ? { childId: child.id } : {})
+  const [showPast, setShowPast] = useState(false)
+  const today = new Date().toLocaleDateString('en-CA')
+  const visible = (events || []).filter(e => showPast || e.endDate >= today)
+  const days = child?.enrollmentDays || child?.attendanceDays
+  return <div className="space-y-5">
+    <SectionHeader title="Calendar & learning plans" subtitle={`Dates and learning updates from ${facility?.name || 'your daycare'}`} />
+    {kids.length > 1 && <label className="block text-sm font-semibold">Child<select className="input mt-1" value={child?.id || ''} onChange={e => setActiveChildId(e.target.value)}>{kids.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
+    {!child ? <Card><p className="text-sm text-slate-600">Your daycare will link your child before their calendar and learning plans appear here.</p></Card> : <>
+      <Card className="bg-brand-50/50"><h3 className="text-xl text-slate-800">{child.first}'s schedule</h3><p className="mt-2 text-sm text-slate-600">{Array.isArray(days) ? (days.length ? `Enrolled days: ${days.join(', ')}.` : 'No recurring attendance days are currently selected. Please contact your daycare before attending.') : 'Your daycare can confirm your child’s enrolled days with you.'} Closure dates below override regular attendance. Please do not attend on days marked closed.</p></Card>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-xl text-slate-800">Calendar & closures</h3><label className="flex items-center gap-2 text-sm text-slate-500"><input type="checkbox" checked={showPast} onChange={e => setShowPast(e.target.checked)} />Show past dates</label></div>
+      {events === undefined ? <p className="text-sm text-slate-500">Loading dates…</p> : visible.length ? <div className="grid gap-3">{visible.map(event => <CalendarEntry key={event.id} event={event} />)}</div> : <Card><p className="text-sm text-slate-600">No {showPast ? '' : 'upcoming '}calendar dates have been posted for your child.</p></Card>}
+      <h3 className="pt-3 text-2xl text-slate-800">What we're learning</h3>
+      {plans === undefined ? <p className="text-sm text-slate-500">Loading learning plans…</p> : plans.length ? plans.map(plan => <FamilyLearningPlan key={plan.id} plan={plan} />) : <Card><p className="text-sm text-slate-600">Your daycare’s weekly and monthly learning plans will appear here when published.</p></Card>}
+    </>}
+  </div>
+}
+
+export function FamilyLearningPlan({ plan }) {
+  return <Card>
+    <div className="mb-2"><Pill className="bg-mint-100 text-mint-700">{plan.period === 'month' ? 'Monthly learning plan' : 'Weekly learning plan'}</Pill></div>
+    <h3 className="text-2xl text-slate-800">{plan.title}</h3>
+    <p className="mt-1 text-sm font-bold text-slate-500">{localDateLabel(plan.startDate)} – {localDateLabel(plan.endDate)} · {plan.room || 'All rooms'}</p>
+    {[['This period', plan.overview], ['Activities to look forward to', plan.activities], ['Learning goals', plan.goals]].filter(([, value]) => value).map(([heading, value]) => <div key={heading} className="mt-4"><h4 className="text-sm font-extrabold text-slate-700">{heading}</h4><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{value}</p></div>)}
+  </Card>
 }
 
 /* ---------------- Parent Billing ---------------- */

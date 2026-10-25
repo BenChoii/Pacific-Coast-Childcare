@@ -2,6 +2,7 @@ import { query, mutation, action, internalQuery, internalMutation } from './_gen
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
 import { requireFacility, randomToken } from './lib'
+import { recordOwnerEvent } from './notifications'
 
 // ── Application-layer encryption for SIN + banking ──────────────────────────
 // AES-256-GCM with a key from the ONBOARDING_ENC_KEY env var (base64 of 32 raw
@@ -257,5 +258,6 @@ export const saveSubmission = internalMutation({
     const clean: any = {}
     for (const [k, val] of Object.entries(fields)) if (val !== undefined) clean[k] = val
     await ctx.db.patch(p._id, { ...clean, status: 'submitted', submittedAt: Date.now(), consentAt: Date.now(), educatorId })
+    if (p.status !== 'submitted') await recordOwnerEvent(ctx, { facilityId: p.facilityId, type: 'educator_onboarding_completed', summary: 'An educator completed their onboarding form. Review their submission in Educators.' })
   },
 })
