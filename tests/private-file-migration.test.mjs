@@ -117,3 +117,28 @@ test('scan and batch limits refuse unsafe scope without deleting source',async()
  await assert.rejects(api.rotateBatch.handler(ctx,{facilityId:'f',storageIds:['legacy','legacy'],dryRun:false}),/distinct/)
  assert.equal(ctx.files.has('legacy'),true)
 })
+
+test('inspection rejects missing, empty and oversized storage metadata before reserving any job',async()=>{
+ for(const[metadata,code]of[[null,'SOURCE_MISSING'],[{size:0},'SOURCE_EMPTY'],[{size:8*1024*1024+1},'SOURCE_OVERSIZE']]){
+  const ctx=fixture();ctx.db.system.get=async()=>metadata
+  const state=await api.inspect.handler(ctx,{facilityId:'f',storageId:'legacy'})
+  assert.equal(state.eligible,false);assert.equal(state.errorCode,code)
+  const result=await api.rotateBatch.handler(ctx,{facilityId:'f',storageIds:['legacy'],dryRun:false})
+  assert.equal(result.results[0].errorCode,code);assert.equal(ctx.writes.length,0);assert.deepEqual(ctx.deletions,[])
+ }
+})
+test('failure diagnostics expose only bounded stage/code, retain original and never log exception payloads',async()=>{
+ const ctx=fixture();ctx.storage.store=async()=>{throw new Error('sensitive exception payload must not escape')}
+ const result=await api.rotateBatch.handler(ctx,{facilityId:'f',storageIds:['legacy'],dryRun:false})
+ assert.equal(result.results[0].stage,'store-copy');assert.equal(result.results[0].errorCode,'MIGRATION_STORE_COPY_FAILED')
+ assert.equal(JSON.stringify(result).includes('sensitive exception'),false)
+ assert.equal(ctx.files.has('legacy'),true);assert.equal(ctx.rows.get('book').storageId,'legacy')
+ const job=ctx.rows.get(result.results[0].jobId)
+ assert.equal(job.status,'failed');assert.match(job.error,/store-copy.*MIGRATION_STORE_COPY_FAILED/)
+ assert.equal(job.error.includes('sensitive exception'),false)
+})
+test('one MiB synthetic crypto preflight validates the actual large-blob path without storage writes',async()=>{
+ const ctx=fixture(),result=await api.cryptoPreflight.handler(ctx,{bytes:1024*1024})
+ assert.equal(result.ok,true);assert.equal(result.plaintextBytes,1024*1024);assert.ok(result.ciphertextBytes>result.plaintextBytes)
+ assert.equal(ctx.writes.length,0);assert.deepEqual(ctx.deletions,[])
+})

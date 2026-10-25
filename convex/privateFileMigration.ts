@@ -66,7 +66,7 @@ export const inventory = internalQuery({
   },
 })
 
-type Inspection = { eligible: false; reason: string } | { eligible: true; phase: 'copy' | 'revoke'; jobId?: Id<'privateFileRotations'>; replacementId?: Id<'_storage'>; references?: number }
+type Inspection = { eligible: false; reason: string; errorCode?: string } | { eligible: true; phase: 'copy' | 'revoke'; jobId?: Id<'privateFileRotations'>; replacementId?: Id<'_storage'>; references?: number }
 async function inspectState(ctx: QueryCtx | MutationCtx, { facilityId, storageId, forceRegistered }: { facilityId: Id<'facilities'>; storageId: Id<'_storage'>; forceRegistered?: boolean }): Promise<Inspection> {
     const facility = await ctx.db.get(facilityId)
     if (!facility || facility.isDemo) return { eligible: false, reason: 'Choose a real daycare.' }
@@ -76,6 +76,10 @@ async function inspectState(ctx: QueryCtx | MutationCtx, { facilityId, storageId
     if (job && job.facilityId !== facilityId) return { eligible: false, reason: 'Another daycare owns this migration.' }
     if (job?.status === 'references_updated') return { eligible: true, phase: 'revoke', jobId: job._id, replacementId: job.replacementId }
     if (job?.status === 'revoked') return { eligible: false, reason: 'Already revoked.' }
+    const metadata = await ctx.db.system.get(storageId)
+    if (!metadata) return { eligible: false, reason: 'Source object is missing; no copy will be reserved.', errorCode: 'SOURCE_MISSING' }
+    if (metadata.size < 1) return { eligible: false, reason: 'Source object is empty; review it before migration.', errorCode: 'SOURCE_EMPTY' }
+    if (metadata.size > MAX_BYTES) return { eligible: false, reason: 'Source exceeds the conservative 8 MiB storage-metadata limit; review it separately.', errorCode: 'SOURCE_OVERSIZE' }
     const facts = await references(ctx, storageId, facilityId)
     if (facts.blocked || !facts.refs.length) return { eligible: false, reason: facts.blocked || 'No private references remain.' }
     if (facts.upload && !forceRegistered && !job) return { eligible: false, reason: 'Registered private upload; use forceRegistered only after review.' }
@@ -113,11 +117,24 @@ export const commitCopy = internalMutation({
     return { referencesUpdated: facts.refs.length }
   },
 })
+const STAGES = ['inspect', 'reserve', 'read-source', 'open-source', 'seal-copy', 'store-copy', 'read-copy', 'verify-copy', 'commit-references', 'check-revoke', 'read-replacement', 'verify-revocation', 'revoke-source'] as const
+type MigrationStage = typeof STAGES[number]
+function errorCode(error: unknown, stage: MigrationStage) {
+  const message = error instanceof Error ? error.message : ''
+  if (message.includes('temporarily unavailable') || message.includes('encryption is not configured')) return 'PRIVATE_KEY_UNAVAILABLE'
+  if (message.includes('lease changed')) return 'COPY_LEASE_CHANGED'
+  if (message.includes('not a function')) return 'RUNTIME_API_UNAVAILABLE'
+  if (message.includes('copy failed byte verification')) return 'COPY_VERIFICATION_FAILED'
+  if (message.includes('Source is still referenced') || message.includes('Public ')) return 'REFERENCE_CHECK_REFUSED'
+  if (message.includes('schema') || message.includes('validator')) return 'DATABASE_VALIDATION_FAILED'
+  return `MIGRATION_${stage.toUpperCase().replaceAll('-', '_')}_FAILED`
+}
 export const failCopy = internalMutation({
-  args: { jobId: v.id('privateFileRotations'), claimToken: v.string() },
-  handler: async (ctx, { jobId, claimToken }) => {
+  args: { jobId: v.id('privateFileRotations'), claimToken: v.string(), stage: v.optional(v.string()), errorCode: v.optional(v.string()) },
+  handler: async (ctx, { jobId, claimToken, stage, errorCode }) => {
     const job = await ctx.db.get(jobId)
-    if (job?.status === 'copying' && job.claimToken === claimToken) await ctx.db.patch(jobId, { status: 'failed', claimToken: undefined, error: 'Copy or reference verification failed. Original remains preserved.', updatedAt: Date.now() })
+    if ((stage && !STAGES.includes(stage as MigrationStage)) || (errorCode && !/^[A-Z0-9_]{1,64}$/.test(errorCode))) throw new Error('Invalid migration diagnostic code.')
+    if (job?.status === 'copying' && job.claimToken === claimToken) await ctx.db.patch(jobId, { status: 'failed', claimToken: undefined, error: stage && errorCode ? `Migration ${stage} failed (${errorCode}). Original remains preserved.` : 'Copy or reference verification failed. Original remains preserved.', updatedAt: Date.now() })
   },
 })
 export const verifyRevoke = internalQuery({
@@ -158,34 +175,49 @@ export const rotateBatch = internalAction({
     const results: any[] = []
     for (const storageId of storageIds) {
       let copyId: any, state: any
+      let stage: MigrationStage = 'inspect'
       try {
         state = await ctx.runQuery(internal.privateFileMigration.inspect, { facilityId, storageId, forceRegistered })
         if (dryRun || !state.eligible) { results.push({ storageId, ...state, dryRun }); continue }
+        stage = 'reserve'
         state = await ctx.runMutation(internal.privateFileMigration.reserve, { facilityId, storageId, forceRegistered })
         if (!state.eligible) { results.push({ storageId, ...state }); continue }
         if (state.phase !== 'revoke') {
+          stage = 'read-source'
           const stored = await ctx.storage.get(storageId)
           if (!stored || stored.size > MAX_BYTES + 512) throw new Error('Original file unavailable or exceeds the safe 8 MiB copy limit.')
+          stage = 'open-source'
           const original = await openPrivateBlob(stored)
           if (original.size < 1 || original.size > MAX_BYTES) throw new Error('Original file unavailable or exceeds the safe 8 MiB copy limit.')
-          copyId = await ctx.storage.store(await sealPrivateBlob(original))
+          stage = 'seal-copy'
+          const sealed = await sealPrivateBlob(original)
+          stage = 'store-copy'
+          copyId = await ctx.storage.store(sealed)
+          stage = 'read-copy'
           const copy = await ctx.storage.get(copyId)
+          stage = 'verify-copy'
           if (!copy || !await equalBytes(original, await openPrivateBlob(copy))) throw new Error('Replacement copy failed byte verification.')
+          stage = 'commit-references'
           await ctx.runMutation(internal.privateFileMigration.commitCopy, { jobId: state.jobId, claimToken: state.claimToken, replacementId: copyId, mimeType: original.type || 'application/octet-stream', size: original.size })
           copyId = undefined // now referenced: never remove on later cleanup failure
         }
+        stage = 'check-revoke'
         const ready = await ctx.runQuery(internal.privateFileMigration.verifyRevoke, { jobId: state.jobId })
+        stage = 'read-replacement'
         const replacementStored = await ctx.storage.get(ready.replacementId)
         if (!replacementStored) throw new Error('Replacement unavailable; original will not be revoked.')
+        stage = 'verify-revocation'
         const replacement = await openPrivateBlob(replacementStored)
         const source = await ctx.storage.get(ready.sourceId)
         if (source && !await equalBytes(await openPrivateBlob(source), replacement)) throw new Error('Replacement differs; original will not be revoked.')
+        stage = 'revoke-source'
         await ctx.runMutation(internal.privateFileMigration.markRevoked, { jobId: state.jobId })
         results.push({ storageId, status: 'revoked', jobId: state.jobId })
-      } catch {
+      } catch (error) {
+        const code = errorCode(error, stage)
         if (copyId) { try { await ctx.storage.delete(copyId) } catch {} }
-        if (state?.claimToken) await ctx.runMutation(internal.privateFileMigration.failCopy, { jobId: state.jobId, claimToken: state.claimToken })
-        results.push({ storageId, status: 'needs_review', jobId: state?.jobId, reason: 'Migration interrupted or a safety check refused it. Inspect job; original or verified replacement remains preserved.' })
+        if (state?.claimToken) { try { await ctx.runMutation(internal.privateFileMigration.failCopy, { jobId: state.jobId, claimToken: state.claimToken, stage, errorCode: code }) } catch {} }
+        results.push({ storageId, status: 'needs_review', jobId: state?.jobId, stage, errorCode: code, reason: 'Migration interrupted or a safety check refused it. Inspect job; original or verified replacement remains preserved.' })
       }
     }
     return { dryRun, results }
@@ -232,5 +264,22 @@ export const rollback = internalAction({
     // Keep the now-unreferenced replacement tracked in the job for operator
     // review rather than deleting data while another operation may be resuming.
     return { dryRun, status: 'rolled_back', retainedReplacement: state.replacementId }
+  },
+})
+
+// Synthetic-only crypto diagnostic: no stored/customer object is read or written.
+export const cryptoPreflight = internalAction({
+  args: { bytes: v.optional(v.number()) },
+  handler: async (_ctx, { bytes = 1024 * 1024 }) => {
+    if (!Number.isInteger(bytes) || bytes < 1 || bytes > MAX_BYTES) throw new Error('Choose 1–8,388,608 synthetic bytes.')
+    let stage: MigrationStage = 'seal-copy'
+    try {
+      const original = new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' })
+      const sealed = await sealPrivateBlob(original)
+      stage = 'verify-copy'
+      const opened = await openPrivateBlob(sealed)
+      if (!await equalBytes(original, opened)) return { ok: false, stage, errorCode: 'COPY_VERIFICATION_FAILED' }
+      return { ok: true, plaintextBytes: bytes, ciphertextBytes: sealed.size }
+    } catch (error) { return { ok: false, stage, errorCode: errorCode(error, stage) } }
   },
 })
