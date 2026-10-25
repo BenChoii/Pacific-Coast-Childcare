@@ -1,3 +1,4 @@
+import { queryRows } from './test-db-query.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
@@ -8,11 +9,12 @@ import path from 'node:path'
 // no backend deployment, network request or production mutation is performed.
 async function handlers(filename) {
   const modules = {
-    server: 'export const query=x=>x; export const mutation=x=>x; export const internalMutation=x=>x;',
+    server: 'export const query=x=>x; export const mutation=x=>x; export const internalMutation=x=>x; export const internalQuery=x=>x; export const action=x=>x;',
     values: 'const value=(...a)=>({}); export const v=new Proxy({}, {get:()=>value});',
     auth: 'export const getAuthUserId=async ctx=>ctx.uid;',
     notifications: 'export const recordOwnerEvent=async(ctx,event)=>{ctx.events.push(event)};',
-    lib: `export const resolveFacilityId=async ctx=>ctx.blocked?null:ctx.fid;
+    lib: `export const childBelongsToParent=(child,id)=>!!id&&!child?.archivedAt&&(child?.parentUserId===id||(child?.guardianUserIds||[]).includes(id));
+      export const resolveFacilityId=async ctx=>ctx.blocked?null:ctx.fid;
       export const requireAdmin=async ctx=>{if(ctx.role!=='admin'||ctx.blocked)throw Error('Directors only');return {facilityId:ctx.fid,userId:ctx.uid,user:{role:ctx.role}}};
       export const requireStaff=async ctx=>{if(!['admin','staff'].includes(ctx.role)||ctx.blocked)throw Error('Staff only');return {facilityId:ctx.fid,userId:ctx.uid,user:{role:ctx.role}}};`,
   }
@@ -39,7 +41,7 @@ function context({ role = 'admin', fid = 'facility-a', uid = role === 'parent' ?
     insert: async (table, data) => { const _id = `${table}-${++seq}`; (tables[table] ||= []).push({ ...data, _id }); return _id },
     patch: async (id, data) => { const d = find(id); assert.ok(d, `Missing ${id}`); Object.assign(d, data) },
     delete: async id => { for (const name of Object.keys(tables)) tables[name] = tables[name].filter(d => d._id !== id) },
-    query: table => { let filters = []; const q = { withIndex(_name, callback) { const matcher = { eq(key, value) { filters.push([key, value]); return matcher } }; callback(matcher); return q }, async collect() { return (tables[table] || []).filter(d => filters.every(([key, value]) => d[key] === value)) }, async first() { return (await q.collect())[0] || null } }; return q },
+    query: table => queryRows(() => tables[table] || []),
   } }
   return ctx
 }

@@ -30,14 +30,15 @@ function useDismiss(open, onClose) {
 }
 
 export default function Shell({ nav, children }) {
-  const { role, view, setView, logout, isAuthenticated, viewer, facility } = useApp()
+  const { role, view, setView, logout, isAuthenticated, viewer, facility, displayPreferences } = useApp()
   const meta = roleMeta[role]
-  const displayName = isAuthenticated && viewer?.name ? viewer.name : meta.name
+  const displayName = isAuthenticated ? (viewer?.name || viewer?.email || 'Your account') : meta.name
   const displaySub = isAuthenticated && viewer?.email ? viewer.email : meta.sub
   const current = nav.find((n) => n.id === view)
+  useEffect(()=>{window.scrollTo({top:0,behavior:'instant'});document.querySelector('main')?.focus({preventScroll:true})},[view])
 
   return (
-    <div className="flex min-h-screen bg-tint">
+    <div data-density={displayPreferences?.density || 'comfortable'} className="mitten-app flex min-h-screen bg-tint">
       {/* Sidebar — desktop only. Nav scrolls on its own; brand + user card stay pinned. */}
       <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-line bg-gradient-to-b from-white to-tint p-5 lg:flex">
         <div className="pb-5"><BrandLockup variant="nav" /></div>
@@ -66,7 +67,7 @@ export default function Shell({ nav, children }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="glass-bar hairline-b sticky top-0 z-30 flex items-center gap-3 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6">
           {/* compact logo on mobile */}
-          <BrandLockup variant="topbar" className="lg:hidden" />
+          <div className="min-w-0 lg:hidden"><BrandLockup variant="topbar"/><p className="mt-1 max-w-40 truncate text-[10px] text-slate-500">{facility?.name || 'Your daycare portal'}</p></div>
           <div className="hidden min-w-0 lg:block">
             <h1 className="truncate text-xl text-slate-800">{current?.label || 'Home'}</h1>
             <p className="eyebrow">{facility?.name || BRAND.short} · powered by {BRAND.short}</p>
@@ -78,7 +79,7 @@ export default function Shell({ nav, children }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:px-6 lg:py-8 lg:pb-10 2xl:max-w-7xl">{children}</main>
+        <main tabIndex={-1} className="mx-auto min-w-0 w-full max-w-6xl flex-1 px-4 py-6 pb-28 sm:px-6 lg:py-8 lg:pb-10 2xl:max-w-7xl outline-none">{facility?.isDemo && <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><strong>Demo workspace</strong> · Sample families and records. <a href="/login" className="font-bold underline">Sign in to your daycare</a></div>}{children}</main>
       </div>
 
       {/* Mobile dock */}
@@ -184,7 +185,7 @@ function NotificationsBell() {
       const due = invoices.find((i) => i.status === 'due')
       if (due) out.push({ key: 'inv', icon: CreditCard, tone: 'bg-coral-50 text-coral-500', title: 'Tuition invoice due', sub: due.amount ? `$${due.amount}` : 'Tap to review & pay', go: () => setView('billing'), fresh: true })
     }
-    ;(milestones || []).slice(-2).reverse().forEach((m) =>
+    ;(milestones || []).slice(0,2).forEach((m) =>
       out.push({ key: 'ms' + m.id, icon: Sparkles, tone: 'bg-grape-400/15 text-grape-600', title: `Milestone: ${m.label}`, sub: [childName(m.childId), m.date].filter(Boolean).join(' · '), go: () => setView(role === 'parent' ? 'memories' : 'milestones') }))
     const lastPhoto = photos[0]
     if (lastPhoto) out.push({ key: 'ph' + lastPhoto.id, icon: ImageIcon, tone: 'bg-mint-400/15 text-mint-600', title: 'New photo in the feed', sub: lastPhoto.caption || 'Tap to see the latest moments', go: () => setView('photos') })

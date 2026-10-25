@@ -15,6 +15,8 @@ import { useApp } from '../context/AppContext.jsx'
 import { Card, SectionHeader, Pill, Avatar, ProgressBar, StatCard } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { MembershipManager, ChildEnrollmentControls, ReleasedChildren } from '../components/AccessManagement.jsx'
+import { CareProfilePanel } from './care.jsx'
+import { GuardianManager } from './today.jsx'
 import { financials, childProfiles, families } from '../data/mockData.js'
 
 const tip = {
@@ -246,7 +248,7 @@ function RealFamilies() {
 function RealChildProfile({ child, roster, onBack }) {
   const { setChildPhoto } = useApp()
   if (!child) return null
-  const live = (roster || []).find((r) => r.name === child.name)
+  const live = (roster || []).find((r) => r.childId === child.id)
   return (
     <div className="space-y-5">
       <Back onBack={onBack} />
@@ -267,6 +269,8 @@ function RealChildProfile({ child, roster, onBack }) {
       </Card>
 
       <ChildEnrollmentControls key={child.id} child={child} onReleased={onBack} />
+      <GuardianManager key={`guardians-${child.id}`} child={child} />
+      <CareProfilePanel key={`care-${child.id}`} child={child} editable />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -279,7 +283,7 @@ function RealChildProfile({ child, roster, onBack }) {
             <div className="flex flex-wrap gap-2">
               {child.allergies.map((a) => <Pill key={a} className="bg-coral-400/15 text-coral-600"><AlertTriangle size={12} /> {a}</Pill>)}
             </div>
-          ) : <p className="text-sm font-semibold text-slate-400">No allergies on file.</p>}
+          ) : <p className="text-sm font-semibold text-slate-400">No allergies recorded — confirm care needs.</p>}
           <p className="mt-3 text-xs font-semibold text-slate-400">Health records, immunizations & milestones are coming soon — for now manage care notes in the daily log.</p>
         </Card>
       </div>
@@ -619,7 +623,7 @@ function InviteEmployee() {
           <div className="font-extrabold text-slate-700">Onboard a new employee</div>
           <div className="text-xs font-medium text-slate-400">Send a secure link — they add their details, banking, SIN &amp; documents themselves.</div>
         </div>
-        {!open && <button onClick={() => setOpen(true)} className="btn-primary !py-2 text-sm"><UserPlus size={15} /> Send onboarding link</button>}
+        {!open && <button onClick={() => setOpen(true)} className="btn-primary !py-2 text-sm"><UserPlus size={15} /> Create onboarding link</button>}
       </div>
       {open && (
         <div className="mt-3 flex flex-wrap items-end gap-3">
@@ -663,8 +667,8 @@ export function EducatorsAdmin() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard icon={Users} label="On the floor" value={onFloor} gradient="from-mint-400 to-mint-500" />
         <StatCard icon={Clock} label="Hours today" value={`${educators.reduce((a, e) => a + (e.todaySeconds + (e.status === 'in' && e.clockInAt ? (now - e.clockInAt) / 1000 : 0)) / 3600, 0).toFixed(1)}`} gradient="from-brand-400 to-brand-600" delay={0.05} />
-        <StatCard icon={Gauge} label="Ratios" value="All ✓" sub="within limits" gradient="from-grape-400 to-grape-600" delay={0.1} />
-        <StatCard icon={Award} label="Certified" value={`${educators.length}/${educators.length}`} sub="CPR current" gradient="from-sunshine-400 to-coral-500" delay={0.15} />
+        <StatCard icon={Gauge} label="Ratio assessment" value="Not assessed" sub="Check room occupancy and staffing" gradient="from-grape-400 to-grape-600" delay={0.1} />
+        <StatCard icon={Award} label="Certification records" value={educators.filter(e=>e.certifications?.length).length} sub="Recorded only · verify expiry separately" gradient="from-sunshine-400 to-coral-500" delay={0.15} />
       </div>
 
       <Card className="p-0">

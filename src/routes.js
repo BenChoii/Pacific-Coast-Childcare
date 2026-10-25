@@ -33,5 +33,7 @@ export function isAppPath() {
   const path = currentPath()
   if (SALES_ROUTES.includes(path)) return false
   const e = getEntry()
+  const returnParams=new URLSearchParams(window.location.search)
+  if(path==='/' && (returnParams.has('stripe') || returnParams.has('billing'))) return true
   return APP_ROUTES.includes(path) || e.kind !== 'normal'
 }

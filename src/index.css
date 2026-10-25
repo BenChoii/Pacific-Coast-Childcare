@@ -244,3 +244,20 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Portal content must shrink in phone grids; long names and records wrap. */
+.mitten-app { overflow-wrap: anywhere; }
+.mitten-app .card { min-width: 0; }
+.mitten-app .input { min-width: 0; max-width: 100%; }
+.mitten-app button { touch-action: manipulation; }
+.mitten-app [data-density="compact"] .card { padding: 1rem; }
+.mitten-app[data-density="compact"] .card { padding: 1rem; }
+html:has(.mitten-app) { scroll-padding-top: 6rem; }
+@media (max-width: 639px) {
+ .mitten-app .btn, .mitten-app .btn-primary, .mitten-app .btn-ghost, .mitten-app .btn-grape { min-height: 44px; }
+ .mitten-app main { min-width: 0; }
+}
+@media print {
+ .mitten-app aside, .mitten-app header, .mitten-app button, .mitten-app input, .mitten-app select { display: none !important; }
+ .mitten-app main { padding: 0 !important; }
+}

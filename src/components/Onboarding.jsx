@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Baby, Users, Share2, Compass, ArrowRight, ArrowLeft, Check, Copy,
@@ -23,7 +23,9 @@ const FEATURES = [
 
 export default function Onboarding() {
   const { facility, enrollChild, generateInvite, completeOnboarding, pushToast } = useApp()
-  const [step, setStep] = useState(0)
+  const progressKey = `mitten_setup_step:${facility?.id || facility?.slug || 'workspace'}`
+  const [step, setStep] = useState(() => { try { const value = Number(sessionStorage.getItem(progressKey)); return Number.isInteger(value) && value >= 0 && value <= 4 ? value : 0 } catch { return 0 } })
+  useEffect(() => { try { sessionStorage.setItem(progressKey, String(step)) } catch {} }, [step, progressKey])
   const [celebrating, setCelebrating] = useState(false)
   const [finishError, setFinishError] = useState('')
   const steps = ['welcome', 'child', 'team', 'families', 'tour']
@@ -37,6 +39,7 @@ export default function Onboarding() {
     try {
       await new Promise((r) => setTimeout(r, 1900))
       await completeOnboarding()
+      try { sessionStorage.removeItem(progressKey) } catch {}
     } catch {
       setCelebrating(false)
       setFinishError('Setup could not be completed. Your progress is saved. Try finishing setup again.')
@@ -124,10 +127,11 @@ function AddChildStep({ enrollChild, onNext, onBack }) {
   const [form, setForm] = useState({ first: '', last: '', age: '3 yrs', room: 'Preschool', parent: '' })
   const [busy, setBusy] = useState(false)
   const [added, setAdded] = useState(false)
+  const [error, setError] = useState('')
   const add = async (e) => {
     e.preventDefault()
-    if (!form.first.trim()) return
-    setBusy(true)
+    if (!form.first.trim()) { setError('Enter the child’s first name.'); return }
+    setBusy(true); setError('')
     try {
       const res = await enrollChild({
         first: form.first.trim(),
@@ -136,7 +140,8 @@ function AddChildStep({ enrollChild, onNext, onBack }) {
         parent: form.parent.trim() || 'Parent', allergies: [],
       })
       if (res?.ok || res?.billingSkipped) { setAdded(true); setForm({ first: '', last: '', age: '3 yrs', room: 'Preschool', parent: '' }) }
-    } finally { setBusy(false) }
+    } catch { setError('The child could not be added. Check the details and try again. Your entry is still here.') }
+    finally { setBusy(false) }
   }
   return (
     <div className="relative">
@@ -149,6 +154,7 @@ function AddChildStep({ enrollChild, onNext, onBack }) {
         <input className="input" placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
         <input className="input" placeholder="Room (e.g. Preschool)" value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} />
         <input className="input sm:col-span-2" placeholder="Parent / guardian name" value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })} />
+        {error && <p role="alert" className="text-sm font-semibold text-coral-700 sm:col-span-2">{error}</p>}
         <button type="submit" disabled={busy} className="btn-ghost sm:col-span-2">
           {busy ? <Loader2 size={16} className="animate-spin" /> : added ? <><Check size={16} /> Added — add another?</> : <>Add child</>}
         </button>
@@ -163,7 +169,7 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
   const { childrenList } = useApp()
   const [childId, setChildId] = useState('')
   const [error, setError] = useState('')
-  const availableChildren = childrenList.filter((child) => !child.parentUserId)
+  const availableChildren = childrenList.filter((child) => !child.archivedAt)
   const [link, setLink] = useState('')
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -177,7 +183,7 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
     } catch { setError('The invitation could not be created. Please try again.') }
     finally { setBusy(false) }
   }
-  const copy = (t) => { navigator.clipboard?.writeText(t); setCopied(true); pushToast('Link copied 📋', { emoji: '📋', tone: 'mint' }); setTimeout(() => setCopied(false), 1600) }
+  const copy = async (t) => { try { await navigator.clipboard.writeText(t); setCopied(true); pushToast('Link copied 📋', { emoji: '📋', tone: 'mint' }); setTimeout(() => setCopied(false), 1600) } catch { setError('Copy was blocked. Select the link above and copy it manually.') } }
   const Icon = icon
   return (
     <div>
@@ -185,7 +191,7 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
       <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
         {role === 'staff'
           ? 'Create a new invite link for each educator. Each link can be accepted once, and the educator lands in their dashboard after joining.'
-          : 'Select a child and create a new invite link for their parent. Each link can be accepted once and connects the parent directly to their child’s dashboard.'}
+          : 'Select a child and create a new invite link for each parent or additional guardian. Each link can be accepted once and connects the parent directly to their child’s dashboard.'}
       </p>
       {role === 'parent' && <label className="mt-4 block text-sm font-semibold text-slate-600">Child for this invitation
         <select value={childId} onChange={(e) => { setChildId(e.target.value); setLink(''); setError('') }} className="input mt-2">
@@ -201,12 +207,12 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
         </button>
       ) : (
         <div className="mt-4 flex items-center gap-2 rounded-2xl border border-line bg-slate-50 p-2 pl-4">
-          <span className="flex-1 truncate font-mono text-sm font-semibold text-slate-600">{link}</span>
+          <input readOnly aria-label="Invitation link" value={link} onFocus={e => e.target.select()} className="min-w-0 flex-1 bg-transparent font-mono text-sm font-semibold text-slate-600" />
           <button onClick={() => copy(link)} className="btn-primary !py-2 text-sm">{copied ? <Check size={15} /> : <Copy size={15} />} Copy</button>
         </div>
       )}
       {link && <button type="button" onClick={make} disabled={busy} className="btn-ghost mt-3 !py-2 text-sm">{busy ? 'Creating…' : 'Create another invite link'}</button>}
-      <p className="mt-3 text-xs font-semibold text-slate-400">Use a different link for each person. Existing families and educators should sign in with their own accounts.</p>
+      <p className="mt-3 text-xs font-semibold text-slate-400">Use a different link for each person. Links expire after 7 days. Creating a link does not send an email; copy it and send it to that person. Existing members should sign in with their own accounts.</p>
       {role === 'parent' && facility && (
         <p className="mt-3 text-xs font-semibold text-slate-400">
           Tip: returning families can always sign in at <span className="font-mono">{origin().replace(/^https?:\/\//, '')}/{facility.slug}</span>
@@ -219,7 +225,7 @@ function InviteStep({ role, title, icon, generateInvite, pushToast, facility, on
 
 function Tour({ onFinish, onBack }) {
   const [busy, setBusy] = useState(false)
-  const done = async () => { setBusy(true); await onFinish() }
+  const done = async () => { setBusy(true); try { await onFinish() } finally { setBusy(false) } }
   return (
     <div>
       <StepHead icon={Compass} eyebrow="Step 4" title="Here’s where everything lives" />

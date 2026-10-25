@@ -8,4 +8,6 @@ const crons = cronJobs()
 // facility that has autoInvoice enabled.
 crons.monthly('generate tuition invoices', { day: 1, hourUTC: 16, minuteUTC: 0 }, internal.invoices.generateMonthly, {})
 
+crons.interval('recover interrupted owner alerts', {minutes:5}, internal.notifications.recoverInterrupted, {})
+
 export default crons

@@ -1,0 +1,21 @@
+# Upload only the application source and its build inputs. Preserve unrelated
+# local research, screenshots, credentials, dependencies and generated output.
+/*
+!/package.json
+!/package-lock.json
+!/index.html
+!/vite.config.js
+!/tailwind.config.js
+!/postcss.config.js
+!/vercel.json
+!/src/
+!/src/**
+!/api/
+!/api/**
+!/public/
+!/public/**
+!/convex/
+!/convex/**
+!/scripts/
+/scripts/*
+!/scripts/build-content.mjs

@@ -3,13 +3,16 @@ import { useQuery, useMutation, useAction, useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import { api } from '../../convex/_generated/api'
 import { getEntry } from '../routes.js'
+import { fileToBase64, prepareImage } from '../lib/files.js'
+import { dayKey } from '../lib/careData.js'
+import { useProtectedMedia } from '../lib/useProtectedMedia.js'
 
 const AppContext = createContext(null)
 
 let toastId = 0
 
-function nowTime() {
-  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+function nowTime(timeZone) {
+  return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone:timeZone || 'America/Vancouver' })
 }
 function todayLabel() {
   return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -20,6 +23,16 @@ export function AppProvider({ children }) {
   const [demoRole, setDemoRole] = useState(null) // set when exploring without an account
   const [view, setView] = useState('home')
   const entryRef = useRef(getEntry())
+  try {if(['join','slug'].includes(entryRef.current.kind)&&entryRef.current.token)sessionStorage.setItem('cubby_pending_join',entryRef.current.token)} catch {}
+  const paymentReturnRef = useRef(new URLSearchParams(window.location.search))
+  const paymentProcessingRef = useRef(false)
+  const [paymentReturnError,setPaymentReturnError] = useState('')
+  const [paymentRetry,setPaymentRetry] = useState(0)
+  const [membershipError,setMembershipError] = useState('')
+  const [membershipRetry,setMembershipRetry] = useState(0)
+  const [joiningFacility,setJoiningFacility] = useState(false)
+  const retryPaymentReturn = useCallback(()=>{paymentProcessingRef.current=false;setPaymentRetry(x=>x+1)},[])
+  const retryMembership = useCallback(()=>{pendingMembershipRef.current=null;setMembershipRetry(x=>x+1)},[])
   // A daycare claiming its public directory listing arrives via
   // mitten.care/childcare/<area> → /signup?claim=<area>. Stash the area so it
   // survives signup + onboarding (which rewrite the URL), then route them to
@@ -55,6 +68,12 @@ export function AppProvider({ children }) {
   const { signOut } = useAuthActions()
   const viewerQ = useQuery(api.users.viewer) // null when signed out, undefined while resolving
   const viewer = viewerQ ?? null
+  const displayPreferences = useQuery(api.preferences.get,isAuthenticated?{}:'skip')
+  useEffect(()=>{
+    const previous=document.documentElement.style.fontSize
+    document.documentElement.style.fontSize=displayPreferences?.textSize==='large'?'18px':''
+    return ()=>{document.documentElement.style.fontSize=previous}
+  },[displayPreferences?.textSize])
   // Real account role wins; otherwise fall back to the demo role.
   const role = isAuthenticated ? viewer?.role ?? null : demoRole
   const authResolving = authLoading || (isAuthenticated && viewerQ === undefined)
@@ -66,22 +85,25 @@ export function AppProvider({ children }) {
     setView('home')
     if (!new URLSearchParams(window.location.search).get('claim')) {
       try { sessionStorage.removeItem('cubby_fresh_auth') } catch {}
-      window.history.replaceState(null, '', '/app')
+      window.history.replaceState(null, '', '/app' + window.location.search)
     }
   }, [isAuthenticated, viewer?.id])
 
   // --- Live data from Convex ---
-  const timelineQ = useQuery(api.activities.list, canReadWorkspace ? {} : 'skip')
+  const [clockNow,setClockNow]=useState(Date.now())
+  useEffect(()=>{const timer=setInterval(()=>setClockNow(Date.now()),60_000);return()=>clearInterval(timer)},[])
+  const facilityQ = useQuery(api.facilities.current, canReadWorkspace ? {} : 'skip')
+  const datedArgs=isAuthenticated?{date:dayKey(clockNow,facilityQ?.timezone)}:{}
+  const timelineQ = useQuery(api.activities.list, canReadWorkspace ? datedArgs : 'skip')
   const conversationsQ = useQuery(api.conversations.list, canReadWorkspace ? {} : 'skip')
   const invoicesQ = useQuery(api.invoices.list, canReadWorkspace ? {} : 'skip')
-  const rosterQ = useQuery(api.roster.list, canReadWorkspace ? {} : 'skip')
-  const photosQ = useQuery(api.photos.list, canReadWorkspace ? {} : 'skip')
+  const rosterQ = useQuery(api.roster.list, canReadWorkspace ? datedArgs : 'skip')
+  const photosQ = useQuery(api.photos.list, canReadWorkspace ? {limit:12} : 'skip')
   const educatorsQ = useQuery(api.educators.list, canReadWorkspace ? {} : 'skip')
   const lessonPlanQ = useQuery(api.lessons.plan, canReadWorkspace ? {} : 'skip')
   const lessonBlocksQ = useQuery(api.lessons.blocks, canReadWorkspace ? {} : 'skip')
   const resourcesQ = useQuery(api.resources.list, canReadWorkspace ? {} : 'skip')
-  const facilityQ = useQuery(api.facilities.current, canReadWorkspace ? {} : 'skip')
-  const childrenQ = useQuery(api.children.list, canReadWorkspace ? {} : 'skip')
+  const childrenQ = useQuery(api.children.list, canReadWorkspace ? datedArgs : 'skip')
   const invitesQ = useQuery(api.facilities.listInvites, canReadWorkspace && role === 'admin' ? {} : 'skip')
   const milestonesQ = useQuery(api.milestones.list, canReadWorkspace ? {} : 'skip')
 
@@ -89,7 +111,7 @@ export function AppProvider({ children }) {
   const conversations = conversationsQ ?? []
   const invoices = invoicesQ ?? []
   const roster = rosterQ ?? []
-  const photos = photosQ ?? []
+  const photos = useProtectedMedia(photosQ ?? [])
   const educators = educatorsQ ?? []
   const lessonPlan = lessonPlanQ ?? null
   const lessonBlocks = lessonBlocksQ ?? []
@@ -105,7 +127,7 @@ export function AppProvider({ children }) {
       setView('account')
     }
   }, [claimArea, facility])
-  const childrenList = childrenQ ?? []
+  const childrenList = useProtectedMedia(childrenQ ?? [])
   const invites = invitesQ ?? []
   const milestones = milestonesQ ?? []
 
@@ -140,7 +162,7 @@ export function AppProvider({ children }) {
   const startThreadMut = useMutation(api.conversations.startWithParent)
   const addMilestoneMut = useMutation(api.milestones.add)
   const removeMilestoneMut = useMutation(api.milestones.remove)
-  const genUploadUrlMut = useMutation(api.files.generateUploadUrl)
+  const uploadFileAction = useAction(api.files.uploadFile)
   const setMyAvatarMut = useMutation(api.files.setMyAvatar)
   const setChildPhotoMut = useMutation(api.files.setChildPhoto)
   const setEducatorPhotoMut = useMutation(api.files.setEducatorPhoto)
@@ -170,63 +192,45 @@ export function AppProvider({ children }) {
   }, [])
   const dismissToast = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), [])
 
-  // Handle the redirect back from Stripe Checkout.
+  // Keep callback parameters until authenticated reconciliation completes. A
+  // failed confirmation stays recoverable across reloads and never claims paid.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const stripe = params.get('stripe')
-    if (!stripe) return
-    const clean = () => window.history.replaceState({}, '', window.location.pathname)
-    if (stripe === 'success') {
-      const sessionId = params.get('session_id')
-      if (sessionId) {
-        confirmCheckout({ sessionId, invId: params.get('inv') || undefined })
-          .then((r) => {
-            if (r?.ok) pushToast('Payment received — thank you! 💙', { emoji: '✅', tone: 'mint', duration: 5000 })
-          })
-          .catch(() => {})
-      }
-      clean()
-    } else if (stripe === 'cancel') {
-      pushToast('Checkout canceled — no charge was made.', { emoji: '↩️', tone: 'coral' })
-      clean()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Handle the redirect back from subscription billing setup.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const billing = params.get('billing')
-    if (!billing) return
-    const clean = () => window.history.replaceState({}, '', '/app')
-    if (billing === 'success') {
-      const sessionId = params.get('session_id')
-      ;(async () => {
-        // Confirm the session against Stripe right away so the plan activates
-        // deterministically (the webhook is just a backup).
-        if (sessionId) { try { await confirmSubscriptionAction({ sessionId }) } catch {} }
-        pushToast('Billing is set up — card on file 💳', { emoji: '✅', tone: 'mint', duration: 5000 })
-        let pending = null
-        try { pending = JSON.parse(sessionStorage.getItem('cubby_pending_child') || 'null') } catch {}
-        if (pending) {
-          sessionStorage.removeItem('cubby_pending_child')
-          try {
-            const r = await addChildAction({ ...pending, origin: window.location.origin })
-            if (r?.ok) pushToast(`${pending.first} is enrolled 🎒`, { emoji: '🎒', tone: 'brand' })
-            else if (r?.needsBilling) pushToast(`Card saved — tap Add child to finish enrolling ${pending.first}.`, { emoji: '👶', tone: 'brand', duration: 5000 })
-          } catch {}
+    const params = paymentReturnRef.current
+    const stripe = params.get('stripe'); const billing = params.get('billing')
+    if ((!stripe && !billing) || authResolving || !isAuthenticated || !viewer?.hasFacility || paymentProcessingRef.current) return
+    paymentProcessingRef.current = true
+    setPaymentReturnError('')
+    setView(stripe ? (viewer.role === 'parent' ? 'billing' : 'invoices') : 'account')
+    ;(async () => {
+      try {
+        if (stripe === 'success') {
+          const sessionId = params.get('session_id')
+          if (!sessionId) throw new Error('Payment reference is missing. Contact the daycare before trying another payment.')
+          const result = await confirmCheckout({sessionId,invId:params.get('inv') || undefined})
+          if (!result?.ok) throw new Error(result?.error || 'Payment has not been confirmed yet. Please retry confirmation before paying again.')
+          pushToast('Payment confirmed. Your receipt is in Billing.',{emoji:'✅',tone:'mint',duration:5000})
+        } else if (billing === 'success') {
+          const sessionId = params.get('session_id')
+          if (!sessionId) throw new Error('Billing setup reference is missing.')
+          const result = await confirmSubscriptionAction({sessionId})
+          if (!result?.ok) throw new Error(result?.error || 'Billing setup could not be confirmed yet.')
+          pushToast('Billing setup confirmed.',{emoji:'✅',tone:'mint'})
+          let pending = null
+          try {pending=JSON.parse(sessionStorage.getItem('cubby_pending_child') || 'null')} catch {}
+          if (pending) {
+            const childResult=await addChildAction({...pending,origin:window.location.origin})
+            if(childResult?.ok) sessionStorage.removeItem('cubby_pending_child')
+            else pushToast('Your enrolment draft is saved. Open Add child to finish.',{tone:'coral',duration:6000})
+          }
+          await syncQuantityAction({})
+        } else if (stripe === 'cancel' || billing === 'cancel') {
+          pushToast('Checkout was cancelled. Your saved records have not changed.',{emoji:'↩️',tone:'coral'})
         }
-        // Reconcile the subscription quantity with the real roster.
-        try { await syncQuantityAction({}) } catch {}
-      })()
-      clean()
-    } else if (billing === 'cancel') {
-      try { sessionStorage.removeItem('cubby_pending_child') } catch {}
-      pushToast('Billing setup canceled — no charge was made.', { emoji: '↩️', tone: 'coral' })
-      clean()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+        params.delete('stripe');params.delete('billing');params.delete('session_id');params.delete('inv')
+        window.history.replaceState(null,'','/app'+(params.toString()?'?'+params.toString():''))
+      } catch (error) { setPaymentReturnError(error?.message || 'Could not confirm. Retry or contact the daycare before making another payment.') }
+    })()
+  }, [authResolving,isAuthenticated,viewer?.hasFacility,viewer?.id,paymentRetry])
 
   // After an owner/parent signs up, finish wiring them to a facility once auth
   // has fully propagated (calling these inline right after signIn races the
@@ -234,22 +238,25 @@ export function AppProvider({ children }) {
   const pendingMembershipRef = useRef(null)
   useEffect(() => {
     if (!isAuthenticated || !viewer || viewer.accessStatus === 'suspended') return
-    let pendFac = null
-    let pendJoin = null
+    let pendingFacility = null; let token = null; let pendingEmail=null
     try {
-      pendFac = sessionStorage.getItem('cubby_pending_facility')
-      pendJoin = sessionStorage.getItem('cubby_pending_join') || (['join', 'slug'].includes(entryRef.current.kind) ? entryRef.current.token : null)
+      pendingFacility=sessionStorage.getItem('cubby_pending_facility')
+      pendingEmail=sessionStorage.getItem('cubby_pending_facility_email')
+      token=sessionStorage.getItem('cubby_pending_join') || (['join','slug'].includes(entryRef.current.kind) ? entryRef.current.token : null)
     } catch {}
-    if (pendJoin) {
-      if (pendingMembershipRef.current === pendJoin) return
-      pendingMembershipRef.current = pendJoin
-      joinViaTokenMut({ token: pendJoin }).then(() => { sessionStorage.removeItem('cubby_pending_join'); setView('home'); window.history.replaceState(null, '', '/app') }).catch(() => { sessionStorage.removeItem('cubby_pending_join'); pushToast('Your invite could not be accepted. Ask the daycare for a new link.', { tone: 'coral' }) })
-    } else if (pendFac && !viewer.hasFacility && viewer.role === 'admin') {
-      try { sessionStorage.removeItem('cubby_pending_facility') } catch {}
-      createFacilityMut({ name: pendFac }).catch(() => {})
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, viewer?.hasFacility, viewer?.id])
+    if(pendingFacility&&!token&&pendingEmail&&pendingEmail!==viewer.email?.trim().toLowerCase()){setMembershipError('This saved daycare setup belongs to a different email. Sign in with that email to resume.');return}
+    const intent=token || (pendingFacility && !viewer.hasFacility && viewer.role==='admin' ? 'facility:'+pendingFacility : null)
+    const key=intent?viewer.id+':'+intent:null
+    if(pendingFacility&&viewer.hasFacility&&!token){try{sessionStorage.removeItem('cubby_pending_facility');sessionStorage.removeItem('cubby_pending_facility_email')}catch{}}
+    if (!key || pendingMembershipRef.current===key) return
+    pendingMembershipRef.current=key; setMembershipError(''); setJoiningFacility(true)
+    const operation=token ? joinViaTokenMut({token}) : createFacilityMut({name:pendingFacility})
+    operation.then(()=>{
+      try {sessionStorage.removeItem(token?'cubby_pending_join':'cubby_pending_facility');if(!token)sessionStorage.removeItem('cubby_pending_facility_email')} catch {}
+      entryRef.current={kind:'normal'};setView('home');window.history.replaceState(null,'','/app')
+    }).catch(error=>setMembershipError(error?.message || 'Setup could not finish. Your details are saved. Retry or ask the daycare for help.'))
+      .finally(()=>setJoiningFacility(false))
+  },[isAuthenticated,viewer?.id,viewer?.hasFacility,viewer?.accessStatus,viewer?.role,membershipRetry])
 
   // --- Navigation ---
   const enterRole = useCallback((r) => {
@@ -258,6 +265,8 @@ export function AppProvider({ children }) {
   }, [])
   const logout = useCallback(async () => {
     if (isAuthenticated) await signOut()
+    pendingMembershipRef.current=null
+    setMembershipError('');setJoiningFacility(false)
     setDemoRole(null)
     setView('home')
   }, [isAuthenticated, signOut])
@@ -268,23 +277,23 @@ export function AppProvider({ children }) {
     [addActivityMut],
   )
   const sendMessage = useCallback(
-    (conversationId, text) => sendMut({ conversationId, text, time: nowTime() }),
-    [sendMut],
+    (conversationId, text) => sendMut({ conversationId, text, time: nowTime(facility?.timezone) }),
+    [sendMut,facility?.timezone],
   )
   const markConversationRead = useCallback(
     (conversationId) => markReadMut({ conversationId }),
     [markReadMut],
   )
   const payInvoice = useCallback((id) => payMut({ id, paidOn: todayLabel() }), [payMut])
-  const toggleAttendance = useCallback((id) => toggleMut({ id, time: nowTime() }), [toggleMut])
-  const setAttendance = useCallback((id, status) => setStatusMut({ id, status, time: nowTime() }), [setStatusMut])
+  const toggleAttendance = useCallback((id) => toggleMut({ id, time: nowTime(facility?.timezone) }), [toggleMut,facility?.timezone])
+  const setAttendance = useCallback((id, status) => setStatusMut({ id, status, time: nowTime(facility?.timezone) }), [setStatusMut,facility?.timezone])
   const likePhoto = useCallback((id) => likeMut({ id }), [likeMut])
-  const clockEducator = useCallback((id) => clockMut({ id, time: nowTime() }), [clockMut])
+  const clockEducator = useCallback((id) => clockMut({ id, time: nowTime(facility?.timezone) }), [clockMut,facility?.timezone])
 
   // --- Tenant / billing wrappers ---
   const createFacility = useCallback((name) => createFacilityMut({ name }), [createFacilityMut])
   const completeOnboarding = useCallback(async () => { await completeOnboardingMut({}); setView('home'); clearClaimArea(); window.history.replaceState(null, '', '/app') }, [completeOnboardingMut, clearClaimArea])
-  const generateInvite = useCallback((role, label, childId) => generateInviteMut({ role, label, childId }), [generateInviteMut])
+  const generateInvite = useCallback((role, label, childId, email, educatorId) => generateInviteMut({ role, label, childId, email, educatorId }), [generateInviteMut])
   const revokeInvite = useCallback((id) => revokeInviteMut({ id }), [revokeInviteMut])
   const joinFacility = useCallback(async (token) => { const result = await joinViaTokenMut({ token }); setView('home'); window.history.replaceState(null, '', '/app'); return result }, [joinViaTokenMut])
   const addEducator = useCallback((fields) => addEducatorMut(fields), [addEducatorMut])
@@ -322,19 +331,17 @@ export function AppProvider({ children }) {
   const addPhoto = useCallback((fields) => addPhotoMut(fields), [addPhotoMut])
   const startThread = useCallback((parentUserId, name) => startThreadMut({ parentUserId, name }), [startThreadMut])
 
-  // Upload an image to Convex storage → returns a storageId.
-  const uploadImage = useCallback(
-    async (file) => {
-      const url = await genUploadUrlMut({})
-      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': file.type }, body: file })
-      const { storageId } = await res.json()
-      return storageId
-    },
-    [genUploadUrlMut],
-  )
-  const setMyAvatar = useCallback(async (file) => { const imageId = await uploadImage(file); await setMyAvatarMut({ imageId }) }, [uploadImage, setMyAvatarMut])
-  const setChildPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file); await setChildPhotoMut({ id, imageId }) }, [uploadImage, setChildPhotoMut])
-  const setEducatorPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file); await setEducatorPhotoMut({ id, imageId }) }, [uploadImage, setEducatorPhotoMut])
+  // Register ownership server-side, resize photos for mobile, and never
+  // accept an arbitrary storage ID as proof that the current user uploaded it.
+  const uploadImage = useCallback(async (file,purpose='photo') => {
+    const prepared = purpose==='bookkeeping' || purpose==='child-document' ? file : await prepareImage(file)
+    if(prepared.size>8*1024*1024) throw new Error('Choose a file smaller than 8 MB.')
+    const {storageId}=await uploadFileAction({base64:await fileToBase64(prepared),mimeType:prepared.type,purpose})
+    return storageId
+  },[uploadFileAction])
+  const setMyAvatar = useCallback(async (file) => { const imageId = await uploadImage(file,'avatar'); await setMyAvatarMut({ imageId }) }, [uploadImage, setMyAvatarMut])
+  const setChildPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file,'child-photo'); await setChildPhotoMut({ id, imageId }) }, [uploadImage, setChildPhotoMut])
+  const setEducatorPhoto = useCallback(async (id, file) => { const imageId = await uploadImage(file,'avatar'); await setEducatorPhotoMut({ id, imageId }) }, [uploadImage, setEducatorPhotoMut])
   const postPhoto = useCallback(
     async ({ file, caption, audience, childId, childName, emoji, gradient, room }) => {
       const imageId = file ? await uploadImage(file) : undefined
@@ -357,6 +364,8 @@ export function AppProvider({ children }) {
 
   const value = {
     role,
+    displayPreferences,
+    paymentReturnError, retryPaymentReturn, membershipError, retryMembership, joiningFacility,
     enterRole,
     logout,
     isAuthenticated,

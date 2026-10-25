@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { useProtectedMedia } from '../lib/useProtectedMedia.js'
 import { motion } from 'framer-motion'
 import {
   Footprints, MessageCircle, Smile, Brain, Sparkles, Award, Plus, Trash2, Check,
@@ -27,9 +30,33 @@ const STATUSES = [
 ]
 const statusTone = (s) => (STATUSES.find((x) => x.id === s) || STATUSES[1]).tone
 
+function useRecordPages(endpoint, childId, enabled, extra={}) {
+  const [page,setPage] = useState({childId:null,records:[],before:undefined})
+  const same = page.childId === childId
+  const before = same ? page.before : undefined
+  const result = useQuery(endpoint, enabled && childId ? {childId,limit:50,...extra,...(before ? {before} : {})} : 'skip')
+  const previous = same ? page.records : []
+  const rows = [...new Map([...previous,...(result || [])].map(row=>[row.id,row])).values()]
+  return {records:rows,loading:enabled && result===undefined,hasMore:result?.length===50,
+    more:()=>{const last=result?.[result.length-1]; if(last?._creationTime) setPage({childId,records:rows,before:last._creationTime})},
+    reset:()=>setPage({childId,records:[],before:undefined})}
+}
+function csvCell(value) {let s=String(value ?? ''); if(/^[=+@-]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'}
+function downloadMilestones(child, rows) {
+  const csv=[['Child','Date','Domain','Milestone','Status','Note','Educator'],...rows.map(m=>[child.name,m.date,m.domain,m.label,m.status,m.note,m.by])].map(r=>r.map(csvCell).join(',')).join('\r\n')
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); const a=document.createElement('a');a.href=url;a.download='memory-book-milestones.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
+}
+function printMemories(child,milestones,photos) {
+  const page=window.open('','_blank')
+  if(!page) return false
+  const escape=value=>String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+  const html=`<!doctype html><html><head><title>${escape(child.first)}'s Memory Book</title><style>body{font:16px system-ui;margin:36px;color:#243342}h1{font-family:Georgia,serif}article{break-inside:avoid;border-top:1px solid #ddd;padding:16px 0}small{color:#667}figure{break-inside:avoid;display:inline-block;vertical-align:top;width:42%;margin:12px 3%}img{width:100%;max-height:350px;object-fit:contain}button{padding:12px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h1>${escape(child.first)}'s journey</h1><p>Loaded memories exported ${escape(new Date().toLocaleDateString())}. ${milestones.length} milestones and ${photos.length} individually attributed photos.</p>${milestones.map(m=>`<article><h2>${escape(m.label)}</h2><p>${escape(m.note)}</p><small>${escape(m.date)} · ${escape(m.domain)} · ${escape(m.status)} · ${escape(m.by)}</small></article>`).join('')}${photos.filter(p=>p.imageUrl).map(p=>`<figure><img src="${escape(p.imageUrl)}" alt="${escape(p.caption)}"><figcaption>${escape(p.caption)}</figcaption></figure>`).join('')}</body></html>`
+  page.document.write(html);page.document.close();return true
+}
+
 /* ============ Educator / Director: tag milestones ============ */
 export function MilestoneTracker() {
-  const { childrenList, milestones, addMilestone, removeMilestone, pushToast } = useApp()
+  const { childrenList, milestones, addMilestone, removeMilestone, pushToast, facility, viewer } = useApp()
   const [childId, setChildId] = useState('')
   const child = childrenList.find((c) => c.id === childId) || childrenList[0]
   const [domain, setDomain] = useState('Motor')
@@ -38,21 +65,24 @@ export function MilestoneTracker() {
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [justSaved, setJustSaved] = useState(0)
+  const [error,setError] = useState('')
+  const live=!!viewer?.id && !facility?.isDemo
+  const pages=useRecordPages(api.milestones.list,child?.id,live)
   const dm = domainMeta(domain)
 
   const save = async () => {
     if (!child || !label.trim()) { pushToast('Pick a child and a milestone.', { emoji: '🧩', tone: 'coral' }); return }
-    setBusy(true)
+    setBusy(true);setError('')
     try {
       await addMilestone({ childId: child.id, domain, label: label.trim(), status, note: note.trim() || undefined })
       pushToast(`Milestone logged for ${child.first} 🌟`, { emoji: '🌟', tone: 'mint' })
-      setLabel(''); setNote('')
+      setLabel(''); setNote(''); pages.reset()
       setJustSaved(Date.now())
       setTimeout(() => setJustSaved(0), 2200)
-    } finally { setBusy(false) }
+    } catch(err) {setError(err.message || 'The milestone could not be saved. Your draft is still here.')} finally { setBusy(false) }
   }
 
-  const childMilestones = child ? milestones.filter((m) => m.childId === child.id) : []
+  const childMilestones = child ? (live ? pages.records : milestones).filter((m) => m.childId === child.id) : []
 
   if (childrenList.length === 0) {
     return (
@@ -74,13 +104,14 @@ export function MilestoneTracker() {
       {/* Child picker */}
       <div className="flex flex-wrap gap-2">
         {childrenList.map((c) => (
-          <button key={c.id} onClick={() => setChildId(c.id)} className={`flex items-center gap-2 rounded-2xl border-2 bg-white p-1.5 pr-4 transition ${c.id === child?.id ? 'border-brand-400 shadow-sm' : 'border-transparent hover:border-slate-200'}`}>
+          <button key={c.id} disabled={busy} onClick={() => {if ((label.trim() || note.trim()) && c.id !== child?.id && !window.confirm('Discard this unsaved milestone draft and switch children?')) return; setChildId(c.id);setLabel('');setNote('');setError('')}} className={`flex items-center gap-2 rounded-2xl border-2 bg-white p-1.5 pr-4 transition ${c.id === child?.id ? 'border-brand-400 shadow-sm' : 'border-transparent hover:border-slate-200'}`}>
             <Avatar emoji={c.emoji} gradient={c.color} src={c.imageUrl} size="h-9 w-9" />
             <span className="text-sm font-bold text-slate-700">{c.first}</span>
           </button>
         ))}
       </div>
 
+      {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
       <Card className="relative space-y-4 overflow-hidden">
         {justSaved > 0 && <YarnConfetti key={justSaved} count={20} />}
         {/* Domain tabs */}
@@ -140,25 +171,31 @@ export function MilestoneTracker() {
                     {m.note && <p className="text-sm font-semibold text-slate-500">{m.note}</p>}
                     <p className="text-xs font-bold text-slate-400">{m.domain} · {m.date} · {m.by}</p>
                   </div>
-                  <button onClick={() => removeMilestone(m.id)} className="rounded-xl p-2 text-slate-300 hover:bg-coral-50 hover:text-coral-500"><Trash2 size={15} /></button>
+                  <button aria-label={`Remove ${m.label}`} disabled={busy} onClick={async()=>{if(!window.confirm(`Remove the milestone “${m.label}”?`)) return;setBusy(true);setError('');try{await removeMilestone(m.id);pages.reset();pushToast('Milestone removed',{emoji:'📝'})}catch(err){setError(err.message || 'Could not remove the milestone.')}finally{setBusy(false)}}} className="rounded-xl p-2 text-slate-300 hover:bg-coral-50 hover:text-coral-500"><Trash2 size={15} /></button>
                 </div>
               )
             })}
           </Card>
         )}
       </div>
+      {live && <div className="flex flex-wrap items-center gap-3"><p role="status" className="text-sm text-slate-500">{pages.loading ? 'Loading milestones…' : `${childMilestones.length} loaded milestones`}</p>{pages.hasMore && <button disabled={pages.loading} className="btn-ghost" onClick={pages.more}>Load earlier milestones</button>}</div>}
     </div>
   )
 }
 
 /* ============ Parent: Memory Book ============ */
 export function MemoryBook() {
-  const { childrenList, milestones, photos, viewer } = useApp()
-  const mine = childrenList.filter((c) => c.parentUserId === viewer?.id)
+  const { childrenList, milestones, photos, viewer, facility, pushToast, activeChildId, setActiveChildId } = useApp()
+  const mine = childrenList.filter(c => c.parentUserId===viewer?.id || (c.guardianUserIds || []).includes(viewer?.id))
   const kids = mine.length ? mine : childrenList
-  const [childId, setChildId] = useState('')
+  const childId = activeChildId || ''
+  const setChildId = setActiveChildId
   const child = kids.find((c) => c.id === childId) || kids[0]
 
+  const live=!!viewer?.id && !facility?.isDemo
+  const milestonePages=useRecordPages(api.milestones.list,child?.id,live)
+  const photoPages=useRecordPages(api.photos.list,child?.id,live,{individualOnly:true})
+  const protectedPhotos=useProtectedMedia(photoPages.records.filter(p=>p.childId===child?.id))
   if (!child) {
     return (
       <div className="space-y-5">
@@ -172,10 +209,11 @@ export function MemoryBook() {
     )
   }
 
-  const childMilestones = milestones.filter((m) => m.childId === child.id)
+  const childMilestones = (live ? milestonePages.records : milestones).filter((m) => m.childId === child.id)
   const mastered = childMilestones.filter((m) => m.status === 'Mastered').length
-  // Photos the parent can see for this child = class photos + this child's family photos.
-  const childPhotos = photos.filter((p) => !p.childId || p.childId === child.id)
+  // The keepsake contains only explicitly attributed child photos. Class-wide
+  // photos remain in the feed rather than becoming a sibling's individual memory.
+  const childPhotos = (live ? protectedPhotos : photos).filter(p => p.childId === child.id)
 
   return (
     <div className="space-y-6">
@@ -200,6 +238,8 @@ export function MemoryBook() {
         </div>
       </motion.div>
 
+      <div className="flex flex-wrap gap-2"><button className="btn-ghost" onClick={()=>{if(!printMemories(child,childMilestones,childPhotos))pushToast('Allow the print window to open, then try again.',{tone:'coral'})}}>Print loaded memories</button><button className="btn-ghost" disabled={!childMilestones.length} onClick={()=>downloadMilestones(child,childMilestones)}>Export loaded milestones</button></div>
+      {live && <p className="text-xs text-slate-500">This book shows loaded records for {child.first}. Load earlier records below before exporting a longer history. Class photos are available in the photo feed.</p>}
       {/* Milestone timeline */}
       <div>
         <h3 className="mb-3 flex items-center gap-2 font-extrabold text-slate-800"><Award size={18} className="text-grape-500" /> Milestones</h3>
@@ -244,13 +284,14 @@ export function MemoryBook() {
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
             {childPhotos.map((p) => (
               <div key={p.id} className="relative overflow-hidden rounded-2xl shadow-card">
-                {p.imageUrl ? <img src={p.imageUrl} alt={p.caption} className="aspect-square w-full object-cover" />
+                {p.imageUrl ? <img loading="lazy" src={p.imageUrl} alt={p.caption} className="aspect-square w-full object-cover" />
                   : <div className={`flex aspect-square items-center justify-center bg-gradient-to-br ${p.gradient} text-4xl`}>{p.emoji}</div>}
               </div>
             ))}
           </div>
         </div>
       )}
+      {live && <div className="flex flex-wrap items-center gap-3"><p role="status" className="text-sm text-slate-500">{milestonePages.loading || photoPages.loading ? 'Loading memories…' : 'Loaded records are shown above.'}</p>{milestonePages.hasMore && <button disabled={milestonePages.loading} className="btn-ghost" onClick={milestonePages.more}>Load earlier milestones</button>}{photoPages.hasMore && <button disabled={photoPages.loading} className="btn-ghost" onClick={photoPages.more}>Load earlier photos</button>}</div>}
     </div>
   )
 }

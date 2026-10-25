@@ -1,4 +1,10 @@
 import { getAuthUserId } from '@convex-dev/auth/server'
+import type {Doc,Id,TableNames} from './_generated/dataModel'
+
+// Guardian access stays centralized so every family surface uses the same rule.
+export function childBelongsToParent(child: any, userId: any) {
+  return !!userId && !child?.archivedAt && (child?.parentUserId === userId || (child?.guardianUserIds || []).includes(userId))
+}
 
 // ── Tenant resolution ────────────────────────────────────────────────────
 // Every data query/mutation derives its facility from the signed-in user.
@@ -6,7 +12,7 @@ import { getAuthUserId } from '@convex-dev/auth/server'
 // the seeded demo facility, so the client never has to pass a facilityId and
 // can never read another tenant's data.
 
-export async function getDemoFacilityId(ctx: any) {
+export async function getDemoFacilityId(ctx: any):Promise<Id<'facilities'>|null> {
   const demo = await ctx.db
     .query('facilities')
     .withIndex('by_slug', (q: any) => q.eq('slug', 'demo'))
@@ -16,7 +22,7 @@ export async function getDemoFacilityId(ctx: any) {
 
 // The facility the current request should read/write. Authed user's facility,
 // else the demo facility. Returns null only if the demo hasn't been seeded.
-export async function resolveFacilityId(ctx: any) {
+export async function resolveFacilityId(ctx: any):Promise<Id<'facilities'>|null> {
   const uid = await getAuthUserId(ctx)
   if (!uid) return await getDemoFacilityId(ctx)
   const user = await ctx.db.get(uid)
@@ -26,14 +32,14 @@ export async function resolveFacilityId(ctx: any) {
   if (!facility) return null
   if (user.role === 'parent') {
     const children = await ctx.db.query('children').withIndex('by_facility', (q: any) => q.eq('facilityId', user.facilityId)).collect()
-    if (!children.some((child: any) => !child.archivedAt && child.parentUserId === uid)) return null
+    if (!children.some((child: any) => childBelongsToParent(child, uid))) return null
   }
   return user.facilityId
 }
 
 // Membership and roles are checked server-side, including for already-issued
 // sessions. Suspending a member immediately removes their data access.
-export async function requireFacility(ctx: any) {
+export async function requireFacility(ctx: any):Promise<{userId:Id<'users'>,user:Doc<'users'>,facilityId:Id<'facilities'>,facility:Doc<'facilities'>}> {
   const uid = await getAuthUserId(ctx)
   if (!uid) throw new Error('Not authenticated')
   const user = await ctx.db.get(uid)
@@ -60,14 +66,14 @@ export async function requireStaff(ctx: any) {
     return { userId: null, user: null, facilityId, facility }
   }
   const membership = await requireFacility(ctx)
-  if (!['admin', 'staff'].includes(membership.user.role)) throw new Error('Educator or director access required.')
+  if (!['admin', 'staff'].includes(membership.user.role || '')) throw new Error('Educator or director access required.')
   return membership
 }
 
-export async function requireRecord(ctx: any, id: any, facilityId: any) {
+export async function requireRecord<T extends TableNames>(ctx: any, id: Id<T>, facilityId: Id<'facilities'>):Promise<Doc<T>> {
   const record = await ctx.db.get(id)
   if (!record || record.facilityId !== facilityId) throw new Error('Not found')
-  return record
+  return record as Doc<T>
 }
 
 // ── Pricing engine ───────────────────────────────────────────────────────

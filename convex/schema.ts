@@ -2,6 +2,8 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { authTables } from '@convex-dev/auth/server'
 import { notificationTables } from './notificationSchema'
+import { workflowTables } from './workflowSchema'
+import { financeTables } from './repairSchema'
 
 // Mitten — multi-tenant childcare portal data model.
 //
@@ -12,10 +14,18 @@ import { notificationTables } from './notificationSchema'
 export default defineSchema({
   // ── Convex Auth tables, with role + facility membership on the user ──
   ...authTables,
+  authVerifiers:authTables.authVerifiers.index('by_session',['sessionId']),
   ...notificationTables,
+  ...workflowTables,
+  ...financeTables,
   users: defineTable({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
+    emailNormalized: v.optional(v.string()),
+    preferences: v.optional(v.object({density:v.optional(v.string()),textSize:v.optional(v.string())})),
+    recoveryRequestedAt: v.optional(v.number()),
+    recoveryWindowStartedAt: v.optional(v.number()),
+    recoveryWindowCount: v.optional(v.number()),
     emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.number()),
@@ -29,7 +39,7 @@ export default defineSchema({
     joinedViaInviteId: v.optional(v.id('invites')),
     role: v.optional(v.string()), // 'parent' | 'staff' | 'admin'
     facilityId: v.optional(v.id('facilities')), // the daycare this user belongs to
-  }).index('email', ['email']).index('by_facility', ['facilityId']),
+  }).index('email', ['email']).index('by_emailNormalized', ['emailNormalized']).index('by_image',['imageId']).index('by_facility', ['facilityId']),
 
   // ── Tenants ──────────────────────────────────────────────────────────
   facilities: defineTable({
@@ -72,11 +82,13 @@ export default defineSchema({
       crm: v.optional(v.boolean()),
       bookkeeping: v.optional(v.boolean()),
     })),
+    timezone: v.optional(v.string()),
+    ownerEmailMode: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index('by_slug', ['slug'])
     .index('by_subscription', ['stripeSubscriptionId'])
-    .index('by_customer', ['stripeCustomerId']),
+    .index('by_customer', ['stripeCustomerId']).index('by_logo',['logoId']),
 
   // Public childcare-directory listing a daycare sets for itself — powers the
   // live status overlay on the static /childcare/<area> boards. One per facility.
@@ -99,6 +111,8 @@ export default defineSchema({
     token: v.string(),
     label: v.optional(v.string()),
     email: v.optional(v.string()),
+    educatorId: v.optional(v.id('educators')),
+    expiresAt: v.optional(v.number()),
     childId: v.optional(v.id('children')), // parent invite tied to one child → auto-claims on join
     used: v.boolean(),
     usedBy: v.optional(v.id('users')),
@@ -117,6 +131,14 @@ export default defineSchema({
     color: v.string(),
     parent: v.string(),
     parentUserId: v.optional(v.id('users')),
+    guardianUserIds: v.optional(v.array(v.id('users'))),
+    attendanceDate: v.optional(v.string()),
+    checkInAt: v.optional(v.number()),
+    checkOutAt: v.optional(v.number()),
+    dateOfBirth: v.optional(v.string()),
+    careInstructions: v.optional(v.string()),
+    emergencyContacts: v.optional(v.array(v.object({name:v.string(),relationship:v.string(),phone:v.string()}))),
+    authorizedPickups: v.optional(v.array(v.object({name:v.string(),relationship:v.string(),phone:v.string()}))),
     enrollmentDays: v.optional(v.array(v.string())), // Mon | Tue | Wed | Thu | Fri | Sat | Sun
     archivedAt: v.optional(v.number()),
     releasedBy: v.optional(v.id('users')),
@@ -129,9 +151,11 @@ export default defineSchema({
     napMinutes: v.number(),
     photosToday: v.number(),
     order: v.number(),
-  }).index('by_facility', ['facilityId', 'order']),
+  }).index('by_facility', ['facilityId', 'order']).index('by_image',['imageId']),
 
   activities: defineTable({
+    date: v.optional(v.string()), occurredAt: v.optional(v.number()), createdBy: v.optional(v.id('users')),
+    durationMinutes: v.optional(v.number()), mood: v.optional(v.string()),
     facilityId: v.id('facilities'),
     childId: v.optional(v.id('children')),
     childName: v.optional(v.string()),
@@ -141,9 +165,10 @@ export default defineSchema({
     detail: v.string(),
     amount: v.optional(v.string()),
     by: v.string(),
-  }).index('by_facility', ['facilityId']),
+  }).index('by_facility', ['facilityId']).index('by_facility_date', ['facilityId','date']).index('by_child_date', ['childId','date']),
 
   roster: defineTable({
+    attendanceDate: v.optional(v.string()), checkInAt: v.optional(v.number()), checkOutAt: v.optional(v.number()),
     facilityId: v.id('facilities'),
     childId: v.optional(v.id('children')),
     name: v.string(),
@@ -155,6 +180,7 @@ export default defineSchema({
   }).index('by_facility', ['facilityId', 'order']),
 
   conversations: defineTable({
+    lastSequence: v.optional(v.number()),
     facilityId: v.id('facilities'),
     name: v.string(),
     role: v.string(),
@@ -166,6 +192,7 @@ export default defineSchema({
   }).index('by_facility', ['facilityId', 'order']),
 
   messages: defineTable({
+    sentAt: v.optional(v.number()), sequence: v.optional(v.number()),
     facilityId: v.optional(v.id('facilities')),
     conversationId: v.id('conversations'),
     from: v.string(), // legacy demo: 'me' | 'them'
@@ -174,7 +201,7 @@ export default defineSchema({
     authorRole: v.optional(v.string()),
     text: v.string(),
     time: v.string(),
-  }).index('by_conversation', ['conversationId']),
+  }).index('by_conversation', ['conversationId']).index('by_conversation_sent', ['conversationId','sentAt']),
 
   invoices: defineTable({
     facilityId: v.id('facilities'),
@@ -222,6 +249,7 @@ export default defineSchema({
     .index('by_child', ['childId']),
 
   photos: defineTable({
+    createdAt: v.optional(v.number()), createdBy: v.optional(v.id('users')),
     facilityId: v.id('facilities'),
     emoji: v.string(),
     caption: v.string(),
@@ -235,10 +263,11 @@ export default defineSchema({
     audience: v.optional(v.string()), // 'all' (whole class) | 'family' (one child's parents)
     childId: v.optional(v.id('children')), // when audience === 'family'
     childName: v.optional(v.string()),
-  }).index('by_facility', ['facilityId', 'order']),
+  }).index('by_facility', ['facilityId', 'order']).index('by_facility_created', ['facilityId','createdAt']).index('by_image',['imageId']),
 
   // Lesson plan meta (theme/week) — one per facility room.
   lessonPlans: defineTable({
+    startDate: v.optional(v.string()), endDate: v.optional(v.string()), updatedAt: v.optional(v.number()),
     facilityId: v.id('facilities'),
     room: v.string(),
     week: v.string(),
@@ -247,6 +276,8 @@ export default defineSchema({
 
   // Time-based, child-based curriculum blocks the director authors and educators run.
   lessonBlocks: defineTable({
+    sourceBlockId: v.optional(v.id('lessonBlocks')),
+    planId: v.optional(v.id('lessonPlans')), date: v.optional(v.string()), doneChildIds: v.optional(v.array(v.id('children'))),
     facilityId: v.id('facilities'),
     room: v.string(),
     day: v.string(), // 'Mon' .. 'Fri'
@@ -290,6 +321,7 @@ export default defineSchema({
 
   // Educators with live time-tracking (clock in/out) the director can see.
   educators: defineTable({
+    imageId:v.optional(v.id('_storage')),
     facilityId: v.id('facilities'),
     userId: v.optional(v.id('users')), // links an invited educator's login to their staff record
     name: v.string(),
@@ -310,7 +342,7 @@ export default defineSchema({
     payType: v.optional(v.string()), // 'hourly' | 'salary'
     payRate: v.optional(v.number()), // $/hr if hourly, annual $ if salary
     vacationPct: v.optional(v.number()), // BC vacation pay %: 4 (<5yrs) or 6 (5yrs+)
-  }).index('by_facility', ['facilityId', 'order']),
+  }).index('by_facility', ['facilityId', 'order']).index('by_image',['imageId']),
 
   // Self-serve employee onboarding. The employer generates a token link; the new
   // hire fills personal info, banking + SIN, and uploads documents. SIN + bank
@@ -318,6 +350,8 @@ export default defineSchema({
   // the ONBOARDING_ENC_KEY env var) plus a masked tail for display; raw values are
   // returned solely to an authenticated admin via the reveal action.
   employeeProfiles: defineTable({
+    loginInviteId: v.optional(v.id('invites')),
+    expiresAt: v.optional(v.number()), revokedAt: v.optional(v.number()), revision: v.optional(v.number()), submittedByUserId: v.optional(v.id('users')),
     facilityId: v.id('facilities'),
     token: v.string(),
     status: v.string(), // 'pending' | 'submitted'
@@ -395,6 +429,7 @@ export default defineSchema({
 
   // Saved payroll runs (gross-pay prep only — no tax/remittance, no money movement).
   payRuns: defineTable({
+    status: v.optional(v.string()), voidedAt: v.optional(v.number()), voidReason: v.optional(v.string()),
     facilityId: v.id('facilities'),
     periodStart: v.string(), // 'YYYY-MM-DD'
     periodEnd: v.string(),
@@ -450,6 +485,7 @@ export default defineSchema({
   // An uploaded receipt/invoice the director files for tax. Manual entry first;
   // AI extraction (vendor/amount/GST/category) fills these in later.
   bookkeepingDocs: defineTable({
+    archivedAt: v.optional(v.number()),
     facilityId: v.id('facilities'),
     storageId: v.optional(v.id('_storage')), // the uploaded file
     fileName: v.optional(v.string()),
@@ -468,7 +504,7 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index('by_facility', ['facilityId', 'status'])
-    .index('by_facility_date', ['facilityId', 'docDate']),
+    .index('by_facility_date', ['facilityId', 'docDate']).index('by_storage',['storageId']),
 
   // Owner-managed closures, holidays and family events. Dates are local calendar dates.
   calendarEvents: defineTable({

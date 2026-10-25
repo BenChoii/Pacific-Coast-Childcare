@@ -1,7 +1,9 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { resolveFacilityId, requireFacility } from './lib'
+import { resolveFacilityId, requireFacility, childBelongsToParent } from './lib'
+import { cents, dollars } from './financeUtils'
+import { recordOwnerEvent } from './notifications'
 
 // ── Extras: incident charges + monthly add-on plans ────────────────────────
 // Catalog managed by the director; charges logged by educators/directors the
@@ -9,7 +11,7 @@ import { resolveFacilityId, requireFacility } from './lib'
 // from the catalog so a typo can't bill a family $1,500. Parents see only
 // their own children's charges and plans.
 
-const r2 = (n: number) => Math.round(n * 100) / 100
+const r2 = (n: number) => dollars(cents(n, 'Extra charge'))
 
 async function requireAdmin(ctx: any) {
   const f = await requireFacility(ctx)
@@ -23,7 +25,7 @@ async function myChildIds(ctx: any, facilityId: any, uid: any) {
     .query('children')
     .withIndex('by_facility', (q: any) => q.eq('facilityId', facilityId))
     .collect()
-  return new Set(kids.filter((k: any) => !k.archivedAt && k.parentUserId === uid).map((k: any) => k._id))
+  return new Set(kids.filter((k: any) => childBelongsToParent(k, uid)).map((k: any) => k._id))
 }
 
 /* ── Catalog ── */
@@ -58,6 +60,7 @@ export const addService = mutation({
       active: true,
       createdAt: Date.now(),
     })
+    await recordOwnerEvent(ctx, { facilityId, type: 'extra_service_added', summary: 'An extra service was added.' })
   },
 })
 
@@ -68,6 +71,7 @@ export const toggleService = mutation({
     const s = await ctx.db.get(id)
     if (!s || s.facilityId !== facilityId) throw new Error('Not found')
     await ctx.db.patch(id, { active })
+    await recordOwnerEvent(ctx, { facilityId, type: 'extra_service_updated', summary: 'An extra service was updated.' })
   },
 })
 
@@ -78,6 +82,7 @@ export const removeService = mutation({
     const s = await ctx.db.get(id)
     if (!s || s.facilityId !== facilityId) throw new Error('Not found')
     await ctx.db.delete(id)
+    await recordOwnerEvent(ctx, { facilityId, type: 'extra_service_removed', summary: 'An extra service was removed.' })
   },
 })
 
@@ -95,11 +100,12 @@ export const logCharge = mutation({
     const { facilityId, user } = await requireFacility(ctx)
     if (user.role === 'parent') throw new Error('Only staff can log charges.')
     const svc = await ctx.db.get(serviceId)
-    if (!svc || svc.facilityId !== facilityId || svc.kind !== 'incident') throw new Error('Service not found')
+    if (!svc || !svc.active || svc.facilityId !== facilityId || svc.kind !== 'incident') throw new Error('Service not found')
     if (childId) {
       const child = await ctx.db.get(childId)
       if (!child || child.archivedAt || child.facilityId !== facilityId) throw new Error('Child not found')
     }
+    if (minutes !== undefined && (!Number.isFinite(minutes) || minutes < 0 || minutes > 1440)) throw new Error('Choose valid late-pickup minutes.')
     const mins = Math.max(0, Math.round(minutes ?? 0))
     const amount = svc.pricing === 'per15' ? r2((Math.max(1, Math.ceil(mins / 15)) * svc.amount)) : svc.amount
     await ctx.db.insert('extraCharges', {
@@ -116,6 +122,7 @@ export const logCharge = mutation({
       status: 'unbilled',
       createdAt: Date.now(),
     })
+    await recordOwnerEvent(ctx, { facilityId, type: 'extra_charge_logged', summary: 'An extra charge was logged for a family.' })
     return { amount }
   },
 })
@@ -153,6 +160,7 @@ export const setChargeStatus = mutation({
     const c = await ctx.db.get(id)
     if (!c || c.facilityId !== facilityId) throw new Error('Not found')
     await ctx.db.patch(id, { status })
+    await recordOwnerEvent(ctx, { facilityId, type: 'extra_charge_updated', summary: 'An extra charge status was updated.' })
   },
 })
 
@@ -162,7 +170,7 @@ export const subscribePlan = mutation({
   handler: async (ctx, { serviceId, childId }) => {
     const { facilityId } = await requireAdmin(ctx)
     const svc = await ctx.db.get(serviceId)
-    if (!svc || svc.facilityId !== facilityId || svc.kind !== 'plan') throw new Error('Plan not found')
+    if (!svc || !svc.active || svc.facilityId !== facilityId || svc.kind !== 'plan') throw new Error('Plan not found')
     const child = await ctx.db.get(childId)
     if (!child || child.archivedAt || child.facilityId !== facilityId) throw new Error('Child not found')
     const existing = await ctx.db
@@ -183,6 +191,7 @@ export const subscribePlan = mutation({
       active: true,
       startedAt: Date.now(),
     })
+    await recordOwnerEvent(ctx, { facilityId, type: 'monthly_plan_added', summary: 'A family monthly plan was added.' })
   },
 })
 
@@ -193,6 +202,7 @@ export const cancelPlan = mutation({
     const s = await ctx.db.get(id)
     if (!s || s.facilityId !== facilityId) throw new Error('Not found')
     await ctx.db.patch(id, { active: false })
+    await recordOwnerEvent(ctx, { facilityId, type: 'monthly_plan_canceled', summary: 'A family monthly plan was canceled.' })
   },
 })
 

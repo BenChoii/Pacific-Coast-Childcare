@@ -3,6 +3,7 @@ import { v } from 'convex/values'
 import { resolveFacilityId, requireAdmin, requireStaff, requireRecord } from './lib'
 import { recordOwnerEvent } from './notifications'
 import { getAuthUserId } from '@convex-dev/auth/server'
+import { dayStart, localDate, nextDate, sessionSeconds, weekStart } from './financeUtils'
 
 export const list = query({
   args: {},
@@ -13,12 +14,28 @@ export const list = query({
       .query('educators')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
       .collect()
+    const facility = await ctx.db.get(fid)
+    const now = Date.now(), zone = facility?.timezone || 'America/Vancouver', day = localDate(now, zone)
+    const sessions = await ctx.db.query('clockSessions').withIndex('by_facility', q => q.eq('facilityId', fid)).collect()
     const out = []
     const uid = await getAuthUserId(ctx)
     const user = uid ? await ctx.db.get(uid) : null
     for (const d of docs.filter((educator) => !user || user.role === 'admin' || (user.role === 'staff' && educator.userId === uid))) {
       const { _id, _creationTime, facilityId, order, imageId, ...rest } = d
-      out.push({ id: _id, ...rest, imageUrl: imageId ? await ctx.storage.getUrl(imageId) : null })
+      const ownSessions = sessions.filter(session => session.educatorId === _id)
+      const midnight = dayStart(day, zone)
+      const open = ownSessions.find(session => session.endedAt === undefined)
+      // StaffClock adds elapsed time for the current shift on the client.
+      const stats = facility?.isDemo && !ownSessions.length ? {} : {
+        todaySeconds: sessionSeconds(ownSessions, midnight, dayStart(nextDate(day), zone), now, true),
+        hoursWeek: sessionSeconds(ownSessions, dayStart(weekStart(day), zone), now, now) / 3600,
+        clockInAt: open ? Math.max(open.startedAt, midnight) : rest.clockInAt ? Math.max(rest.clockInAt, midnight) : undefined,
+        punches: ownSessions.flatMap(session => [
+          ...(session.startedAt >= midnight ? [{ type: 'in', time: new Date(session.startedAt).toLocaleTimeString('en-CA', { timeZone: zone, hour: 'numeric', minute: '2-digit' }) }] : []),
+          ...(session.endedAt && session.endedAt >= midnight ? [{ type: 'out', time: new Date(session.endedAt).toLocaleTimeString('en-CA', { timeZone: zone, hour: 'numeric', minute: '2-digit' }) }] : []),
+        ]),
+      }
+      out.push({ id: _id, ...rest, ...stats, imageUrl: imageId ? await ctx.storage.getUrl(imageId) : null })
     }
     return out
   },
@@ -66,19 +83,26 @@ export const clock = mutation({
     const { facilityId, user, userId } = await requireStaff(ctx)
     const e = await requireRecord(ctx, id, facilityId)
     if (user?.role === 'staff' && e.userId !== userId) throw new Error('You can only clock your own attendance.')
-    if (e.status === 'out') {
-      await ctx.db.patch(id, {
-        status: 'in',
-        clockInAt: Date.now(),
-        punches: [...e.punches, { type: 'in', time }],
-      })
+    const now = Date.now()
+    const facility = await ctx.db.get(facilityId)
+    const zone = facility?.timezone || 'America/Vancouver', day = localDate(now, zone)
+    const sessions = await ctx.db.query('clockSessions').withIndex('by_educator', q => q.eq('educatorId', id)).collect()
+    const open = sessions.find(row => row.endedAt === undefined)
+    const stamp = new Date(now).toLocaleTimeString('en-CA', { timeZone: zone, hour: 'numeric', minute: '2-digit' })
+    if (e.status === 'out' && !open) {
+      await ctx.db.insert('clockSessions', { facilityId, educatorId: id, startedAt: now })
+      await ctx.db.patch(id, { status: 'in', clockInAt: now, todaySeconds: sessionSeconds(sessions, dayStart(day, zone), now, now, true), punches: [{ type: 'in', time: stamp }] })
     } else {
-      const sessionSec = e.clockInAt ? Math.round((Date.now() - e.clockInAt) / 1000) : 0
-      await ctx.db.patch(id, {
-        status: 'out',
-        clockInAt: undefined,
-        todaySeconds: e.todaySeconds + sessionSec,
-        punches: [...e.punches, { type: 'out', time }],
+      if (open) { await ctx.db.patch(open._id, { endedAt: now }); open.endedAt = now }
+      else if (e.clockInAt && e.clockInAt <= now) {
+        // Preserve a pre-upgrade open shift when its first clock-out arrives.
+        const legacy = { facilityId, educatorId: id, startedAt: e.clockInAt, endedAt: now }
+        await ctx.db.insert('clockSessions', legacy); sessions.push(legacy as any)
+      }
+      await ctx.db.patch(id, { status: 'out', clockInAt: undefined,
+        todaySeconds: sessionSeconds(sessions, dayStart(day, zone), dayStart(nextDate(day), zone), now, true),
+        hoursWeek: sessionSeconds(sessions, dayStart(weekStart(day), zone), now, now) / 3600,
+        punches: [...(e.punches || []).slice(-19), { type: 'out', time: stamp }],
       })
     }
     await recordOwnerEvent(ctx, { facilityId, actorId: userId || undefined, type: 'educator_attendance_changed', summary: `${e.name} clocked ${e.status === 'out' ? 'in' : 'out'}.` })

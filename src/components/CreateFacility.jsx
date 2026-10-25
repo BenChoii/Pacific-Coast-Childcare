@@ -7,17 +7,20 @@ import BrandLockup from './BrandLockup.jsx'
 // Shown when an owner is signed in but hasn't created their facility yet
 // (e.g. they signed up through the generic flow as a Director).
 export default function CreateFacility() {
-  const { createFacility, logout } = useApp()
-  const [name, setName] = useState('')
+  const { createFacility, logout, membershipError, retryMembership, joiningFacility } = useApp()
+  const [name, setName] = useState(() => { try { return sessionStorage.getItem('cubby_pending_facility') || '' } catch { return '' } })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   const submit = async (e) => {
     e.preventDefault()
+    if (!name.trim()) { setError('Enter your daycare name.'); return }
     setBusy(true)
     setError('')
+    try { sessionStorage.setItem('cubby_pending_facility', name.trim()) } catch {}
     try {
-      await createFacility(name)
+      await createFacility(name.trim())
+      try { sessionStorage.removeItem('cubby_pending_facility') } catch {}
       // viewer.hasFacility flips → the gate moves to onboarding.
     } catch {
       setBusy(false)
@@ -43,12 +46,12 @@ export default function CreateFacility() {
             <span className="eyebrow mb-1.5 block">Daycare name</span>
             <span className="relative block">
               <Home size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input className="input pl-10" placeholder="Sunshine Family Daycare" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input className="input pl-10" placeholder="Sunshine Family Daycare" value={name} onChange={(e) => setName(e.target.value)} required maxLength={160} />
             </span>
           </label>
-          {error && <p className="rounded-xl bg-coral-400/15 px-3 py-2 text-sm font-semibold text-coral-600">{error}</p>}
-          <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? <Loader2 size={18} className="animate-spin" /> : <>Create my daycare <ArrowRight size={16} /></>}
+          {(error || membershipError) && <div role="alert" className="rounded-xl bg-coral-400/15 px-3 py-2 text-sm font-semibold text-coral-600"><p>{error || membershipError}</p>{membershipError && <button type="button" disabled={busy || joiningFacility} onClick={retryMembership} className="mt-2 underline">Retry saved setup</button>}</div>}
+          <button type="submit" disabled={busy || joiningFacility} className="btn-primary w-full">
+            {busy || joiningFacility ? <Loader2 size={18} className="animate-spin" /> : <>Create my daycare <ArrowRight size={16} /></>}
           </button>
         </form>
         <button onClick={logout} className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-coral-500">

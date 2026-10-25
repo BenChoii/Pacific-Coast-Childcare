@@ -11,279 +11,20 @@ import { openInvoicePrint } from '../lib/invoiceDoc.js'
 import { StatCard, Card, SectionHeader, Pill, Avatar, ProgressBar, HomeSkeleton, KnitEmpty } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { ParentExtrasCard } from './finance.jsx'
-import { CalendarEntry, localDateLabel } from './calendar.jsx'
+import { CalendarEntry, MonthCalendar, localDateLabel } from './calendar.jsx'
 import { ACTIVITY_TYPES } from '../data/mockData.js'
+import { dayKey } from '../lib/careData.js'
 
 // Families only see children linked by the daycare; demo data stays in the demo workspace.
 function useMyKids() {
   const { childrenList, viewer, isAuthenticated } = useApp()
   const kids = isAuthenticated
-    ? childrenList.filter(c => c.parentUserId === viewer?.id && !c.archivedAt)
+    ? childrenList.filter(c => (c.parentUserId === viewer?.id || c.guardianUserIds?.includes(viewer?.id)) && !c.archivedAt)
     : childrenList
   return { kids, needClaim: false }
 }
 
-/* ---------------- Parent Home ---------------- */
-export function ParentHome() {
-  const { setView, activeChildId, setActiveChildId, timeline, conversations, loading, viewer, invoices, dailyRecap } = useApp()
-  const { kids, needClaim } = useMyKids()
-  const child = kids.find((c) => c.id === activeChildId) || kids[0]
-  const [recap, setRecap] = useState('')
-  const [recapBusy, setRecapBusy] = useState(false)
-  const makeRecap = async () => {
-    if (!child) return
-    setRecapBusy(true)
-    try {
-      const activities = timeline.slice(0, 10).map((t) => `- ${t.title}: ${t.detail}`).join('\n')
-      const r = await dailyRecap({ childName: child.first, activities })
-      setRecap(r?.text || (r?.configured === false ? 'AI recaps aren’t switched on yet.' : 'Couldn’t generate right now.'))
-    } catch {
-      setRecap('Couldn’t generate right now — please try again.')
-    } finally { setRecapBusy(false) }
-  }
-  const unread = conversations.reduce((n, c) => n + c.unread, 0)
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
-  const firstName = (viewer?.name || 'there').split(' ')[0]
-  const due = invoices.find((i) => i.status === 'due')
-  const checkedIn = child && (child.status === 'checked-in' || child.status === 'napping')
-
-  if (loading && timeline.length === 0) return <HomeSkeleton />
-  if (!child) {
-    return (
-      <div className="space-y-6">
-        <SectionHeader eyebrow="Family" title={`Welcome, ${firstName}`} />
-        <KnitEmpty
-          image="/cinema/spots/cubs.webp"
-          title="Almost there!"
-          hint="No child is linked to your account yet. Your daycare will add your child shortly, or ask them for an invite link."
-        />
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="pt-1"
-      >
-        <p className="eyebrow">{greeting}, {firstName}</p>
-        <h2 className="mt-2 text-4xl leading-[1.04] text-slate-800 sm:text-[3rem]">{child.first} is having a <span className="text-brand-600">great day</span></h2>
-        <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-mint-500">
-          <CheckCircle2 size={16} /> {checkedIn ? `Checked in at ${child.checkInTime} · ${child.room} room` : `${child.room} room`}
-        </div>
-      </motion.div>
-
-      {/* Child switcher */}
-      <div className="flex flex-wrap gap-3">
-        {kids.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setActiveChildId(c.id)}
-            className={`flex items-center gap-3 rounded-3xl border-2 bg-white p-2 pr-5 transition ${
-              c.id === activeChildId ? 'border-brand-400 shadow-playful' : 'border-transparent shadow-sm hover:border-slate-200'
-            }`}
-          >
-            <Avatar emoji={c.emoji} gradient={c.color} src={c.imageUrl} />
-            <div className="text-left">
-              <div className="text-sm font-extrabold text-slate-800">{c.first}</div>
-              <div className="text-xs font-bold text-slate-400">{c.age} · {c.room}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* AI day-in-a-glance */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-4xl border border-line bg-gradient-to-br from-brand-50 to-grape-400/10 p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="flex items-center gap-2 font-extrabold text-slate-800"><Sparkles size={18} className="text-grape-500" /> Day in a glance</h3>
-          {!recap && (
-            <button onClick={makeRecap} disabled={recapBusy} className="btn-primary !py-2 text-sm">
-              {recapBusy ? <Loader2 size={15} className="animate-spin" /> : 'Generate'}
-            </button>
-          )}
-        </div>
-        {recap ? (
-          <>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-600">{recap}</p>
-            <button onClick={makeRecap} disabled={recapBusy} className="mt-2 text-xs font-bold text-brand-600">{recapBusy ? 'Refreshing…' : '↻ Refresh'}</button>
-          </>
-        ) : (
-          <p className="mt-1 text-sm font-semibold text-slate-400">A warm AI summary of {child.first}'s day, from the classroom log.</p>
-        )}
-      </motion.div>
-
-      {/* Today snapshot */}
-      <div>
-        <SectionHeader title={`${child.first}'s day so far`} subtitle="Live updates from the classroom" />
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard icon={Smile} label="Mood" value={child.mood} gradient="from-sunshine-400 to-coral-500" delay={0} />
-          <StatCard icon={Moon} label="Nap" value={`${Math.floor(child.napMinutes / 60)}h ${child.napMinutes % 60}m`} gradient="from-grape-400 to-grape-600" delay={0.05} />
-          <StatCard icon={Apple} label="Meals" value="2 of 3" sub="Snack & lunch logged" gradient="from-coral-400 to-pink-500" delay={0.1} />
-          <StatCard icon={Camera} label="New photos" value={child.photosToday} gradient="from-brand-400 to-brand-600" delay={0.15} />
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Recent activity */}
-        <Card className="lg:col-span-2" delay={0.1}>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-extrabold text-slate-800">Recent activity</h3>
-            <button onClick={() => setView('timeline')} className="inline-flex items-center text-sm font-extrabold text-brand-600">
-              Full log <ChevronRight size={16} />
-            </button>
-          </div>
-          <div className="space-y-3">
-            {timeline.slice(0, 4).map((t) => {
-              const meta = ACTIVITY_TYPES[t.type]
-              return (
-                <div key={t.id} className="flex items-start gap-3">
-                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-lg ${meta.soft}`}>{meta.emoji}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-bold text-slate-700">{t.title}</span>
-                      <span className="shrink-0 text-xs font-bold text-slate-400">{t.time}</span>
-                    </div>
-                    <p className="truncate text-sm font-semibold text-slate-400">{t.detail}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-
-        {/* Side cards */}
-        <div className="space-y-4">
-          <QuickCard
-            onClick={() => setView('messages')}
-            icon={MessageCircle}
-            title="Messages"
-            sub={unread > 0 ? `${unread} new from teachers` : 'All caught up'}
-            gradient="from-grape-400 to-grape-600"
-            badge={unread}
-          />
-          <QuickCard
-            onClick={() => setView('billing')}
-            icon={CreditCard}
-            title="Tuition"
-            sub={due ? `$${due.amount.toLocaleString()} due ${due.due}` : 'No balance due'}
-            gradient="from-mint-400 to-brand-500"
-          />
-          <QuickCard
-            onClick={() => setView('calendar')}
-            icon={CalendarDays}
-            title="Calendar & events"
-            sub="See what's coming up"
-            gradient="from-blush-300 to-blush-500"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function QuickCard({ icon: Icon, title, sub, gradient, onClick, badge }) {
-  return (
-    <button
-      onClick={onClick}
-      className="card flex w-full items-center gap-3 p-4 text-left transition hover:-translate-y-1 hover:shadow-playful"
-    >
-      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-md`}>
-        <Icon size={20} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="font-extrabold text-slate-800">{title}</div>
-        <div className="truncate text-sm font-semibold text-slate-400">{sub}</div>
-      </div>
-      {badge > 0 && (
-        <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-coral-500 px-2 text-xs font-extrabold text-white">{badge}</span>
-      )}
-      <ChevronRight size={18} className="text-slate-300" />
-    </button>
-  )
-}
-
-/* ---------------- Parent Timeline ---------------- */
-export function ParentTimeline() {
-  const { timeline, activeChildId } = useApp()
-  const { kids } = useMyKids()
-  const child = kids.find((c) => c.id === activeChildId) || kids[0]
-  const [filter, setFilter] = useState('all')
-  const filters = ['all', 'meal', 'nap', 'diaper', 'activity', 'learning', 'photo']
-  const items = filter === 'all' ? timeline : timeline.filter((t) => t.type === filter)
-
-  return (
-    <div className="space-y-5">
-      <SectionHeader title="Daily log 📋" subtitle={child ? `Every moment of ${child.first}'s day, as it happens` : 'Live updates from the classroom'} />
-
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => {
-          const meta = ACTIVITY_TYPES[f]
-          const active = filter === f
-          return (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`pill capitalize ${active ? 'bg-brand-500 text-white shadow-md' : 'bg-white text-slate-500 ring-1 ring-slate-200'}`}
-            >
-              {f === 'all' ? '✨ All' : `${meta.emoji} ${meta.label}`}
-            </button>
-          )
-        })}
-      </div>
-
-      {items.length === 0 ? (
-        <KnitEmpty
-          image="/cinema/spots/nap.webp"
-          title="All quiet for now"
-          hint={child ? `${child.first}’s day will appear here moment by moment — meals, naps, learning and play.` : 'Live updates will appear here as the day unfolds.'}
-        />
-      ) : (
-      <Card>
-        <div className="relative pl-2">
-          <div className="absolute bottom-2 left-[1.35rem] top-2 w-0.5 bg-slate-100" />
-          <div className="space-y-5">
-            {items.map((t, i) => {
-              const meta = ACTIVITY_TYPES[t.type]
-              return (
-                <motion.div
-                  key={t.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="relative flex gap-4"
-                >
-                  <span className={`z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-base text-white shadow-md ${meta.color}`}>
-                    {meta.emoji}
-                  </span>
-                  <div className="flex-1 rounded-2xl bg-slate-50 p-3.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-slate-700">{t.title}</span>
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-400">
-                        <Clock size={12} /> {t.time}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-sm font-semibold text-slate-500">{t.detail}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      {t.amount && <Pill className={meta.soft}>{t.amount}</Pill>}
-                      <span className="text-xs font-bold text-slate-400">by {t.by}</span>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      </Card>
-      )}
-    </div>
-  )
-}
+export { FamilyToday as ParentHome, FamilyDailyLog as ParentTimeline, FamilyProfile as ParentProfile } from './care.jsx'
 
 /* ---------------- Parent Calendar ---------------- */
 export function ParentCalendar() {
@@ -293,7 +34,7 @@ export function ParentCalendar() {
   const events = useQuery(api.calendar.list, child ? { childId: child.id } : {})
   const plans = useQuery(api.lessons.familyPlans, child ? { childId: child.id } : {})
   const [showPast, setShowPast] = useState(false)
-  const today = new Date().toLocaleDateString('en-CA')
+  const today = dayKey(Date.now(),facility?.timezone)
   const visible = (events || []).filter(e => showPast || e.endDate >= today)
   const days = child?.enrollmentDays || child?.attendanceDays
   return <div className="space-y-5">
@@ -302,6 +43,7 @@ export function ParentCalendar() {
     {!child ? <Card><p className="text-sm text-slate-600">Your daycare will link your child before their calendar and learning plans appear here.</p></Card> : <>
       <Card className="bg-brand-50/50"><h3 className="text-xl text-slate-800">{child.first}'s schedule</h3><p className="mt-2 text-sm text-slate-600">{Array.isArray(days) ? (days.length ? `Enrolled days: ${days.join(', ')}.` : 'No recurring attendance days are currently selected. Please contact your daycare before attending.') : 'Your daycare can confirm your child’s enrolled days with you.'} Closure dates below override regular attendance. Please do not attend on days marked closed.</p></Card>
       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-xl text-slate-800">Calendar & closures</h3><label className="flex items-center gap-2 text-sm text-slate-500"><input type="checkbox" checked={showPast} onChange={e => setShowPast(e.target.checked)} />Show past dates</label></div>
+      {events && <MonthCalendar key={child.id} events={events} attendanceDays={days}/>}
       {events === undefined ? <p className="text-sm text-slate-500">Loading dates…</p> : visible.length ? <div className="grid gap-3">{visible.map(event => <CalendarEntry key={event.id} event={event} />)}</div> : <Card><p className="text-sm text-slate-600">No {showPast ? '' : 'upcoming '}calendar dates have been posted for your child.</p></Card>}
       <h3 className="pt-3 text-2xl text-slate-800">What we're learning</h3>
       {plans === undefined ? <p className="text-sm text-slate-500">Loading learning plans…</p> : plans.length ? plans.map(plan => <FamilyLearningPlan key={plan.id} plan={plan} />) : <Card><p className="text-sm text-slate-600">Your daycare’s weekly and monthly learning plans will appear here when published.</p></Card>}
@@ -340,9 +82,9 @@ export function ParentBilling() {
         pushToast(res.error, { emoji: '⚠️', tone: 'coral' })
         return
       }
-      // Stripe not configured yet → instant-pay demo fallback
-      payInvoice(inv.id)
-      pushToast(`Payment of $${inv.amount.toLocaleString()} recorded — thank you!`, { emoji: '💳', tone: 'mint' })
+      if (!facility?.isDemo) { pushToast('Card payments are not available yet. Ask your daycare for their payment instructions.',{tone:'coral'}); return }
+      await payInvoice(inv.id)
+      pushToast('Sample payment recorded in the demo.', { emoji: '💳', tone: 'mint' })
     } catch {
       pushToast('Could not start checkout. Please try again.', { emoji: '⚠️', tone: 'coral' })
     } finally {
@@ -354,6 +96,7 @@ export function ParentBilling() {
     <div className="space-y-6">
       <SectionHeader title="Tuition & billing 💳" subtitle="Pay, review and download statements" />
 
+      <p className="text-sm text-slate-500">Only invoices addressed to your account appear here. Ask your daycare if the family’s billing contact needs to change.</p>
       <ParentExtrasCard />
 
       {due.map((inv) => (
@@ -428,8 +171,8 @@ export function ParentBilling() {
         <Card className="flex items-center gap-4 bg-mint-400/10">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-mint-400/20 text-mint-500"><CheckCircle2 /></span>
           <div>
-            <div className="font-extrabold text-slate-800">You’re all paid up! 🎉</div>
-            <div className="text-sm font-semibold text-slate-400">No outstanding balance. Auto-pay is on.</div>
+            <div className="font-extrabold text-slate-800">No payable invoices currently recorded</div>
+            <div className="text-sm font-semibold text-slate-400">Your daycare confirms any transfers awaiting receipt. Review the recorded history below.</div>
           </div>
         </Card>
       )}
@@ -449,101 +192,6 @@ export function ParentBilling() {
             </div>
           ))}
         </Card>
-      </div>
-    </div>
-  )
-}
-
-/* ---------------- Parent Profile ---------------- */
-export function ParentProfile() {
-  const { activeChildId, setActiveChildId, educators, setChildPhoto } = useApp()
-  const { kids } = useMyKids()
-  const child = kids.find((c) => c.id === activeChildId) || kids[0]
-  const teacher = educators?.[0]?.name || 'Your child’s educator'
-
-  if (!child) {
-    return (
-      <div className="space-y-6">
-        <SectionHeader eyebrow="Child" title="Child profile" />
-        <Card className="text-center"><p className="text-sm font-semibold text-slate-500">No child linked yet.</p></Card>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap gap-3">
-        {kids.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setActiveChildId(c.id)}
-            className={`pill ${c.id === activeChildId ? 'bg-brand-500 text-white' : 'bg-white text-slate-500 ring-1 ring-slate-200'}`}
-          >
-            {c.emoji} {c.first}
-          </button>
-        ))}
-      </div>
-
-      <Card className="overflow-hidden p-0">
-        <div className="flex items-center gap-4 p-6">
-          <AvatarUpload src={child.imageUrl} fallback={child.emoji} size="h-20 w-20" gradient={child.color} onUpload={(f) => setChildPhoto(child.id, f)} />
-          <div>
-            <h2 className="text-3xl text-slate-800">{child.name}</h2>
-            <p className="text-sm font-medium text-slate-500">{child.age} · {child.room} room</p>
-            <p className="mt-0.5 text-xs font-medium text-slate-400">Tap the photo to add one 📷</p>
-          </div>
-        </div>
-        <div className="grid gap-4 border-t border-line p-6 sm:grid-cols-2">
-          <Info label="Status" value="Enrolled" icon={CheckCircle2} tone="text-mint-500" />
-          <Info label="Primary teacher" value={teacher} icon={Smile} tone="text-brand-500" />
-          <Info label="Allergies" value={child.allergies.length ? child.allergies.join(', ') : 'None on file'} icon={AlertTriangle} tone={child.allergies.length ? 'text-coral-500' : 'text-slate-400'} />
-          <Info label="Parent / guardian" value={child.parent} icon={Phone} tone="text-grape-500" />
-        </div>
-      </Card>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <h3 className="mb-3 flex items-center gap-2 font-extrabold text-slate-800"><ShieldCheck size={18} className="text-brand-500" /> Authorized pickups</h3>
-          <div className="space-y-2">
-            {[`${child.parent} (Parent)`].map((p) => (
-              <div key={p} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                <Avatar emoji="🧑" size="h-9 w-9" gradient="from-slate-300 to-slate-400" />
-                <span className="text-sm font-bold text-slate-600">{p}</span>
-                <CheckCircle2 size={16} className="ml-auto text-mint-500" />
-              </div>
-            ))}
-            <p className="px-1 text-xs font-semibold text-slate-400">Ask your daycare to add more authorized pickups.</p>
-          </div>
-        </Card>
-
-        <Card>
-          <h3 className="mb-3 flex items-center gap-2 font-extrabold text-slate-800"><FileText size={18} className="text-grape-500" /> Documents & forms</h3>
-          <div className="space-y-2">
-            {[
-              { name: 'Enrollment agreement', status: 'Signed', tone: 'bg-mint-400/15 text-mint-500' },
-              { name: 'Immunization record', status: 'On file', tone: 'bg-mint-400/15 text-mint-500' },
-              { name: 'Summer 2026 form', status: 'Action needed', tone: 'bg-coral-400/15 text-coral-600' },
-            ].map((d) => (
-              <div key={d.name} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-                <FileText size={18} className="text-slate-400" />
-                <span className="flex-1 text-sm font-bold text-slate-600">{d.name}</span>
-                <Pill className={d.tone}>{d.status}</Pill>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-    </div>
-  )
-}
-
-function Info({ label, value, icon: Icon, tone }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-      <Icon size={20} className={tone} />
-      <div>
-        <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</div>
-        <div className="font-extrabold text-slate-700">{value}</div>
       </div>
     </div>
   )

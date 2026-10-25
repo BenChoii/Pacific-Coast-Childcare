@@ -1,6 +1,9 @@
-import { action } from './_generated/server'
+import { action, internalQuery } from './_generated/server'
 import { v } from 'convex/values'
-import { internal } from './_generated/api'
+import { api, internal } from './_generated/api'
+import { requireFacility } from './lib'
+import { assertOwnedUpload } from './files'
+import { openPrivateBlob } from './fileEncryption'
 
 // Free OpenRouter models, tried in order (availability shifts over time, so we
 // fall through to the next if one is unavailable). Override with OPENROUTER_MODEL.
@@ -13,7 +16,7 @@ const FREE_MODELS = [
   'z-ai/glm-4.5-air:free',
 ]
 
-export async function chat(messages, maxTokens = 220) {
+export async function chat(messages: any[], maxTokens = 220) {
   const key = process.env.OPENROUTER_API_KEY
   if (!key) return { configured: false }
   const models = [process.env.OPENROUTER_MODEL, ...FREE_MODELS].filter(Boolean)
@@ -97,8 +100,13 @@ export const scanIntake = action({
   args: { storageId: v.id('_storage') },
   handler: async (ctx, { storageId }) => {
     await ctx.runQuery(internal.users.actionMembership, { staffOnly: true })
-    const url = await ctx.storage.getUrl(storageId)
-    if (!url) return { configured: true, error: 'Could not read the uploaded image.' }
+    await ctx.runQuery(internal.ai.authorizeIntake,{storageId})
+    const stored=await ctx.storage.get(storageId)
+    const blob=stored?await openPrivateBlob(stored):null
+    if(!blob) return {configured:true,error:'Could not read the uploaded image.'}
+    const bytes=new Uint8Array(await blob.arrayBuffer())
+    let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192))
+    const url=`data:${blob.type};base64,${btoa(binary)}`
     const res = await visionChat(
       url,
       `This is a photo of a childcare/daycare enrolment or intake form (possibly handwritten). Extract what you can read and return ONLY a JSON object — no prose, no markdown fence — with exactly these keys (use "" when unreadable or absent):
@@ -136,6 +144,8 @@ export const draftNote = action({
   handler: async (ctx, { childName, kind, keywords }) => {
     await ctx.runQuery(internal.users.actionMembership, { staffOnly: true })
     const first = (childName || 'the child').split(' ')[0]
+    if(!keywords?.trim())return {configured:true,error:'Add the actual facts or observations before asking for a draft.'}
+    if(keywords.length>5000||childName.length>200||kind.length>50)throw new Error('Please shorten the notes.')
     return await chat([
       {
         role: 'system',
@@ -144,7 +154,7 @@ export const draftNote = action({
       },
       {
         role: 'user',
-        content: `Child's first name: ${first}\nActivity type: ${kind}\nEducator's rough notes/keywords: ${keywords || '(none — write a pleasant generic note for this activity type)'}\n\nWrite the note to the parent.`,
+        content: `Child's first name: ${first}\nActivity type: ${kind}\nEducator's rough notes/keywords: ${keywords}\n\nWrite the note to the parent.`,
       },
     ], 160)
   },
@@ -152,12 +162,18 @@ export const draftNote = action({
 
 // Parent: a warm "day in a glance" recap built from the day's activity log.
 export const dailyRecap = action({
-  args: { childName: v.string(), activities: v.string() },
-  handler: async (ctx, { childName, activities }) => {
+  args: {childId:v.optional(v.id('children')),date:v.optional(v.string()),childName:v.optional(v.string()),activities:v.optional(v.string())},
+  handler: async (ctx, {childId,date}):Promise<any> => {
     await ctx.runQuery(internal.users.actionMembership, {})
-    const first = (childName || 'your child').split(' ')[0]
+    if(!childId)throw new Error('Select the child and date for this summary.')
+    const kids=await ctx.runQuery(api.children.list,{date})
+    const child=kids.find((c:any)=>c.id===childId)
+    if(!child)throw new Error('Child not available.')
+    const records=await ctx.runQuery(api.activities.list,{childId,date,limit:100})
+    const activities=records.map((entry:any)=>`${entry.time} · ${entry.title}: ${entry.detail}`).join('\n').slice(0,16000)
+    const first=child.first
     if (!activities.trim()) {
-      return { configured: true, text: `${first} is having a lovely day! Check back soon — the educators will post updates as the day unfolds. 💙` }
+      return { configured: true, text: `No activities have been recorded for ${first} on this date. Check the daily log for updates.` }
     }
     return await chat([
       {
@@ -172,3 +188,5 @@ export const dailyRecap = action({
     ], 220)
   },
 })
+
+export const authorizeIntake=internalQuery({args:{storageId:v.id('_storage')},handler:async(ctx,{storageId})=>{const {facilityId,userId,user}=await requireFacility(ctx);if(!['admin','staff'].includes(user.role||''))throw new Error('Educator access required.');await assertOwnedUpload(ctx,storageId,facilityId,userId,['intake']);return true}})

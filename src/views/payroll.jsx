@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { motion } from 'framer-motion'
@@ -8,6 +8,7 @@ import {
   ExternalLink, Lock, ShieldCheck, FileText,
 } from 'lucide-react'
 import { SectionHeader, Card } from '../components/ui.jsx'
+import { usePrivateDownload } from '../lib/files.js'
 import { useApp } from '../context/AppContext.jsx'
 
 const PERIODS = [
@@ -17,9 +18,9 @@ const PERIODS = [
 ]
 const PPY = { weekly: 52, biweekly: 26, semimonthly: 24 }
 const OT = 1.5
-const r2 = (n) => Math.round((Number.isFinite(+n) ? +n : 0) * 100) / 100
+const r2 = (n) => { const value = Number.isFinite(+n) ? +n : 0; return Math.round((value + Math.sign(value || 1) * Number.EPSILON) * 100) / 100 }
 const money = (n) => '$' + r2(n).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-const ymd = (d) => d.toISOString().slice(0, 10)
+const ymd = (d) => new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
 
 // Mirror of convex/payroll.ts computeLine — keep identical.
 function calcLine(ed, input, payPeriod) {
@@ -56,8 +57,10 @@ function Disclaimer() {
 function PaySetup({ settings }) {
   const setPeriod = useMutation(api.payroll.setPayPeriod)
   const setPay = useMutation(api.payroll.setEducatorPay)
+  const [error, setError] = useState('')
   return (
     <div className="space-y-5">
+      {error && <p role="alert" className="text-sm text-coral-600">{error}</p>}
       <Card className="p-5">
         <p className="eyebrow">Pay period</p>
         <p className="mt-1 text-sm font-medium text-slate-500">How often you run payroll. Sets how salaries split per run.</p>
@@ -65,7 +68,7 @@ function PaySetup({ settings }) {
           {PERIODS.map(([id, label]) => (
             <button
               key={id}
-              onClick={() => setPeriod({ payPeriod: id })}
+              onClick={async () => { setError(''); try { await setPeriod({ payPeriod: id }) } catch (e) { setError(e.message || 'Could not save pay period.') } }}
               className={`rounded-xl px-4 py-2 text-sm font-bold transition ${settings.payPeriod === id ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
             >
               {label}
@@ -98,19 +101,22 @@ function EducatorPayRow({ ed, onSave }) {
   const [saved, setSaved] = useState(false)
   const dirty = payType !== (ed.payType || 'hourly') || +rate !== (ed.payRate ?? '') || vac !== (ed.vacationPct || 4)
 
+  const [error, setError] = useState('')
   const save = async () => {
-    setSaving(true)
+    setSaving(true); setError('')
     try {
-      await onSave({ educatorId: ed._id, payType, payRate: Math.max(0, +rate || 0), vacationPct: vac })
+      if (rate === '' || !Number.isFinite(+rate) || +rate < 0) throw new Error('Enter a valid nonnegative pay rate.')
+      await onSave({ educatorId: ed._id, payType, payRate: +rate, vacationPct: vac })
       setSaved(true)
       setTimeout(() => setSaved(false), 1800)
-    } finally {
+    } catch (e) { setError(e.message || 'Could not save pay settings.') } finally {
       setSaving(false)
     }
   }
 
   return (
     <div className="rounded-2xl border border-line p-3.5">
+      {error && <p role="alert" className="mb-2 text-sm text-coral-600">{error}</p>}
       <div className="flex items-center gap-2">
         <span className="text-xl">{ed.emoji || '🧑‍🏫'}</span>
         <div className="min-w-0">
@@ -172,37 +178,48 @@ function EducatorPayRow({ ed, onSave }) {
 function RunPayroll({ settings, onRan }) {
   const run = useMutation(api.payroll.runPayroll)
   const payable = settings.educators.filter((e) => e.payRate)
-  const weeksFactor = settings.payPeriod === 'weekly' ? 1 : 2
   const [{ start, end }, setRange] = useState(() => defaultPeriod(settings.payPeriod))
   const [entries, setEntries] = useState(() =>
     Object.fromEntries(
-      payable.map((e) => [e._id, { regularHours: e.payType === 'salary' ? 0 : r2((e.hoursWeek || 0) * weeksFactor), otHours: 0, statPay: 0 }]),
+      payable.map((e) => [e._id, { regularHours: 0, otHours: 0, statPay: 0 }]),
     ),
   )
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [reviewed, setReviewed] = useState(false)
+  const [loadedRange, setLoadedRange] = useState('')
+  const validRange = /^\d{4}-\d{2}-\d{2}$/.test(start) && /^\d{4}-\d{2}-\d{2}$/.test(end) && start <= end && Date.parse(end) - Date.parse(start) <= 366 * 86400000
+  const tracked = useQuery(api.payroll.hoursForPeriod, validRange ? { periodStart: start, periodEnd: end } : 'skip')
+  const inputFor = id => entries[id] || { regularHours: 0, otHours: 0, statPay: 0 }
+  const loadHours = () => {
+    if (!tracked) return
+    setEntries(Object.fromEntries(payable.map(ed => { const hours = tracked.find(row => row.educatorId === ed._id)?.hours || 0; return [ed._id, { regularHours: ed.payType === 'salary' ? 0 : hours, otHours: 0, statPay: inputFor(ed._id).statPay }] })))
+    setLoadedRange(`${start}:${end}`); setReviewed(false)
+  }
+  const changeRange = (field, value) => { setRange(range => ({ ...range, [field]: value })); setReviewed(false) }
 
-  const set = (id, field, val) => setEntries((p) => ({ ...p, [id]: { ...p[id], [field]: val } }))
+  const set = (id, field, val) => { setEntries((p) => ({ ...p, [id]: { ...p[id], [field]: val } })); setReviewed(false) }
 
-  const rows = payable.map((ed) => ({ ed, input: entries[ed._id], ...calcLine(ed, entries[ed._id], settings.payPeriod) }))
+  const rows = payable.map((ed) => ({ ed, input: inputFor(ed._id), ...calcLine(ed, inputFor(ed._id), settings.payPeriod) }))
   const totalGross = r2(rows.reduce((s, r) => s + r.gross, 0))
   const totalVac = r2(rows.reduce((s, r) => s + r.vacationAccrued, 0))
 
   const generate = async () => {
-    setBusy(true)
+    setBusy(true); setError('')
     try {
       const res = await run({
         periodStart: start,
         periodEnd: end,
         entries: payable.map((e) => ({
           educatorId: e._id,
-          regularHours: Math.max(0, +entries[e._id].regularHours || 0),
-          otHours: Math.max(0, +entries[e._id].otHours || 0),
-          statPay: Math.max(0, +entries[e._id].statPay || 0),
+          regularHours: Math.max(0, +inputFor(e._id).regularHours || 0),
+          otHours: Math.max(0, +inputFor(e._id).otHours || 0),
+          statPay: Math.max(0, +inputFor(e._id).statPay || 0),
         })),
       })
       onRan(res.runId)
     } catch (e) {
-      alert(e.message || 'Could not generate the pay run.')
+      setError(e.message || 'Could not generate the pay run.')
     } finally {
       setBusy(false)
     }
@@ -227,17 +244,22 @@ function RunPayroll({ settings, onRan }) {
         <div className="flex flex-wrap items-end gap-4">
           <label className="block">
             <span className="eyebrow mb-1 block">Period start</span>
-            <input type="date" value={start} onChange={(e) => setRange((r) => ({ ...r, start: e.target.value }))} className="input !py-2" />
+            <input type="date" value={start} onChange={(e) => changeRange('start', e.target.value)} className="input !py-2" />
           </label>
           <label className="block">
             <span className="eyebrow mb-1 block">Period end</span>
-            <input type="date" value={end} onChange={(e) => setRange((r) => ({ ...r, end: e.target.value }))} className="input !py-2" />
+            <input type="date" value={end} onChange={(e) => changeRange('end', e.target.value)} className="input !py-2" />
           </label>
           <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500">
             <Clock size={13} /> {PERIODS.find((p) => p[0] === settings.payPeriod)?.[1]}
           </span>
         </div>
 
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button className="btn-ghost !py-2 text-sm" disabled={!validRange || tracked === undefined} onClick={loadHours}><Clock size={15} /> Load recorded hours</button>
+          <p className="text-xs text-slate-500">{loadedRange === `${start}:${end}` ? 'Recorded shifts loaded for these dates. Review regular, overtime and stat pay.' : 'Enter confirmed hours, or load recorded shifts for this date range.'}</p>
+        </div>
+        {error && <p role="alert" className="mt-3 text-sm text-coral-600">{error}</p>}
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
@@ -304,9 +326,9 @@ function RunPayroll({ settings, onRan }) {
           </table>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold text-slate-400">Reg hrs pre-filled from tracked weekly hours — review &amp; adjust before generating.</p>
-          <button onClick={generate} disabled={busy} className="btn-primary disabled:opacity-50">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <label className="flex items-start gap-2 text-xs font-semibold text-slate-500"><input type="checkbox" checked={reviewed} onChange={e => setReviewed(e.target.checked)} /> I have reviewed the dates, hours, overtime and stat pay for this run.</label>
+          <button onClick={generate} disabled={busy || !validRange || !reviewed} className="btn-primary disabled:opacity-50">
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Calculator size={16} />}
             Generate pay run &amp; stubs
           </button>
@@ -319,7 +341,7 @@ function RunPayroll({ settings, onRan }) {
 /* ─────────────────────────── Stub view (run detail) ─────────────────────────── */
 function csvForRun(run) {
   const head = ['Educator', 'Role', 'Pay type', 'Rate', 'Regular hrs', 'OT hrs', 'Stat pay', 'Gross pay', 'Vacation %', 'Vacation accrued']
-  const esc = (v) => `"${String(v).replace(/"/g, '""')}"`
+  const esc = (v) => `"${String(v).replace(/^[=+@\-]/, "\'$&").replace(/"/g, '""')}"`
   const rows = run.lines.map((l) =>
     [l.name, l.role, l.payType, l.rate, l.regularHours, l.otHours, l.statPay, l.gross, l.vacationPct + '%', l.vacationAccrued].map(esc).join(','),
   )
@@ -330,6 +352,8 @@ function csvForRun(run) {
 function RunDetail({ runId, onBack }) {
   const run = useQuery(api.payroll.getRun, { runId })
   const del = useMutation(api.payroll.deleteRun)
+  const [error, setError] = useState('')
+  const [voiding, setVoiding] = useState(false)
   if (run === undefined) return <Card className="p-10 text-center"><Loader2 className="mx-auto animate-spin text-brand-400" /></Card>
   if (run === null) return <Card className="p-10 text-center text-slate-500">Run not found.</Card>
 
@@ -375,6 +399,8 @@ function RunDetail({ runId, onBack }) {
         </div>
       </Card>
 
+      {run.status === 'void' && <p className="rounded-xl bg-coral-50 p-3 text-sm font-bold text-coral-600">Voided {run.voidedAt ? new Date(run.voidedAt).toLocaleDateString('en-CA') : ''} · Historical record preserved.</p>}
+      {error && <p role="alert" className="text-sm text-coral-600">{error}</p>}
       <Disclaimer />
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -403,10 +429,10 @@ function RunDetail({ runId, onBack }) {
       </div>
 
       <button
-        onClick={() => { if (confirm('Delete this pay run? This cannot be undone.')) del({ runId }).then(onBack) }}
+        disabled={voiding || run.status === 'void'} onClick={async () => { if (!confirm('Void this pay run? Its history and stubs will remain available.')) return; setVoiding(true); setError(''); try { await del({ runId }) } catch (e) { setError(e.message || 'Could not void this run.') } finally { setVoiding(false) } }}
         className="inline-flex items-center gap-1.5 text-xs font-bold text-coral-500 hover:text-coral-600"
       >
-        <Trash2 size={13} /> Delete this run
+        <Trash2 size={13} /> {run.status === 'void' ? 'Run voided' : voiding ? 'Voiding…' : 'Void this run'}
       </button>
     </div>
   )
@@ -423,7 +449,7 @@ function Row({ k, v, strong, mint }) {
 
 /* ─────────────────────────── History tab ─────────────────────────── */
 function RunHistory({ onOpen }) {
-  const runs = useQuery(api.payroll.listRuns)
+  const runs = useQuery(api.payroll.listRuns, { includeVoided: true })
   if (runs === undefined) return <Card className="p-10 text-center"><Loader2 className="mx-auto animate-spin text-brand-400" /></Card>
   if (runs.length === 0) return (
     <Card className="flex flex-col items-center gap-2 p-10 text-center">
@@ -439,7 +465,7 @@ function RunHistory({ onOpen }) {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-grape-500 text-white"><Banknote size={18} /></span>
             <div className="min-w-0">
               <div className="truncate font-extrabold text-slate-700">{r.periodStart} → {r.periodEnd}</div>
-              <div className="text-[11px] font-bold text-slate-400">{r.headcount} educator{r.headcount === 1 ? '' : 's'} · {new Date(r.createdAt).toLocaleDateString('en-CA')}</div>
+              <div className="text-[11px] font-bold text-slate-400">{r.status === 'void' ? 'Voided · ' : ''}{r.headcount} educator{r.headcount === 1 ? '' : 's'} · {new Date(r.createdAt).toLocaleDateString('en-CA')}</div>
             </div>
             <div className="ml-auto text-right">
               <div className="font-extrabold text-brand-700">{money(r.totalGross)}</div>
@@ -457,35 +483,47 @@ function OnboardingAdmin() {
   const enc = useQuery(api.onboarding.status)
   const profiles = useQuery(api.onboarding.listProfiles)
   const createLink = useMutation(api.onboarding.createLink)
+  const reissue = useMutation(api.onboarding.reissueLink)
+  const revoke = useMutation(api.onboarding.revokeLink)
+  const archive = useMutation(api.onboarding.deleteProfile)
   const [name, setName] = useState('')
   const [role, setRole] = useState('Educator')
   const [link, setLink] = useState(null)
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
   const [openId, setOpenId] = useState(null)
+  const [error, setError] = useState('')
 
   if (openId) return <ProfileDetail profileId={openId} onBack={() => setOpenId(null)} />
 
   const gen = async () => {
-    setBusy(true)
+    setBusy(true); setError('')
     try {
       const { token } = await createLink({ name, role })
       setLink(`${window.location.origin}/onboard?t=${token}`)
       setName('')
       setCopied(false)
-    } finally { setBusy(false) }
+    } catch (e) { setError(e.message || 'Could not create onboarding link.') } finally { setBusy(false) }
   }
-  const copy = () => { navigator.clipboard?.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1800) }
+  const copy = async () => { try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1800) } catch { setError('Could not copy. Select and copy the link above.') } }
+  const manage = async (profileId, operation) => {
+    if (operation === 'archive' && !confirm('Archive this onboarding profile and withdraw its links? Employment records will be preserved.')) return
+    setBusy(true); setError('')
+    try {
+      if (operation === 'reissue') { const { token } = await reissue({ profileId }); setLink(`${window.location.origin}/onboard?t=${token}`); setCopied(false) }
+      else if (operation === 'revoke') await revoke({ profileId })
+      else await archive({ profileId })
+    } catch (e) { setError(e.message || 'Could not update this onboarding link.') } finally { setBusy(false) }
+  }
 
   return (
     <div className="space-y-4">
+      {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-600">{error}</p>}
       {enc && !enc.encConfigured && (
         <div className="flex gap-2.5 rounded-2xl border border-coral-400/40 bg-coral-400/10 p-3.5 text-sm">
           <AlertTriangle size={18} className="mt-0.5 shrink-0 text-coral-500" />
           <div className="font-medium text-slate-600">
-            Secure storage for SIN &amp; banking isn't enabled yet. Set an encryption key once to turn it on:
-            <code className="mt-1 block overflow-x-auto rounded bg-slate-800 px-2 py-1.5 font-mono text-[11px] text-mint-300">KEY=$(openssl rand -base64 32); npx convex env set ONBOARDING_ENC_KEY "$KEY" --prod</code>
-            Links still collect everything else in the meantime.
+            Secure collection of SIN and banking details is unavailable. Contact support to enable it. Onboarding links can still collect the other required details.
           </div>
         </div>
       )}
@@ -514,20 +552,26 @@ function OnboardingAdmin() {
         ) : profiles.length === 0 ? (
           <p className="p-6 text-center text-sm font-medium text-slate-500">No onboarding links yet. Create one above.</p>
         ) : profiles.map((p) => {
-          const submitted = p.status === 'submitted'
+          const submitted = p.status === 'submitted', archived = p.status === 'archived'
+          const expired = p.expiresAt && p.expiresAt < Date.now()
+          const state = archived ? 'Archived' : submitted ? 'Submitted' : p.revokedAt ? 'Withdrawn' : expired ? 'Expired' : 'Pending'
           return (
-            <button key={p._id} disabled={!submitted} onClick={() => submitted && setOpenId(p._id)}
-              className={`flex w-full items-center gap-3 border-b border-line p-4 text-left last:border-0 ${submitted ? 'hover:bg-slate-50' : 'cursor-default'}`}>
-              <span className="text-xl">🧑‍🏫</span>
-              <div className="min-w-0">
-                <div className="truncate font-extrabold text-slate-700">{p.fullName || p.inviteName}</div>
-                <div className="text-[11px] font-bold text-slate-400">{p.inviteRole}</div>
+            <div key={p._id} className="border-b border-line p-4 last:border-0">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🧑‍🏫</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-extrabold text-slate-700">{p.fullName || p.inviteName || 'New employee'}</div>
+                  <div className="text-[11px] font-bold text-slate-400">{p.inviteRole}</div>
+                </div>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">{state}</span>
               </div>
-              <span className={`ml-auto rounded-full px-2.5 py-1 text-[11px] font-bold ${submitted ? 'bg-mint-400/15 text-mint-600' : 'bg-sunshine-400/15 text-sunshine-600'}`}>
-                {submitted ? 'Submitted' : 'Pending'}
-              </span>
-              {submitted && <ExternalLink size={15} className="text-slate-300" />}
-            </button>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(submitted || archived) && <button className="btn-ghost !py-1.5 text-xs" onClick={() => setOpenId(p._id)}><Eye size={13} /> View record</button>}
+                {!archived && <button disabled={busy} className="btn-ghost !py-1.5 text-xs" onClick={() => manage(p._id, 'reissue')}>Issue new link</button>}
+                {!archived && !p.revokedAt && !submitted && <button disabled={busy} className="btn-ghost !py-1.5 text-xs" onClick={() => manage(p._id, 'revoke')}>Withdraw link</button>}
+                {!archived && <button disabled={busy} className="btn-ghost !py-1.5 text-xs text-coral-500" onClick={() => manage(p._id, 'archive')}>Archive profile</button>}
+              </div>
+            </div>
           )
         })}
       </Card>
@@ -541,13 +585,24 @@ function ProfileDetail({ profileId, onBack }) {
   const del = useMutation(api.onboarding.deleteProfile)
   const [secret, setSecret] = useState(null)
   const [revealing, setRevealing] = useState(false)
+  const [error, setError] = useState('')
+  const [archiving, setArchiving] = useState(false)
+  const downloadPrivate = usePrivateDownload()
+  useEffect(() => {
+    if (!secret) return
+    const hide = () => setSecret(null)
+    const timeout = setTimeout(hide, 60_000)
+    window.addEventListener('blur', hide)
+    return () => { clearTimeout(timeout); window.removeEventListener('blur', hide) }
+  }, [secret])
 
   if (p === undefined) return <Card className="p-10 text-center"><Loader2 className="mx-auto animate-spin text-brand-400" /></Card>
   if (p === null) return <Card className="p-10 text-center text-slate-500">Not found.</Card>
 
   const doReveal = async () => {
     setRevealing(true)
-    try { setSecret(await reveal({ profileId })) } catch (e) { alert(e.message || 'Could not reveal.') } finally { setRevealing(false) }
+    setError('')
+    try { setSecret(await reveal({ profileId })) } catch (e) { setError(e.message || 'Could not reveal.') } finally { setRevealing(false) }
   }
 
   const rows = [
@@ -559,6 +614,8 @@ function ProfileDetail({ profileId, onBack }) {
   return (
     <div className="space-y-4">
       <button onClick={onBack} className="btn-ghost !py-2 text-sm"><ArrowLeft size={15} /> Back</button>
+      {error && <p role="alert" className="text-sm text-coral-600">{error}</p>}
+      {p.status === 'archived' && <p className="rounded-xl bg-slate-100 p-3 text-sm text-slate-600">Archived employee onboarding record · links withdrawn.</p>}
       <Card className="p-5">
         <h3 className="text-2xl text-slate-800">{p.fullName || p.inviteName}</h3>
         <p className="text-xs font-bold text-slate-400">{p.inviteRole} · submitted {p.submittedAt ? new Date(p.submittedAt).toLocaleDateString('en-CA') : ''}</p>
@@ -580,7 +637,7 @@ function ProfileDetail({ profileId, onBack }) {
           <div className="flex items-center justify-between"><dt className="font-semibold text-slate-500">SIN</dt><dd className="font-mono font-bold text-slate-800">{secret?.sin ?? p.sinMasked ?? '—'}</dd></div>
           <div className="flex items-center justify-between"><dt className="font-semibold text-slate-500">Direct deposit</dt><dd className="font-mono font-bold text-slate-800">{secret?.bank ? `${secret.bank.institution}-${secret.bank.transit}-${secret.bank.account}` : (p.bankMasked ?? '—')}</dd></div>
         </dl>
-        {secret && <p className="mt-2 text-[11px] font-semibold text-coral-500">Revealed — copy what you need into your payroll system, then leave this screen. Don't leave it open.</p>}
+        {secret && <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold text-coral-500"><span>Details hide after one minute or when this window loses focus.</span><button className="btn-ghost !py-1 text-xs" onClick={() => setSecret(null)}>Hide now</button></div>}
       </Card>
 
       <Card className="p-5">
@@ -591,17 +648,17 @@ function ProfileDetail({ profileId, onBack }) {
           <ul className="mt-2 space-y-1.5">
             {p.documents.map((d, i) => (
               <li key={i}>
-                <a href={d.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold text-brand-700 hover:bg-slate-100">
+                <button disabled={!d.hasFile} onClick={async () => { setError(''); try { await downloadPrivate(d.storageId, d.name) } catch (e) { setError(e.message || 'Could not download this document.') } }} className="flex w-full items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-bold text-brand-700 hover:bg-slate-100">
                   <FileText size={15} /> <span className="truncate">{d.name}</span> <Download size={14} className="ml-auto" />
-                </a>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </Card>
 
-      <button onClick={() => { if (confirm('Delete this employee profile and its documents? This cannot be undone.')) del({ profileId }).then(onBack) }} className="inline-flex items-center gap-1.5 text-xs font-bold text-coral-500 hover:text-coral-600">
-        <Trash2 size={13} /> Delete profile
+      <button disabled={archiving || p.status === 'archived'} onClick={async () => { if (!confirm('Archive this onboarding profile? Its employment record and documents will be preserved.')) return; setArchiving(true); setError(''); try { await del({ profileId }); setSecret(null) } catch (e) { setError(e.message || 'Could not archive this profile.') } finally { setArchiving(false) } }} className="inline-flex items-center gap-1.5 text-xs font-bold text-coral-500 hover:text-coral-600">
+        <Trash2 size={13} /> {p.status === 'archived' ? 'Profile archived' : archiving ? 'Archiving…' : 'Archive profile'}
       </button>
     </div>
   )

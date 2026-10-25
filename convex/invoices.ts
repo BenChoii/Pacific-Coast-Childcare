@@ -3,6 +3,8 @@ import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
 import { resolveFacilityId, requireFacility } from './lib'
 import { subsidyReductionItems } from './subsidies'
+import { cents, dollars, localDate, monthBounds } from './financeUtils'
+import { recordOwnerEvent } from './notifications'
 
 async function requireAdmin(ctx: any) {
   const f = await requireFacility(ctx)
@@ -110,7 +112,11 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const { facilityId } = await requireAdmin(ctx)
     if (args.parentUserId) { const parent = await ctx.db.get(args.parentUserId); if (!parent || parent.facilityId !== facilityId || parent.role !== 'parent') throw new Error('Family not found.') }
-    const items = [...args.items]
+    if (!args.billTo.trim() || !args.period.trim() || !args.due.trim()) throw new Error('Family, period and due date are required.')
+    const facility = await ctx.db.get(facilityId)
+    const range = monthBounds(args.period, localDate(Date.now(), facility?.timezone))
+    const items = args.items.map(item => { if (!item.label.trim()) throw new Error('Each invoice item needs a label.'); return { label: item.label.trim(), amt: dollars(cents(item.amt)) } })
+    const consumed: any[] = []
 
     if (args.includeExtras && args.parentUserId) {
       const kids = await ctx.db
@@ -123,22 +129,22 @@ export const create = mutation({
           .query('extraCharges')
           .withIndex('by_facility', (q) => q.eq('facilityId', facilityId))
           .collect()
-        for (const c of charges.filter((c: any) => c.childId === kid._id && c.status === 'logged')) {
-          items.push({ label: `${c.serviceName} — ${kid.name} (${c.date})`, amt: Math.round(c.amountCents / 100) })
-          await ctx.db.patch(c._id, { status: 'billed' })
+        for (const c of charges.filter((c: any) => c.childId === kid._id && (c.status === 'unbilled' || c.status === 'logged') && localDate(c.createdAt, facility?.timezone) <= range.end)) {
+          items.push({ label: `${c.serviceName} — ${kid.name} (${localDate(c.createdAt, facility?.timezone)})`, amt: dollars(cents(c.amount)) })
+          consumed.push(c._id)
         }
         const subs = await ctx.db
           .query('planSubscriptions')
           .withIndex('by_facility', (q) => q.eq('facilityId', facilityId))
           .collect()
         for (const s of subs.filter((s: any) => s.childId === kid._id && s.active)) {
-          items.push({ label: `${s.serviceName} (monthly plan) — ${kid.name}`, amt: Math.round(s.monthlyCents / 100) })
+          items.push({ label: `${s.serviceName} (monthly plan) — ${kid.name}`, amt: dollars(cents(s.monthlyAmount)) })
         }
-        for (const it of await subsidyReductionItems(ctx, kid._id, kid.name)) items.push(it)
+        for (const it of await subsidyReductionItems(ctx, kid._id, kid.name, range)) items.push(it)
       }
     }
 
-    const amount = items.reduce((sum, it) => sum + it.amt, 0)
+    const amount = dollars(items.reduce((sum, it) => sum + cents(it.amt), 0))
     if (amount <= 0) throw new Error('Invoice has no amount.')
     const last = await ctx.db
       .query('invoices')
@@ -159,6 +165,8 @@ export const create = mutation({
       childName: args.childName,
       notes: args.notes,
     })
+    for (const chargeId of consumed) await ctx.db.patch(chargeId, { status: 'billed' })
+    await recordOwnerEvent(ctx, { facilityId, type: 'invoice_created', summary: `Invoice ${invId} was issued.` })
     return { invId, amount }
   },
 })
@@ -169,10 +177,11 @@ export const markEtransferSent = mutation({
   handler: async (ctx, { id, ref }) => {
     const { userId: uid, facilityId: fid } = await requireFacility(ctx)
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
-    if (!doc || doc.facilityId !== fid || doc.status === 'paid') return
+    if (!doc || doc.facilityId !== fid || ['paid', 'void'].includes(doc.status)) return
     const facility = await ctx.db.get(doc.facilityId)
     if (!facility?.isDemo && doc.parentUserId !== uid) throw new Error('Not your invoice.')
     await ctx.db.patch(doc._id, { status: 'processing', method: 'etransfer', etransferRef: ref || doc.invId })
+    await recordOwnerEvent(ctx, { facilityId: fid, actorId: uid, type: 'payment_reported', summary: `A family reported an e-transfer for ${id}.` })
   },
 })
 
@@ -182,8 +191,10 @@ export const confirmPaid = mutation({
   handler: async (ctx, { id, method }) => {
     const { facilityId } = await requireAdmin(ctx)
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
-    if (!doc || doc.facilityId !== facilityId) return
+    if (!doc || doc.facilityId !== facilityId || doc.status === 'void') throw new Error('Invoice cannot be paid.')
+    if (doc.status === 'paid') return
     await ctx.db.patch(doc._id, { status: 'paid', paidOn: todayLabel(), method: method || doc.method || 'manual' })
+    await recordOwnerEvent(ctx, { facilityId, type: 'payment_confirmed', summary: `Payment for ${id} was confirmed by the director.` })
   },
 })
 
@@ -192,8 +203,9 @@ export const voidInvoice = mutation({
   handler: async (ctx, { id }) => {
     const { facilityId } = await requireAdmin(ctx)
     const doc = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
-    if (!doc || doc.facilityId !== facilityId || doc.status === 'paid') return
+    if (!doc || doc.facilityId !== facilityId || ['paid', 'void'].includes(doc.status)) return
     await ctx.db.patch(doc._id, { status: 'void' })
+    await recordOwnerEvent(ctx, { facilityId, type: 'invoice_voided', summary: `Invoice ${id} was voided.` })
   },
 })
 
@@ -236,13 +248,14 @@ export const generateMonthly = internalMutation({
   args: {},
   handler: async (ctx) => {
     const facilities = await ctx.db.query('facilities').collect()
-    const now = new Date()
-    const period = `${MONTHS[now.getUTCMonth()]} ${now.getUTCFullYear()}`
-    const due = `${MONTHS[now.getUTCMonth()]} 15, ${now.getUTCFullYear()}`
     let created = 0
 
     for (const f of facilities) {
       if (f.isDemo || !f.autoInvoice) continue
+      const day = localDate(Date.now(), f.timezone)
+      const range = monthBounds(day)
+      const period = `${MONTHS[Number(day.slice(5, 7)) - 1]} ${day.slice(0, 4)}`
+      const due = `${MONTHS[Number(day.slice(5, 7)) - 1]} 15, ${day.slice(0, 4)}`
       const kids = await ctx.db
         .query('children')
         .withIndex('by_facility', (q) => q.eq('facilityId', f._id))
@@ -273,18 +286,19 @@ export const generateMonthly = internalMutation({
         // skip if this family already has an invoice for this period
         if (existing.some((d: any) => d.period === period && String(d.parentUserId) === parentKey)) continue
         const items: { label: string; amt: number }[] = []
+        const consumed: any[] = []
         for (const kid of family) {
-          if (kid.monthlyTuition > 0) items.push({ label: `Tuition — ${kid.name}`, amt: kid.monthlyTuition })
+          if (kid.monthlyTuition > 0) items.push({ label: `Tuition — ${kid.name}`, amt: dollars(cents(kid.monthlyTuition)) })
           for (const s of subs.filter((s: any) => s.childId === kid._id && s.active)) {
-            items.push({ label: `${s.serviceName} (monthly plan) — ${kid.name}`, amt: Math.round(s.monthlyCents / 100) })
+            items.push({ label: `${s.serviceName} (monthly plan) — ${kid.name}`, amt: dollars(cents(s.monthlyAmount)) })
           }
-          for (const c of charges.filter((c: any) => c.childId === kid._id && c.status === 'logged')) {
-            items.push({ label: `${c.serviceName} — ${kid.name} (${c.date})`, amt: Math.round(c.amountCents / 100) })
-            await ctx.db.patch(c._id, { status: 'billed' })
+          for (const c of charges.filter((c: any) => c.childId === kid._id && (c.status === 'unbilled' || c.status === 'logged') && localDate(c.createdAt, f.timezone) <= range.end)) {
+            items.push({ label: `${c.serviceName} — ${kid.name} (${localDate(c.createdAt, f.timezone)})`, amt: dollars(cents(c.amount)) })
+            consumed.push(c._id)
           }
-          for (const it of await subsidyReductionItems(ctx, kid._id, kid.name)) items.push(it)
+          for (const it of await subsidyReductionItems(ctx, kid._id, kid.name, range)) items.push(it)
         }
-        const amount = items.reduce((s, it) => s + it.amt, 0)
+        const amount = dollars(items.reduce((s, it) => s + cents(it.amt), 0))
         if (amount <= 0) continue
         const parent = await ctx.db.get(family[0].parentUserId)
         await ctx.db.insert('invoices', {
@@ -300,6 +314,8 @@ export const generateMonthly = internalMutation({
           billTo: (parent as any)?.name || family.map((k) => k.name).join(' & ') + ' family',
           childName: family.map((k) => k.name).join(', '),
         })
+        for (const chargeId of consumed) await ctx.db.patch(chargeId, { status: 'billed' })
+        await recordOwnerEvent(ctx, { facilityId: f._id, type: 'invoice_created', summary: `Monthly tuition invoice was issued for ${period}.` })
         created++
       }
     }
@@ -307,12 +323,65 @@ export const generateMonthly = internalMutation({
   },
 })
 
-// Only the server's verified Stripe session may complete a real card payment.
-export const recordVerifiedPayment = internalMutation({
-  args: { id: v.string(), sessionId: v.string(), paidOn: v.string() },
-  handler: async (ctx, { id, sessionId, paidOn }) => {
-    const invoice = await ctx.db.query('invoices').withIndex('by_invId', (q) => q.eq('invId', id)).first()
-    if (!invoice || invoice.stripeSessionId !== sessionId) throw new Error('Payment session does not match this invoice.')
-    await ctx.db.patch(invoice._id, { status: 'paid', paidOn, method: 'card' })
+// Reserve a stable payment attempt before contacting Stripe. Concurrent calls
+// reuse the same idempotency key and never create competing Checkout charges.
+export const beginCheckout = internalMutation({
+  args: { id: v.string() },
+  handler: async (ctx, { id }) => {
+    const { facilityId, userId, user, facility } = await requireFacility(ctx)
+    const invoice = await ctx.db.query('invoices').withIndex('by_invId', q => q.eq('invId', id)).first()
+    if (!invoice || invoice.facilityId !== facilityId || !['admin', 'parent'].includes(user.role || '') || (user.role === 'parent' && invoice.parentUserId !== userId)) throw new Error('Invoice not found.')
+    if (facility.isDemo) throw new Error('Demo invoices cannot be charged.')
+    if (!['due', 'overdue'].includes(invoice.status)) throw new Error('This invoice is already paid, awaiting confirmation, or canceled.')
+    const amountCents = cents(invoice.amount)
+    if (amountCents <= 0) throw new Error('Invoice has no payable amount.')
+    const attempts = await ctx.db.query('paymentAttempts').withIndex('by_invoice', q => q.eq('invoiceId', invoice._id)).collect()
+    const prior = attempts.find(a => ((a.status === 'creating' && a.createdAt > Date.now() - 5 * 60 * 1000) || (a.status === 'open' && a.createdAt > Date.now() - 60 * 60 * 1000)) && a.amountCents === amountCents)
+    if (prior) return { ...prior, attemptId: prior._id, period: invoice.period, facilityName: facility.name }
+    const accountId = facility.stripeAccountReady ? facility.stripeAccountId : undefined
+    const now = Date.now()
+    const values = { facilityId, invoiceId: invoice._id, invId: id, amountCents, currency: 'cad', status: 'creating', createdAt: now, updatedAt: now, stripeAccountId: accountId }
+    const attemptId = await ctx.db.insert('paymentAttempts', values)
+    return { ...values, attemptId, period: invoice.period, facilityName: facility.name }
   },
+})
+export const attachAttempt = internalMutation({
+  args: { attemptId: v.id('paymentAttempts'), sessionId: v.string(), url: v.string() },
+  handler: async (ctx, { attemptId, sessionId, url }) => {
+    const attempt = await ctx.db.get(attemptId)
+    if (!attempt) throw new Error('Payment attempt not found.')
+    if (attempt.stripeSessionId && attempt.stripeSessionId !== sessionId) throw new Error('Payment session conflict.')
+    await ctx.db.patch(attemptId, { stripeSessionId: sessionId, checkoutUrl: url, status: attempt.status === 'paid' ? 'paid' : 'open', updatedAt: Date.now() })
+    await ctx.db.patch(attempt.invoiceId, { stripeSessionId: sessionId, stripeAccountId: attempt.stripeAccountId, method: 'card' })
+  },
+})
+export const attemptForSession = internalMutation({
+  args: { sessionId: v.string(), invId: v.optional(v.string()) },
+  handler: async (ctx, { sessionId, invId }) => {
+    const { facilityId, userId, user } = await requireFacility(ctx)
+    const attempt = await ctx.db.query('paymentAttempts').withIndex('by_session', q => q.eq('stripeSessionId', sessionId)).first()
+    const invoice = attempt ? await ctx.db.get(attempt.invoiceId) : invId ? await ctx.db.query('invoices').withIndex('by_invId', q => q.eq('invId', invId)).first() : null
+    if (!invoice || invoice.facilityId !== facilityId || (invId && invoice.invId !== invId) || !['admin', 'parent'].includes(user.role || '') || (user.role === 'parent' && invoice.parentUserId !== userId)) throw new Error('Invoice not found.')
+    if (!attempt && invoice.stripeSessionId !== sessionId) throw new Error('Unknown payment session.')
+    return attempt || { invId: invoice.invId, stripeAccountId: invoice.stripeAccountId, amountCents: cents(invoice.amount), currency: 'cad' }
+  },
+})
+export async function applyVerifiedPayment(ctx: any, input: { id: string; sessionId: string; paidOn: string; amountCents: number; currency: string; accountId?: string }) {
+  const invoice = await ctx.db.query('invoices').withIndex('by_invId', (q: any) => q.eq('invId', input.id)).first()
+  const attempt = await ctx.db.query('paymentAttempts').withIndex('by_session', (q: any) => q.eq('stripeSessionId', input.sessionId)).first()
+  if (!invoice || (attempt ? attempt.invoiceId !== invoice._id : invoice.stripeSessionId !== input.sessionId)) throw new Error('Payment session does not match this invoice.')
+  const expected = attempt || { amountCents: cents(invoice.amount), currency: 'cad', stripeAccountId: invoice.stripeAccountId }
+  if (input.amountCents !== expected.amountCents || input.currency.toLowerCase() !== expected.currency || (input.accountId || '') !== (expected.stripeAccountId || '')) throw new Error('Payment amount, currency or account does not match.')
+  if (attempt?.status === 'paid') return
+  if (attempt) await ctx.db.patch(attempt._id, { status: 'paid', paidAt: Date.now(), updatedAt: Date.now() })
+  if (invoice.status === 'paid' || invoice.status === 'void') {
+    await recordOwnerEvent(ctx, { facilityId: invoice.facilityId, type: 'payment_review_required', summary: `A card payment for ${input.id} requires review because the invoice is ${invoice.status}.` })
+    return
+  }
+  await ctx.db.patch(invoice._id, { status: 'paid', paidOn: input.paidOn, method: 'card' })
+  await recordOwnerEvent(ctx, { facilityId: invoice.facilityId, type: 'payment_confirmed', summary: `Card payment for ${input.id} was verified.` })
+}
+export const recordVerifiedPayment = internalMutation({
+  args: { id: v.string(), sessionId: v.string(), paidOn: v.string(), amountCents: v.number(), currency: v.string(), accountId: v.optional(v.string()) },
+  handler: applyVerifiedPayment,
 })

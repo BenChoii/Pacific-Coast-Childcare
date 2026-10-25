@@ -1,11 +1,11 @@
-import React from 'react'
+import React, {lazy,Suspense} from 'react'
 import ReactDOM from 'react-dom/client'
 import { ConvexReactClient } from 'convex/react'
 import { ConvexAuthProvider } from '@convex-dev/auth/react'
-import App from './App.jsx'
-import Sales from './components/Sales.jsx'
-import Legal from './components/Legal.jsx'
-import EmployeeOnboarding from './components/EmployeeOnboarding.jsx'
+const App=lazy(()=>import('./App.jsx'))
+const Sales=lazy(()=>import('./components/Sales.jsx'))
+const Legal=lazy(()=>import('./components/Legal.jsx'))
+const EmployeeOnboarding=lazy(()=>import('./components/EmployeeOnboarding.jsx'))
 import { AppProvider } from './context/AppContext.jsx'
 import { isMitten, applyBrandHead } from './brand.js'
 import { SALES_ROUTES, LEGAL_ROUTES, isAppPath, currentPath, getEntry } from './routes.js'
@@ -34,22 +34,23 @@ else mode = 'app'
 applyBrandHead(mode === 'app' ? 'app' : 'sales')
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
+const render=content=>root.render(<Suspense fallback={<div role="status" className="flex min-h-screen items-center justify-center bg-tint p-6 text-brand-700">Opening Mitten…</div>}>{content}</Suspense>)
 
 if (mode === 'legal') {
-  root.render(
+  render(
     <React.StrictMode>
       <Legal page={path === '/privacy' ? 'privacy' : 'terms'} />
     </React.StrictMode>,
   )
 } else if (mode === 'sales') {
-  root.render(
+  render(
     <React.StrictMode>
       <Sales />
     </React.StrictMode>,
   )
 } else if (mode === 'onboard') {
   const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL)
-  root.render(
+  render(
     <React.StrictMode>
       <ConvexAuthProvider client={convex}>
         <EmployeeOnboarding token={entry.token} />
@@ -58,7 +59,7 @@ if (mode === 'legal') {
   )
 } else {
   const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL)
-  root.render(
+  render(
     <React.StrictMode>
       <ConvexAuthProvider client={convex}>
         <AppProvider>

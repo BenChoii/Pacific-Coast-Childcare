@@ -22,8 +22,11 @@ import type * as directory from "../directory.js";
 import type * as educators from "../educators.js";
 import type * as extras from "../extras.js";
 import type * as facilities from "../facilities.js";
+import type * as fileEncryption from "../fileEncryption.js";
 import type * as files from "../files.js";
+import type * as financeUtils from "../financeUtils.js";
 import type * as http from "../http.js";
+import type * as incidents from "../incidents.js";
 import type * as inquiries from "../inquiries.js";
 import type * as invoices from "../invoices.js";
 import type * as lessons from "../lessons.js";
@@ -36,11 +39,20 @@ import type * as ownerEmail from "../ownerEmail.js";
 import type * as payments from "../payments.js";
 import type * as payroll from "../payroll.js";
 import type * as photos from "../photos.js";
+import type * as preferences from "../preferences.js";
+import type * as privateFileHttp from "../privateFileHttp.js";
+import type * as privateFileMigration from "../privateFileMigration.js";
+import type * as privateFiles from "../privateFiles.js";
+import type * as qaFixtures from "../qaFixtures.js";
+import type * as repairSchema from "../repairSchema.js";
+import type * as reports from "../reports.js";
 import type * as resources from "../resources.js";
 import type * as roster from "../roster.js";
 import type * as seed from "../seed.js";
 import type * as subsidies from "../subsidies.js";
 import type * as users from "../users.js";
+import type * as workflowSchema from "../workflowSchema.js";
+import type * as workflowUtils from "../workflowUtils.js";
 
 import type {
   ApiFromModules,
@@ -63,8 +75,11 @@ declare const fullApi: ApiFromModules<{
   educators: typeof educators;
   extras: typeof extras;
   facilities: typeof facilities;
+  fileEncryption: typeof fileEncryption;
   files: typeof files;
+  financeUtils: typeof financeUtils;
   http: typeof http;
+  incidents: typeof incidents;
   inquiries: typeof inquiries;
   invoices: typeof invoices;
   lessons: typeof lessons;
@@ -77,11 +92,20 @@ declare const fullApi: ApiFromModules<{
   payments: typeof payments;
   payroll: typeof payroll;
   photos: typeof photos;
+  preferences: typeof preferences;
+  privateFileHttp: typeof privateFileHttp;
+  privateFileMigration: typeof privateFileMigration;
+  privateFiles: typeof privateFiles;
+  qaFixtures: typeof qaFixtures;
+  repairSchema: typeof repairSchema;
+  reports: typeof reports;
   resources: typeof resources;
   roster: typeof roster;
   seed: typeof seed;
   subsidies: typeof subsidies;
   users: typeof users;
+  workflowSchema: typeof workflowSchema;
+  workflowUtils: typeof workflowUtils;
 }>;
 
 /**

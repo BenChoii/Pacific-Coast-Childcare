@@ -6,15 +6,16 @@ import { Camera, Loader2 } from 'lucide-react'
 export default function AvatarUpload({ src, fallback, gradient = 'from-brand-400 to-grape-500', size = 'h-20 w-20', rounded = 'rounded-3xl', onUpload }) {
   const ref = useRef(null)
   const [busy, setBusy] = useState(false)
+  const [error,setError]=useState('')
   const pick = async (e) => {
     const f = e.target.files?.[0]
     if (!f) return
-    setBusy(true)
-    try { await onUpload(f) } finally { setBusy(false); if (ref.current) ref.current.value = '' }
+    setBusy(true);setError('')
+    try { await onUpload(f) } catch(error){setError(error.message||'Photo could not be saved. Please retry.')} finally { setBusy(false); if (ref.current) ref.current.value = '' }
   }
   return (
-    <button
-      type="button"
+    <span className="inline-flex max-w-full flex-col items-start gap-2"><button
+      type="button" disabled={busy} aria-label={busy?'Saving profile photo':'Change profile photo'}
       onClick={() => ref.current?.click()}
       className={`group relative inline-flex ${size} items-center justify-center overflow-hidden ${rounded} bg-gradient-to-br ${gradient} text-3xl text-white shadow-md`}
     >
@@ -23,6 +24,6 @@ export default function AvatarUpload({ src, fallback, gradient = 'from-brand-400
       <span className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
         {busy ? <Loader2 className="animate-spin" size={20} /> : <Camera size={20} />}
       </span>
-    </button>
+    </button>{error&&<span role="alert" className="max-w-64 break-words text-xs text-coral-600">{error}</span>}</span>
   )
 }

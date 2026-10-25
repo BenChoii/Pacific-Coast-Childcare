@@ -85,7 +85,7 @@ export function InvoicingStudio() {
             <Pill className={STATUS_STYLE[inv.status]}>{inv.status === 'processing' ? 'e-Transfer sent' : inv.status}</Pill>
             {inv.status === 'processing' && (
               <button
-                onClick={async () => { await confirmPaid({ id: inv.id }); pushToast('Marked paid — receipt updated for the family.', { emoji: '✅', tone: 'mint' }) }}
+                onClick={async () => { try{await confirmPaid({ id: inv.id }); pushToast('Marked paid — receipt updated for the family.', { emoji: '✅', tone: 'mint' })}catch(error){pushToast(error.message||'Could not confirm receipt.',{tone:'coral'})} }}
                 className="btn bg-mint-400/15 px-3 py-1.5 text-xs font-bold text-mint-600"
               >
                 <CheckCircle2 size={14} /> Confirm received
@@ -93,7 +93,7 @@ export function InvoicingStudio() {
             )}
             {inv.status === 'due' && (
               <button
-                onClick={async () => { await voidInvoice({ id: inv.id }); pushToast('Invoice voided.', { emoji: '🗑️' }) }}
+                onClick={async () => { if(!window.confirm('Void this invoice? The record will remain in history.'))return;try{await voidInvoice({ id: inv.id }); pushToast('Invoice voided.', { emoji: '🗑️' })}catch(error){pushToast(error.message||'Could not void invoice.',{tone:'coral'})} }}
                 className="btn bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-500"
               >
                 <Ban size={14} /> Void
@@ -131,8 +131,10 @@ function BillingProfileCard() {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const save = async () => {
-    await update(form)
-    pushToast('Invoice branding saved.', { emoji: '🎨', tone: 'mint' })
+    setBusy(true)
+    try {await update(form);pushToast('Invoice branding saved.', { emoji: '🎨', tone: 'mint' })}
+    catch(error){pushToast(error.message||'Could not save. Your changes are still here.',{tone:'coral'})}
+    finally{setBusy(false)}
   }
 
   const startConnect = async () => {
@@ -173,9 +175,10 @@ function BillingProfileCard() {
               <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                 const file = e.target.files?.[0]
                 if (!file) return
-                const storageId = await uploadImage(file)
-                await setLogo({ storageId })
-                pushToast('Logo updated — it now appears on every invoice.', { emoji: '🖼️', tone: 'mint' })
+                setBusy(true)
+                try {const storageId = await uploadImage(file,'avatar');await setLogo({ storageId });pushToast('Logo updated.', { emoji: '🖼️', tone: 'mint' })}
+                catch(error){pushToast(error.message||'Logo could not be saved.',{tone:'coral'})}
+                finally{setBusy(false)}
               }} />
             </label>
             <span className="text-xs font-semibold text-slate-400">Shown at the top of every invoice your families download.</span>

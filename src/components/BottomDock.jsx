@@ -1,12 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, X } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 
 // Floating, blurred bottom dock for mobile (<lg). Desktop keeps the sidebar.
 export default function BottomDock({ nav }) {
   const { view, setView, conversations } = useApp()
   const [moreOpen, setMoreOpen] = useState(false)
+  const dialogRef=useRef(null)
+  useEffect(()=>{
+    if(!moreOpen) return
+    const previous=document.activeElement;const overflow=document.body.style.overflow
+    document.body.style.overflow='hidden'
+    dialogRef.current?.querySelector('button')?.focus()
+    const key=e=>{
+      if(e.key==='Escape') setMoreOpen(false)
+      if(e.key==='Tab'){
+        const buttons=[...(dialogRef.current?.querySelectorAll('button') || [])]
+        const first=buttons[0],last=buttons.at(-1)
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}
+      }
+    }
+    document.addEventListener('keydown',key)
+    return ()=>{document.body.style.overflow=overflow;document.removeEventListener('keydown',key);previous?.focus?.()}
+  },[moreOpen])
   const unread = conversations.reduce((n, c) => n + c.unread, 0)
 
   const dockItems = nav.filter((n) => n.dock)
@@ -58,11 +76,11 @@ export default function BottomDock({ nav }) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-              className="absolute inset-x-0 bottom-0 rounded-t-[28px] bg-white p-5 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-2xl"
+              ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="more-title" className="absolute inset-x-0 bottom-0 flex max-h-[90dvh] flex-col rounded-t-[28px] bg-white p-5 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-2xl"
             >
               <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-slate-200" />
-              <p className="eyebrow mb-3">More</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="mb-3 flex shrink-0 items-center justify-between"><h2 id="more-title" className="text-xl">More</h2><button aria-label="Close menu" className="btn-ghost !p-3" onClick={()=>setMoreOpen(false)}><X size={20}/></button></div>
+              <div className="grid min-h-0 grid-cols-3 gap-3 overflow-y-auto overscroll-contain pb-2">
                 {moreItems.map((item) => {
                   const active = view === item.id
                   return (

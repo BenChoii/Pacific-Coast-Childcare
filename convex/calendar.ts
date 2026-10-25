@@ -1,7 +1,7 @@
 import { query, mutation, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { requireAdmin, resolveFacilityId } from './lib'
+import { childBelongsToParent, requireAdmin, resolveFacilityId } from './lib'
 import { recordOwnerEvent } from './notifications'
 
 const fields = {
@@ -27,7 +27,7 @@ export const list = query({
     let rooms: Set<string> | null = null
     if (user?.role === 'parent') {
       const kids = await ctx.db.query('children').withIndex('by_facility', q => q.eq('facilityId', fid)).collect()
-      const mine = kids.filter(k => k.parentUserId === uid && !k.archivedAt)
+      const mine = kids.filter(k => childBelongsToParent(k, uid))
       if (childId && !mine.some(k => k._id === childId)) return []
       const selected = childId ? mine.filter(k => k._id === childId) : mine
       if (!selected.length) return []

@@ -1,3 +1,4 @@
+import { queryRows } from './test-db-query.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
@@ -13,7 +14,7 @@ const bundled = await build({
     b.onLoad({ filter: /.*/, namespace: 'test-mock' }, ({ path }) => ({ contents:
       path.includes('auth/server') ? 'export async function getAuthUserId(ctx) { return ctx.uid ?? null }' :
       path.includes('notifications') ? 'export async function recordOwnerEvent(ctx,event) { ctx.events.push(event) }' :
-      'export const query = x => x; export const mutation = x => x; export const internalMutation = x => x; export const internalQuery = x => x;'
+      'export const query = x => x; export const mutation = x => x; export const internalMutation = x => x; export const internalQuery = x => x; export const action = x => x;'
     }))
   } }],
 })
@@ -35,16 +36,11 @@ function fixture({ actor = 'owner', siblings = false, suspended = false } = {}) 
     ['invite', { _id: 'invite', table: 'invites', childId: 'child', facilityId: 'facility', used: false }],
   ])
   if (siblings) rows.set('sibling', { _id: 'sibling', table: 'children', name: 'Child B', room: 'Preschool', parentUserId: 'parent', facilityId: 'facility', order: 2 })
+  for (const row of rows.values()) row._creationTime ??= 1
   const ctx = { uid: actor, rows, events: [], storage: { getUrl: async () => 'image-url' }, db: {
     async get(id) { return rows.get(id) ?? null },
     async patch(id, patch) { const row = rows.get(id); assert.ok(row); for (const [k,v] of Object.entries(patch)) { if (v === undefined) delete row[k]; else row[k] = v } },
-    query(table) {
-      let selected = [...rows.values()].filter(row => row.table === table)
-      return { withIndex(_name, callback) {
-        const q = { eq(key, value) { selected = selected.filter(row => row[key] === value); return q } }
-        callback(q); return this
-      }, async collect() { return selected }, async first() { return selected[0] ?? null } }
-    },
+    query(table) { return queryRows(() => [...rows.values()].filter(row => row.table === table)) },
   } }
   return ctx
 }

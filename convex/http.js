@@ -1,3 +1,4 @@
+import { registerPrivateFiles } from './privateFileHttp'
 import { httpRouter } from 'convex/server'
 import { httpAction } from './_generated/server'
 import { internal } from './_generated/api'
@@ -76,27 +77,20 @@ http.route({
 //   https://<your-convex-site>.convex.site/stripe/webhook
 // and put the signing secret in STRIPE_WEBHOOK_SECRET.
 
-function hex(buf) {
-  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('')
-}
-
-async function verifyStripeSignature(payload, header, secret) {
-  if (!secret) return true // not configured → accept (use only in dev)
-  if (!header) return false
-  const parts = Object.fromEntries(header.split(',').map((kv) => kv.split('=')))
-  const t = parts.t
-  const v1 = parts.v1
-  if (!t || !v1) return false
+export async function verifyStripeSignature(payload, header, secret, now = Date.now()) {
+  if (!secret || !header) return false
+  const parts = header.split(',').map(value => value.trim().split('='))
+  const timestamp = parts.find(([key]) => key === 't')?.[1]
+  const signatures = parts.filter(([key]) => key === 'v1').map(([, value]) => value)
+  if (!timestamp || !/^\d+$/.test(timestamp) || Math.abs(now / 1000 - Number(timestamp)) > 300) return false
   const enc = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw',
-    enc.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const mac = await crypto.subtle.sign('HMAC', key, enc.encode(`${t}.${payload}`))
-  return hex(mac) === v1
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'])
+  for (const signature of signatures) {
+    if (!/^[a-f0-9]{64}$/i.test(signature || '')) continue
+    const bytes = Uint8Array.from(signature.match(/.{2}/g), pair => parseInt(pair, 16))
+    if (await crypto.subtle.verify('HMAC', key, bytes, enc.encode(`${timestamp}.${payload}`))) return true
+  }
+  return false
 }
 
 http.route({
@@ -106,6 +100,7 @@ http.route({
     const payload = await request.text()
     const sig = request.headers.get('stripe-signature')
     const secret = process.env.STRIPE_WEBHOOK_SECRET
+    if (!secret) return new Response('Webhook is not configured', { status: 503 })
     const ok = await verifyStripeSignature(payload, sig, secret)
     if (!ok) return new Response('Bad signature', { status: 400 })
 
@@ -120,10 +115,12 @@ http.route({
       await ctx.runMutation(internal.billing.handleStripeEvent, {
         type: event.type,
         data: event.data,
+        eventId: event.id,
+        accountId: event.account,
       })
     } catch (e) {
-      // Acknowledge anyway so Stripe doesn't hammer retries on a logic bug.
-      return new Response('handled-with-error', { status: 200 })
+      // Stripe retries transient failures; successful event IDs are deduplicated.
+      return new Response('Webhook processing failed', { status: 500 })
     }
     return new Response('ok', { status: 200 })
   }),
@@ -206,5 +203,7 @@ http.route({
     return new Response(JSON.stringify(res), { status: 200, headers: { ...CORS, 'Content-Type': 'application/json' } })
   }),
 })
+
+registerPrivateFiles(http)
 
 export default http

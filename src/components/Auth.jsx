@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
-import { Mail, Lock, User, ArrowRight, ArrowLeft, Loader2, Heart, GraduationCap, Building2, Home, Check, ShieldCheck, Camera, Banknote } from 'lucide-react'
+import { Mail, Lock, User, ArrowRight, ArrowLeft, Loader2, Heart, GraduationCap, Building2, Home, Check, ShieldCheck, Camera, Banknote, Eye, EyeOff } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import BrandLockup from './BrandLockup.jsx'
 
@@ -24,7 +24,7 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
   const inviteInfo = useQuery(api.facilities.inviteInfo, isJoin && intent.token ? { token: intent.token } : 'skip')
   const inviteRole = inviteInfo?.role || 'parent'
 
-  const [flow, setFlow] = useState(isOwner || isJoin ? 'signUp' : 'signIn')
+  const [flow, setFlow] = useState(() => new URLSearchParams(window.location.search).get('reset') === '1' ? 'reset' : isOwner || isJoin ? 'signUp' : 'signIn')
   const [name, setName] = useState('')
   const [facilityName, setFacilityName] = useState('')
   // Prefill from a handoff link (e.g. the Pacific Coast site's Parent Portal →
@@ -32,49 +32,67 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
   // own secure origin — never collected on a partner marketing domain.
   const [email, setEmail] = useState(() => new URLSearchParams(window.location.search).get('email') || '')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [role, setRole] = useState('parent')
+  const [code, setCode] = useState('')
+  const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   const isSignUp = flow === 'signUp'
-
+  const isReset = flow === 'reset' || flow === 'reset-verification'
+  const verifyingReset = flow === 'reset-verification'
+  useEffect(() => { if (inviteInfo?.email) setEmail(inviteInfo.email) }, [inviteInfo?.email])
+  const switchFlow = (value) => { setFlow(value); setError(''); setNotice(''); setPassword(''); setCode('') }
   const submit = async (e) => {
     e.preventDefault()
-    setError('')
+    setError(''); setNotice('')
+    if (isSignUp && isJoin && !inviteInfo) { setError('This invitation is unavailable. Ask your daycare for a new link.'); return }
+    if (verifyingReset && !/^\d{8}$/.test(code)) { setError('Enter the 8-digit code from your email.'); return }
     setBusy(true)
     try {
-      // Stash the follow-up action and let it run from an effect once auth has
-      // fully propagated — calling it inline right after signIn races the token.
-      if (isOwner && isSignUp) sessionStorage.setItem('cubby_pending_facility', facilityName)
-      if (isJoin && intent.token) sessionStorage.setItem('cubby_pending_join', intent.token)
-      // Mark this as a fresh sign-in so App routes to the portal instead of
-      // showing the "already signed in" interstitial on /signup or /join.
+      if (flow === 'reset') {
+        await signIn('password', { email: email.trim(), flow: 'reset' })
+        setNotice('If an account uses that email, a recovery code has been sent. Check your inbox and spam folder. The code expires in 10 minutes.')
+        setFlow('reset-verification'); setBusy(false)
+        return
+      }
+      if (!isReset && isOwner && isSignUp) {sessionStorage.setItem('cubby_pending_facility', facilityName.trim());sessionStorage.setItem('cubby_pending_facility_email',email.trim().toLowerCase())}
+      if (isJoin && intent.token && inviteInfo) sessionStorage.setItem('cubby_pending_join', intent.token)
       sessionStorage.setItem('cubby_fresh_auth', '1')
-      const r = isOwner ? (isSignUp ? 'admin' : role) : isJoin ? inviteRole : role
-      await signIn('password', { email, password, name, role: r, flow })
-      // Success → ConvexAuthProvider flips auth state and App re-renders; the
-      // AppProvider effect picks up the pending facility/join.
+      if (verifyingReset) {
+        await signIn('password', { email: email.trim(), code, newPassword: password, flow: 'reset-verification' })
+      } else {
+        const r = isOwner ? (isSignUp ? 'admin' : role) : isJoin ? inviteRole : role
+        await signIn('password', { email: email.trim(), password, name, role: r, flow, ...(isJoin && isSignUp ? { inviteToken: intent.token } : {}) })
+      }
+      // Membership creation waits for authenticated context; failures there
+      // remain visible and retryable in the workspace gate.
     } catch (err) {
-      try { sessionStorage.removeItem('cubby_pending_facility'); sessionStorage.removeItem('cubby_pending_join') } catch {}
+      // Clear only the handoff written by this attempt. A failed generic
+      // sign-in must not discard a previously saved invitation/setup retry.
+      if (!isReset) try {
+        if (isOwner && isSignUp){sessionStorage.removeItem('cubby_pending_facility');sessionStorage.removeItem('cubby_pending_facility_email')}
+        if (isJoin && inviteInfo) sessionStorage.removeItem('cubby_pending_join')
+      } catch {}
       setBusy(false)
-      const msg = String(err?.message || '')
+      const message = String(err?.message || '')
       setError(
-        msg.includes('invite')
-          ? 'That invite link is no longer valid. Ask your daycare for a fresh link.'
-          : isSignUp
-            ? 'Could not create that account. Try a different email or a longer password.'
-            : 'Sign in failed. Check your email and password.',
+        message.includes('Multiple legacy') ? 'Multiple older accounts use this email. Enter the exact email originally registered, or contact support.'
+          : message.includes('already uses this email') ? 'An account already uses this email. Choose Sign in or Forgot password.'
+          : message.includes('suspended') || message.includes('access has ended') ? 'Your daycare access is inactive. Contact the owner to restore access.'
+          : isReset ? verifyingReset ? 'The code is invalid or expired. Check the email and code, or request a new code.' : 'The recovery email could not be sent. Please try again later.'
+          : message.toLowerCase().includes('invit') ? 'That invitation is no longer valid for this email. Ask your daycare for a new link.'
+          : isSignUp ? 'Could not create that account. Check your email and use a password of at least 8 characters.'
+          : 'Sign in failed. Check your email and password, or reset your password.',
       )
     }
   }
-
-  const heading = isOwner
-    ? isSignUp ? 'Start your daycare on Mitten' : 'Welcome back'
-    : isJoin
-      ? `Join ${inviteInfo?.facilityName || 'your daycare'}`
-      : isSignUp ? 'Create your account' : 'Sign in to your portal'
-  const eyebrow = isOwner
-    ? isSignUp ? 'Free for up to 5 children' : 'Owner sign in'
+  const heading = isReset ? verifyingReset ? 'Choose a new password' : 'Reset your password'
+    : isOwner ? isSignUp ? 'Start your daycare on Mitten' : 'Welcome back'
+      : isJoin ? `Join ${inviteInfo?.facilityName || 'your daycare'}`
+        : isSignUp ? 'Create your account' : 'Sign in to your portal'
+  const eyebrow = isReset ? 'Secure account recovery' : isOwner ? isSignUp ? 'Free for up to 5 children' : 'Owner sign in'
     : isJoin ? `You're invited as a ${inviteRole === 'staff' ? 'educator' : inviteRole}` : isSignUp ? 'Create your account' : 'Welcome back'
 
   return (
@@ -157,7 +175,8 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
           ].map((t) => (
             <button
               key={t.id}
-              onClick={() => { setFlow(t.id); setError('') }}
+              disabled={busy}
+              onClick={() => switchFlow(t.id)}
               className={`rounded-xl py-2 text-sm font-semibold transition ${flow === t.id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'}`}
             >
               {t.label}
@@ -165,6 +184,9 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
           ))}
         </div>
 
+        {isJoin && inviteInfo === undefined && <p role="status" className="mt-4 text-sm text-slate-500">Checking your invitation…</p>}
+        {isJoin && inviteInfo === null && <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-800">This invitation has been used, expired or withdrawn. Ask your daycare for a new link. You can still sign in to an existing account.</p>}
+        {notice && <p role="status" className="mt-4 rounded-xl bg-brand-50 p-3 text-sm text-brand-700">{notice}</p>}
         <form onSubmit={submit} className="mt-5 space-y-4">
           {isSignUp && isOwner && (
             <Field icon={Home} label="Daycare name">
@@ -179,12 +201,14 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
           )}
 
           <Field icon={Mail} label="Email">
-            <input type="email" className="input pl-10" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input type="email" className="input pl-10" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" readOnly={busy || verifyingReset} />
           </Field>
 
-          <Field icon={Lock} label="Password">
-            <input type="password" className="input pl-10" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          </Field>
+          {verifyingReset && <Field icon={ShieldCheck} label="8-digit recovery code"><input className="input pl-10" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} required /></Field>}
+          {flow !== 'reset' && <div><Field icon={Lock} label={verifyingReset ? 'New password' : 'Password'}>
+            <input type={showPassword ? 'text' : 'password'} className="input pl-10 pr-12" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={isSignUp || verifyingReset ? 8 : undefined} autoComplete={isSignUp || verifyingReset ? 'new-password' : 'current-password'} />
+            <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(value => !value)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+          </Field>{(isSignUp || verifyingReset) && <p className="mt-1 text-xs text-slate-500">At least 8 characters.</p>}</div>}
 
           {/* Role picker only for the generic flow */}
           {isSignUp && intent.kind === 'default' && (
@@ -209,13 +233,18 @@ export default function Auth({ onBack, intent = { kind: 'default' } }) {
           )}
 
           {error && (
-            <p className="rounded-xl bg-coral-400/15 px-3 py-2 text-sm font-semibold text-coral-600">{error}</p>
+            <p role="alert" className="rounded-xl bg-coral-400/15 px-3 py-2 text-sm font-semibold text-coral-600">{error}</p>
           )}
 
-          <button type="submit" disabled={busy} className="btn-primary w-full">
-            {busy ? <Loader2 size={18} className="animate-spin" /> : <>{isSignUp ? (isOwner ? 'Create my daycare' : 'Create account') : 'Sign in'} <ArrowRight size={16} /></>}
+          <button type="submit" disabled={busy || (isSignUp && isJoin && !inviteInfo)} className="btn-primary w-full">
+            {busy ? <Loader2 size={18} className="animate-spin" /> : <>{isReset ? verifyingReset ? 'Save password and sign in' : 'Email recovery code' : isSignUp ? (isOwner ? 'Create my daycare' : 'Create account') : 'Sign in'} <ArrowRight size={16} /></>}
           </button>
         </form>
+        {flow === 'signIn' && <button type="button" disabled={busy} onClick={() => switchFlow('reset')} className="mt-4 text-sm font-semibold text-brand-600">Forgot password?</button>}
+        {isReset && <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-brand-600">
+          <button type="button" disabled={busy} onClick={() => switchFlow('signIn')}>Back to sign in</button>
+          {verifyingReset && <button type="button" disabled={busy} onClick={() => switchFlow('reset')}>Request a new code</button>}
+        </div>}
 
         {isOwner && isSignUp && (
           <p className="mt-4 text-center text-xs font-medium leading-relaxed text-slate-400">

@@ -1,7 +1,9 @@
 import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 import { getAuthUserId } from '@convex-dev/auth/server'
-import { resolveFacilityId, requireFacility } from './lib'
+import { resolveFacilityId, requireFacility, childBelongsToParent } from './lib'
+import { cents, dollars, localDate, monthBounds, validDate } from './financeUtils'
+import { recordOwnerEvent } from './notifications'
 
 const TYPES = ['ccfri', 'accb', 'cwelcc', 'other']
 const STATUSES = ['tracking', 'applied', 'approved', 'expired']
@@ -27,7 +29,7 @@ function daysUntil(dateStr?: string): number | null {
 
 // Plain helper (NOT a Convex function) — invoices.ts imports this to net approved
 // subsidies off a child's bill as transparent negative line items.
-export async function subsidyReductionItems(ctx: any, childId: any, childName: string) {
+export async function subsidyReductionItems(ctx: any, childId: any, childName: string, period?: { start: string; end: string }) {
   const subs = await ctx.db
     .query('subsidies')
     .withIndex('by_child', (q: any) => q.eq('childId', childId))
@@ -36,9 +38,11 @@ export async function subsidyReductionItems(ctx: any, childId: any, childName: s
   for (const s of subs) {
     if (s.status !== 'approved') continue
     if (s.applyToInvoices === false) continue
-    const amt = Math.round(s.monthlyAmount || 0)
+    const range = period || monthBounds(localDate())
+    if ((s.startDate && s.startDate > range.end) || (s.expiryDate && s.expiryDate < range.start)) continue
+    const amt = cents(s.monthlyAmount || 0, 'Subsidy')
     if (amt <= 0) continue
-    items.push({ label: `${TYPE_LABEL[s.type] || 'Subsidy'} — ${childName}`, amt: -amt })
+    items.push({ label: `${TYPE_LABEL[s.type] || 'Subsidy'} — ${childName}`, amt: -dollars(amt) })
   }
   return items
 }
@@ -51,6 +55,7 @@ export const listByFacility = query({
     if (!fid) return []
     const uid = await getAuthUserId(ctx)
     const me = uid ? await ctx.db.get(uid) : null
+    if (me?.role === 'staff') return []
     const kids = await ctx.db
       .query('children')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
@@ -65,7 +70,7 @@ export const listByFacility = query({
       .filter((s: any) => {
         if (!isParent) return true
         const kid: any = kidById.get(String(s.childId))
-        return kid && !kid.archivedAt && kid.parentUserId === uid
+        return childBelongsToParent(kid, uid)
       })
       .map((s: any) => {
         const kid: any = kidById.get(String(s.childId))
@@ -142,12 +147,14 @@ export const upsert = mutation({
     if (!STATUSES.includes(args.status)) throw new Error('Unknown status.')
     const kid = await ctx.db.get(args.childId)
     if (!kid || (kid as any).facilityId !== facilityId) throw new Error('Child not in your facility.')
+    if ((args.startDate && !validDate(args.startDate)) || (args.expiryDate && !validDate(args.expiryDate)) || (args.startDate && args.expiryDate && args.startDate > args.expiryDate)) throw new Error('Choose valid subsidy start and expiry dates.')
+    if (cents(args.monthlyAmount ?? 0, 'Subsidy') < 0) throw new Error('Subsidy cannot be negative.')
     const fields = {
       facilityId,
       childId: args.childId,
       type: args.type,
       status: args.status,
-      monthlyAmount: args.monthlyAmount ?? 0,
+      monthlyAmount: dollars(cents(args.monthlyAmount ?? 0, 'Subsidy')),
       startDate: args.startDate,
       expiryDate: args.expiryDate,
       reference: args.reference,
@@ -159,9 +166,12 @@ export const upsert = mutation({
       const existing = await ctx.db.get(args.id)
       if (!existing || (existing as any).facilityId !== facilityId) throw new Error('Not your subsidy record.')
       await ctx.db.patch(args.id, fields)
+      await recordOwnerEvent(ctx, { facilityId, type: 'subsidy_updated', summary: 'A family subsidy record was updated.' })
       return args.id
     }
-    return await ctx.db.insert('subsidies', { ...fields, createdAt: Date.now() })
+    const id = await ctx.db.insert('subsidies', { ...fields, createdAt: Date.now() })
+    await recordOwnerEvent(ctx, { facilityId, type: 'subsidy_added', summary: 'A family subsidy record was added.' })
+    return id
   },
 })
 
@@ -172,5 +182,6 @@ export const remove = mutation({
     const existing = await ctx.db.get(id)
     if (!existing || (existing as any).facilityId !== facilityId) return
     await ctx.db.delete(id)
+    await recordOwnerEvent(ctx, { facilityId, type: 'subsidy_removed', summary: 'A family subsidy record was removed.' })
   },
 })

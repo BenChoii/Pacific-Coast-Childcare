@@ -3,6 +3,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { BookOpen, Upload, X, FileText, Trash2, Download, Receipt, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
+import { usePrivateDownload } from '../lib/files.js'
 import { SectionHeader, StatCard, Pill, KnitEmpty } from '../components/ui.jsx'
 
 const money = (n) => `$${Number(n || 0).toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -35,17 +36,20 @@ function Field({ label, children }) {
 }
 
 export function BookkeepingStudio() {
-  const { facility, pushToast } = useApp()
+  const { facility, pushToast, uploadImage } = useApp()
+  const downloadPrivate = usePrivateDownload()
   const enabled = facility?.addons?.bookkeeping
-  const docs = useQuery(api.bookkeeping.listByFacility) ?? []
+  const [includeArchived, setIncludeArchived] = useState(false)
+  const docs = useQuery(api.bookkeeping.listByFacility, { includeArchived }) ?? []
   const summary = useQuery(api.bookkeeping.summary)
-  const genUrl = useMutation(api.bookkeeping.generateUploadUrl)
   const add = useMutation(api.bookkeeping.add)
   const update = useMutation(api.bookkeeping.update)
   const remove = useMutation(api.bookkeeping.remove)
   const fileInput = useRef(null)
   const [busy, setBusy] = useState(false)
   const [edit, setEdit] = useState(null)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
   const [filter, setFilter] = useState('all')
 
   if (!enabled) return <BooksLocked />
@@ -55,26 +59,40 @@ export function BookkeepingStudio() {
   const onFiles = async (files) => {
     if (!files?.length) return
     setBusy(true)
+    setError('')
+    let added = 0
     try {
       for (const file of files) {
-        const url = await genUrl()
-        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': file.type }, body: file })
-        const { storageId } = await res.json()
+        const storageId = await uploadImage(file, 'bookkeeping')
         await add({ storageId, fileName: file.name, mimeType: file.type, kind: file.type === 'application/pdf' ? 'invoice' : 'receipt', direction: 'expense' })
+        added++
       }
       pushToast(`${files.length} document${files.length > 1 ? 's' : ''} added — tap to categorize 📄`, { emoji: '📄', tone: 'brand' })
-    } catch { pushToast('Upload failed — try again.', { emoji: '⚠️', tone: 'coral' }) }
-    setBusy(false)
+    } catch (e) { setError(`${added ? `${added} document(s) were added. ` : ''}${e.message || 'Upload failed. Please try again.'}`) }
+    finally { setBusy(false); if (fileInput.current) fileInput.current.value = '' }
+  }
+
+  const performSave = async (status) => {
+    setSaving(true); setError('')
+    try { await save(edit, update, status); setEdit(null); pushToast(status === 'filed' ? 'Filed ✅' : 'Saved', { emoji: '✅', tone: 'mint' }) }
+    catch (e) { setError(e.message || 'Could not save. Your changes are still here.') }
+    finally { setSaving(false) }
+  }
+  const download = async (doc) => {
+    setError('')
+    try { await downloadPrivate(doc.storageId, doc.fileName || 'document') }
+    catch (e) { setError(e.message || 'Could not download this document.') }
   }
 
   const exportCsv = () => {
     const head = ['Date', 'Vendor', 'Category', 'Kind', 'Type', 'Amount', 'GST/HST', 'Status', 'Notes']
-    const rows = docs.map((d) => [d.docDate || '', d.vendor || '', d.category || 'Uncategorized', d.kind || '', d.direction || 'expense', d.amount ?? '', d.taxAmount ?? '', d.status, (d.notes || '').replace(/\n/g, ' ')])
-    const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const rows = docs.map((d) => [d.docDate || '', d.vendor || '', d.category || 'Uncategorized', d.kind || '', d.direction || 'expense', d.amount ?? '', d.taxAmount ?? '', d.archivedAt ? 'archived' : d.status, (d.notes || '').replace(/\n/g, ' ')])
+    const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/^[=+@\-]/, "\'$&").replace(/"/g, '""')}"`).join(',')).join('\n')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
     a.download = `bookkeeping-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
   }
 
   return (
@@ -90,8 +108,9 @@ export function BookkeepingStudio() {
           </div>
         }
       />
-      <input ref={fileInput} type="file" accept="image/*,application/pdf" multiple hidden onChange={(e) => onFiles([...e.target.files])} />
+      <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" multiple hidden onChange={(e) => onFiles([...e.target.files])} />
 
+      {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-600">{error}</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard icon={Receipt} label="Expenses (total)" value={money(summary?.expense)} gradient="from-brand-400 to-grape-500" />
         <StatCard icon={FileText} label="GST/HST tracked" value={money(summary?.tax)} gradient="from-mint-400 to-mint-500" delay={0.04} />
@@ -104,6 +123,7 @@ export function BookkeepingStudio() {
         <span>Upload your receipts &amp; invoices, then <strong>tap any one</strong> to add its vendor, amount &amp; GST and file it. Export the whole lot for your accountant anytime.</span>
       </div>
 
+      <label className="flex items-center gap-2 text-sm text-slate-500"><input type="checkbox" checked={includeArchived} onChange={e => setIncludeArchived(e.target.checked)} /> Include archived documents</label>
       {/* category filter */}
       {summary?.byCategory?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -127,12 +147,12 @@ export function BookkeepingStudio() {
                 className="flex w-full items-center gap-3 rounded-2xl border border-line bg-white/80 p-3.5 text-left shadow-card transition active:scale-[0.99]"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-700">{d.fileUrl ? <FileText size={14} className="shrink-0 text-brand-400" /> : null}<span className="truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div>
+                  <div className="flex items-center gap-1.5 font-semibold text-slate-700">{d.hasFile ? <FileText size={14} className="shrink-0 text-brand-400" /> : null}<span className="truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : null}{d.docDate ? <span className="text-xs text-slate-400">{d.docDate}</span> : null}</div>
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="font-bold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</div>
-                  <div className="mt-0.5">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-mint-600"><CheckCircle2 size={12} /> Filed</span> : <span className="text-[11px] font-semibold text-sunshine-600">To review</span>}</div>
+                  <div className="mt-0.5">{d.archivedAt ? <span className="text-xs font-bold text-slate-400">Archived</span> : d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-[11px] font-bold text-mint-600"><CheckCircle2 size={12} /> Filed</span> : <span className="text-[11px] font-semibold text-sunshine-600">To review</span>}</div>
                 </div>
               </button>
             ))}
@@ -147,13 +167,13 @@ export function BookkeepingStudio() {
               <tbody className="divide-y divide-line">
                 {shown.map((d) => (
                   <tr key={d.id} className="cursor-pointer hover:bg-brand-50/40" onClick={() => setEdit({ ...d, amount: d.amount ?? '', taxAmount: d.taxAmount ?? '', category: d.category || '', vendor: d.vendor || '', docDate: d.docDate || '', notes: d.notes || '', kind: d.kind || 'receipt' })}>
-                    <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.fileUrl ? <FileText size={15} className="shrink-0 text-brand-400" /> : null}<span className="min-w-0 truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div></td>
+                    <td className="px-4 py-3"><div className="flex items-center gap-2 font-semibold text-slate-700">{d.hasFile ? <FileText size={15} className="shrink-0 text-brand-400" /> : null}<span className="min-w-0 truncate">{d.vendor || <span className="text-slate-300">Untitled</span>}</span></div></td>
                     <td className="px-3 py-3 text-slate-500">{d.docDate || '—'}</td>
                     <td className="px-3 py-3">{d.category ? <Pill className="bg-brand-50 text-brand-600">{d.category}</Pill> : <span className="text-slate-300">—</span>}</td>
                     <td className="px-3 py-3 text-right font-semibold text-slate-700">{d.amount != null ? money(d.amount) : '—'}</td>
                     <td className="px-3 py-3 text-right text-slate-500">{d.taxAmount != null ? money(d.taxAmount) : '—'}</td>
-                    <td className="px-3 py-3">{d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-mint-600"><CheckCircle2 size={13} /> Filed</span> : <span className="text-xs font-semibold text-sunshine-600">To review</span>}</td>
-                    <td className="px-3 py-3 text-right">{d.fileUrl && <a href={d.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-brand-400 hover:text-brand-600">view</a>}</td>
+                    <td className="px-3 py-3">{d.archivedAt ? <span className="text-xs font-bold text-slate-400">Archived</span> : d.status === 'filed' ? <span className="inline-flex items-center gap-1 text-xs font-bold text-mint-600"><CheckCircle2 size={13} /> Filed</span> : <span className="text-xs font-semibold text-sunshine-600">To review</span>}</td>
+                    <td className="px-3 py-3 text-right">{d.hasFile && <button onClick={(e) => { e.stopPropagation(); download(d) }} className="text-brand-400 hover:text-brand-600">Download</button>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -163,9 +183,10 @@ export function BookkeepingStudio() {
       )}
 
       {edit && (
-        <Modal title={edit.fileName || 'Document'} onClose={() => setEdit(null)}>
+        <Modal title={edit.fileName || 'Document'} onClose={() => { if (!saving) setEdit(null) }}>
           <div className="space-y-3">
-            {edit.fileUrl && (edit.mimeType || '').startsWith('image/') && <img src={edit.fileUrl} alt="" className="max-h-48 w-full rounded-2xl object-contain bg-slate-50" />}
+            {error && <p role="alert" className="text-sm text-coral-600">{error}</p>}
+            {edit.hasFile && <button className="btn-ghost" onClick={() => download(edit)}><Download size={15} /> Download original document</button>}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Vendor"><input className="input" value={edit.vendor} onChange={(e) => setEdit({ ...edit, vendor: e.target.value })} placeholder="Costco, BC Hydro…" /></Field>
               <Field label="Date"><input type="date" className="input" value={edit.docDate} onChange={(e) => setEdit({ ...edit, docDate: e.target.value })} /></Field>
@@ -189,9 +210,9 @@ export function BookkeepingStudio() {
             </div>
             <Field label="Notes"><input className="input" value={edit.notes} onChange={(e) => setEdit({ ...edit, notes: e.target.value })} placeholder="Optional" /></Field>
             <div className="flex gap-2 pt-1">
-              <button className="btn-ghost px-3 py-2 text-coral-500" onClick={async () => { await remove({ id: edit.id }); setEdit(null) }}><Trash2 size={15} /></button>
-              <button className="btn-ghost flex-1 py-2" onClick={async () => { await save(edit, update, 'unreviewed'); setEdit(null) }}>Save</button>
-              <button className="btn-primary flex-1 py-2" onClick={async () => { await save(edit, update, 'filed'); setEdit(null); pushToast('Filed ✅', { emoji: '✅', tone: 'mint' }) }}><CheckCircle2 size={15} /> File it</button>
+              <button className="btn-ghost px-3 py-2 text-coral-500" disabled={saving || !!edit.archivedAt} aria-label="Archive document" onClick={async () => { if (!confirm('Archive this bookkeeping document? The record and original file will be preserved.')) return; setSaving(true); setError(''); try { await remove({ id: edit.id }); setEdit(null) } catch (e) { setError(e.message || 'Could not archive this document.') } finally { setSaving(false) } }}><Trash2 size={15} /> Archive</button>
+              <button className="btn-ghost flex-1 py-2" disabled={saving} onClick={() => performSave('unreviewed')}>Save</button>
+              <button className="btn-primary flex-1 py-2" disabled={saving} onClick={() => performSave('filed')}><CheckCircle2 size={15} /> File it</button>
             </div>
           </div>
         </Modal>
@@ -202,6 +223,7 @@ export function BookkeepingStudio() {
 
 async function save(edit, update, status) {
   await update({
+    clearFields: ['vendor', 'docDate', 'amount', 'taxAmount', 'category', 'notes'].filter(key => edit[key] === ''),
     id: edit.id, vendor: edit.vendor || undefined, docDate: edit.docDate || undefined,
     amount: edit.amount === '' ? undefined : Number(edit.amount),
     taxAmount: edit.taxAmount === '' ? undefined : Number(edit.taxAmount),

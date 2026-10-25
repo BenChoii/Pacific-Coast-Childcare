@@ -10,7 +10,7 @@ import {
 import { useApp } from '../context/AppContext.jsx'
 import { Card, SectionHeader, Pill, ProgressBar } from '../components/ui.jsx'
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const PROGRAMS = ['Little Leaders', 'Global Citizens', 'Real Life Skills', 'Smart Minds STEM', 'Mindful Hearts', 'Routine']
 const PROGRAM_PILL = {
   'Little Leaders': 'bg-brand-100 text-brand-700',
@@ -26,8 +26,34 @@ const PROGRAM_EMOJI = {
 }
 const NEXT_STATUS = { planned: 'active', active: 'done', done: 'planned' }
 
-function todayDay() {
-  return ['Mon', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Fri'][new Date().getDay()]
+function dateInFacility(facility) {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: facility?.timezone || 'America/Vancouver', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(new Date())
+  const get = type => parts.find(p => p.type === type)?.value
+  return `${get('year')}-${get('month')}-${get('day')}`
+}
+function moveDate(date, amount) { const d = new Date(date + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + amount); return d.toISOString().slice(0,10) }
+function dayForDate(date) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(date+'T12:00:00Z').getUTCDay()] }
+function monday(date) { const index = DAYS.indexOf(dayForDate(date)); return moveDate(date,-index) }
+function useWorkingPlan() {
+  const app = useApp()
+  const [date,setDate] = useState(() => dateInFacility(app.facility))
+  const [room,setRoom] = useState('')
+  const rooms = [...new Set([...app.childrenList.map(c=>c.room).filter(Boolean),app.lessonPlan?.room].filter(r=>r && r !== 'Unassigned'))].sort()
+  const selectedRoom = room || rooms[0] || 'Main Room'
+  const startDate = monday(date)
+  const live = !!app.viewer?.id && !app.facility?.isDemo
+  const planQ = useQuery(api.lessons.plan, live ? {room:selectedRoom,startDate} : 'skip')
+  const blocksQ = useQuery(api.lessons.blocks, live ? {room:selectedRoom,startDate} : 'skip')
+  const rosterQ = useQuery(api.roster.list, live ? {date} : 'skip')
+  return { ...app, date,setDate, room:selectedRoom,setRoom, rooms:rooms.length?rooms:['Main Room'],startDate,endDate:moveDate(startDate,6),
+    plan:live ? planQ : app.lessonPlan, blocks:live ? blocksQ || [] : app.lessonBlocks,
+    datedRoster:live ? rosterQ || [] : app.roster, loading:live && (planQ === undefined || blocksQ === undefined),live }
+}
+function PlanSelection({selection}) {
+  return <Card className="!p-4"><div className="grid gap-3 sm:grid-cols-2">
+    <Labeled label="Classroom"><select className="input" value={selection.room} onChange={e=>selection.setRoom(e.target.value)}>{selection.rooms.map(room=><option key={room}>{room}</option>)}</select></Labeled>
+    <Labeled label="Lesson date"><input className="input" type="date" value={selection.date} onChange={e=>e.target.value && selection.setDate(e.target.value)} /></Labeled>
+  </div><p className="mt-2 text-xs text-slate-500">Week of {selection.startDate} through {selection.endDate}. Completion belongs to one classroom and date.</p></Card>
 }
 function DayTabs({ day, setDay }) {
   return (
@@ -56,14 +82,19 @@ function Tabs({ tab, setTab, items }) {
 
 /* ===================== EDUCATOR ===================== */
 export function EducatorLessons() {
-  const { lessonPlan, lessonBlocks, roster, resources, setLessonStatus, toggleLessonChild } = useApp()
+  const selection = useWorkingPlan()
+  const { plan: lessonPlan, blocks: lessonBlocks, datedRoster: roster, resources, setLessonStatus, toggleLessonChild } = selection
+  const [busy,setBusy] = useState(false)
+  const [error,setError] = useState('')
+  const act = async action => { if (busy) return; setBusy(true); setError(''); try { const id=await action(); if (typeof id==='string') setOpenId(id) } catch(err) {setError(err.message || 'The lesson update could not be saved. Please retry.')} finally {setBusy(false)} }
   const [tab, setTab] = useState('plan')
-  const [day, setDay] = useState(todayDay())
+  const day = dayForDate(selection.date)
+  const setDay = next => selection.setDate(moveDate(selection.startDate,DAYS.indexOf(next)))
   const [openId, setOpenId] = useState(null)
 
   const dayBlocks = lessonBlocks.filter((b) => b.day === day).sort((a, b) => a.order - b.order)
   const done = dayBlocks.filter((b) => b.status === 'done').length
-  const present = roster.filter((r) => r.status !== 'absent' && r.status !== 'checked-out')
+  const present = roster.filter((r) => r.room === selection.room && ['checked-in','napping'].includes(r.status))
 
   return (
     <div className="space-y-5">
@@ -72,7 +103,10 @@ export function EducatorLessons() {
 
       {tab === 'plan' ? (
         <>
+          <PlanSelection selection={selection} />
           <DayTabs day={day} setDay={setDay} />
+          {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
+          {selection.loading && <p role="status" className="text-sm text-slate-500">Loading lesson plan…</p>}
           {dayBlocks.length > 0 && (
             <Card className="!p-4">
               <div className="mb-2 flex items-center justify-between text-sm font-bold">
@@ -92,7 +126,8 @@ export function EducatorLessons() {
                   <div className="flex items-stretch">
                     {/* status toggle */}
                     <button
-                      onClick={() => setLessonStatus({ id: b.id, status: NEXT_STATUS[b.status] })}
+                      disabled={busy || selection.date !== dateInFacility(selection.facility)} aria-label={`Change ${b.title} status`}
+                      onClick={() => act(() => setLessonStatus({ id: b.id, status: NEXT_STATUS[b.status], date:selection.date }))}
                       className="flex w-14 shrink-0 flex-col items-center justify-center gap-1 border-r border-line"
                     >
                       <StatusDot status={b.status} />
@@ -104,6 +139,7 @@ export function EducatorLessons() {
                         <div className={`font-extrabold text-slate-800 ${b.status === 'done' ? 'line-through decoration-slate-300' : ''}`}>{b.title}</div>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                           <Pill className={PROGRAM_PILL[b.program]}>{PROGRAM_EMOJI[b.program]} {b.program}</Pill>
+                          {b.template && <Pill className="bg-slate-100 text-slate-500">Template · completion recorded for this date</Pill>}
                           {b.doneChildren.length > 0 && <Pill className="bg-mint-400/15 text-mint-500"><Users size={11} /> {b.doneChildren.length}</Pill>}
                         </div>
                       </div>
@@ -131,9 +167,9 @@ export function EducatorLessons() {
                             <p className="eyebrow mb-1.5">Who took part ({b.doneChildren.length}/{present.length})</p>
                             <div className="flex flex-wrap gap-1.5">
                               {present.map((r) => {
-                                const on = b.doneChildren.includes(r.name)
+                                const on = (b.doneChildIds || []).includes(r.childId)
                                 return (
-                                  <button key={r.id} onClick={() => toggleLessonChild({ id: b.id, child: r.name })}
+                                  <button key={r.childId} disabled={busy || selection.date !== dateInFacility(selection.facility)} onClick={() => act(() => toggleLessonChild({ id: b.id, childId:r.childId, date:selection.date }))}
                                     className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition ${on ? 'border-transparent bg-mint-500 text-white' : 'border-line bg-white text-slate-500'}`}>
                                     {on ? <Check size={12} /> : <span className="text-sm leading-none">{r.emoji}</span>} {r.name.split(' ')[0]}
                                   </button>
@@ -200,15 +236,16 @@ export function DirectorCurriculum() {
     lessonPlan, lessonBlocks, setLessonTheme, addLessonBlock, updateLessonBlock, deleteLessonBlock,
     resources, addResource, removeResource, pushToast,
   } = useApp()
+  const selection = useWorkingPlan()
   const [tab, setTab] = useState('plan')
 
   return (
     <div className="space-y-5">
       <SectionHeader eyebrow="Curriculum studio" title="Lesson plans & training 🎓" subtitle="Build the week your educators run — and the materials that grow them" />
       <Tabs tab={tab} setTab={setTab} items={[{ id: 'plan', label: 'Lesson builder' }, { id: 'training', label: 'Training library' }, { id: 'family', label: 'Family plans' }]} />
-      {tab === 'family' ? <FamilyPlanManager /> : tab === 'plan' ? (
+      {tab === 'family' ? <><PlanSelection selection={selection}/><FamilyPlanManager lessonPlan={selection.plan} lessonBlocks={selection.blocks} /></> : tab === 'plan' ? (
         <Builder
-          plan={lessonPlan} blocks={lessonBlocks}
+          plan={selection.plan} blocks={selection.blocks} selection={selection}
           setTheme={setLessonTheme} addBlock={addLessonBlock} updateBlock={updateLessonBlock} deleteBlock={deleteLessonBlock}
           pushToast={pushToast}
         />
@@ -219,8 +256,12 @@ export function DirectorCurriculum() {
   )
 }
 
-function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, pushToast }) {
-  const [day, setDay] = useState(todayDay())
+function Builder({ plan, blocks, selection, setTheme, addBlock, updateBlock, deleteBlock, pushToast }) {
+  const day = dayForDate(selection.date)
+  const setDay = next => selection.setDate(moveDate(selection.startDate,DAYS.indexOf(next)))
+  const [busy,setBusy] = useState(false)
+  const [error,setError] = useState('')
+  const [themeTarget,setThemeTarget] = useState(null)
   const [editingTheme, setEditingTheme] = useState(false)
   const [theme, setThemeVal] = useState(plan?.theme || '')
   const [week, setWeekVal] = useState(plan?.week || '')
@@ -228,22 +269,31 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
 
   const dayBlocks = blocks.filter((b) => b.day === day).sort((a, b) => a.order - b.order)
 
-  const saveTheme = () => { setTheme({ theme, week }); setEditingTheme(false); pushToast('Theme updated for all educators', { emoji: '🎓', tone: 'mint' }) }
-  const startAdd = () => setForm({ time: '', title: '', detail: '', program: 'Routine', materials: '', objectives: '' })
-  const startEdit = (b) => setForm({ id: b.id, time: b.time, title: b.title, detail: b.detail, program: b.program, materials: b.materials.join(', '), objectives: b.objectives.join(', ') })
-  const submitForm = () => {
+  const saveTheme = async () => { if(busy) return; setBusy(true); setError(''); try { await setTheme({theme,week,...themeTarget}); setEditingTheme(false); pushToast('Dated classroom theme saved', {emoji:'🎓',tone:'mint'}) } catch(err) {setError(err.message || 'Could not save theme. Your draft is still here.')} finally {setBusy(false)} }
+  const startAdd = () => setForm({time:'',title:'',detail:'',program:'Routine',materials:'',objectives:'',date:selection.date,room:selection.room,planId:plan?.id})
+  const startEdit = (b) => setForm({ id: b.id, date:b.date || selection.date, room:b.room, time: b.time, title: b.title, detail: b.detail, program: b.program, materials: b.materials.join(', '), objectives: b.objectives.join(', ') })
+  const submitForm = async () => {
+    if (busy) return
+    setBusy(true); setError('')
     const payload = {
       time: form.time, title: form.title, detail: form.detail, program: form.program,
       materials: form.materials.split(',').map((s) => s.trim()).filter(Boolean),
       objectives: form.objectives.split(',').map((s) => s.trim()).filter(Boolean),
     }
-    if (form.id) { updateBlock({ id: form.id, ...payload }); pushToast('Block updated', { emoji: '✏️', tone: 'brand' }) }
-    else { addBlock({ day, ...payload }); pushToast('Block added — live for educators', { emoji: '✅', tone: 'mint' }) }
-    setForm(null)
+    try {
+      if (form.id) await updateBlock({id:form.id,...payload})
+      else await addBlock({day:dayForDate(form.date),date:form.date,room:form.room,planId:form.planId,...payload})
+      pushToast(form.id ? 'Block updated' : 'Dated classroom block saved', {emoji:'✅',tone:'mint'})
+      setForm(null)
+    } catch(err) {setError(err.message || 'Could not save. Your block draft is still here.')} finally {setBusy(false)}
+
   }
 
   return (
     <div className="space-y-4">
+      <PlanSelection selection={selection} />
+      {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
+      {selection.loading && <p role="status" className="text-sm text-slate-500">Loading plan…</p>}
       {/* Theme editor */}
       <Card className="!p-4">
         {editingTheme ? (
@@ -251,8 +301,8 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
             <input className="input" value={theme} onChange={(e) => setThemeVal(e.target.value)} placeholder="Weekly theme" />
             <input className="input" value={week} onChange={(e) => setWeekVal(e.target.value)} placeholder="Week label" />
             <div className="flex gap-2">
-              <button onClick={saveTheme} className="btn-primary flex-1 !py-2 text-sm"><Save size={15} /> Save theme</button>
-              <button onClick={() => setEditingTheme(false)} className="btn-ghost !py-2 text-sm">Cancel</button>
+              <button onClick={saveTheme} disabled={busy} className="btn-primary flex-1 !py-2 text-sm"><Save size={15} /> Save theme</button>
+              <button onClick={() => setEditingTheme(false)} disabled={busy} className="btn-ghost !py-2 text-sm">Cancel</button>
             </div>
           </div>
         ) : (
@@ -262,7 +312,7 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
               <h3 className="text-xl text-slate-800">{plan?.theme || 'Untitled'}</h3>
               <p className="text-xs font-bold text-slate-400">{plan?.week}</p>
             </div>
-            <button onClick={() => { setThemeVal(plan?.theme || ''); setWeekVal(plan?.week || ''); setEditingTheme(true) }} className="btn-ghost !py-2 text-sm"><Pencil size={14} /> Edit</button>
+            <button onClick={() => { setThemeVal(plan?.theme || ''); setWeekVal(plan?.week || `${selection.startDate} – ${selection.endDate}`); setThemeTarget({room:selection.room,startDate:selection.startDate,endDate:selection.endDate}); setEditingTheme(true) }} className="btn-ghost !py-2 text-sm"><Pencil size={14} /> Edit</button>
           </div>
         )}
       </Card>
@@ -278,7 +328,7 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
               <Pill className={`mt-1 ${PROGRAM_PILL[b.program]}`}>{PROGRAM_EMOJI[b.program]} {b.program}</Pill>
             </div>
             <button onClick={() => startEdit(b)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-brand-600"><Pencil size={16} /></button>
-            <button onClick={() => { deleteBlock({ id: b.id }); pushToast('Block removed', { emoji: '🗑️', tone: 'coral' }) }} className="rounded-xl p-2 text-slate-300 hover:bg-coral-400/10 hover:text-coral-600"><Trash2 size={16} /></button>
+            <button disabled={busy} aria-label={`Delete ${b.title}`} onClick={async () => {if(!window.confirm(`Remove ${b.title}?`)) return; setBusy(true); setError(''); try {await deleteBlock({id:b.id}); pushToast('Block removed',{emoji:'🗑️',tone:'coral'})} catch(err) {setError(err.message || 'Could not remove block.')} finally {setBusy(false)}}} className="rounded-xl p-2 text-slate-300 hover:bg-coral-400/10 hover:text-coral-600"><Trash2 size={16} /></button>
           </div>
         ))}
         {dayBlocks.length === 0 && <Card><p className="py-5 text-center text-sm font-semibold text-slate-400">No blocks for {day}. Add the first one.</p></Card>}
@@ -287,8 +337,8 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
       {form ? (
         <Card className="space-y-3 ring-2 ring-brand-200">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-slate-800">{form.id ? 'Edit block' : `Add block · ${day}`}</h3>
-            <button onClick={() => setForm(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+            <h3 className="font-extrabold text-slate-800">{form.id ? 'Edit block' : `Add block · ${form.date} · ${form.room}`}</h3>
+            <button disabled={busy} onClick={() => setForm(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Labeled label="Time"><input className="input" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} placeholder="10:00 AM" /></Labeled>
@@ -302,7 +352,7 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
           <Labeled label="Description"><textarea rows={2} className="input resize-none" value={form.detail} onChange={(e) => setForm({ ...form, detail: e.target.value })} placeholder="What educators do with the children" /></Labeled>
           <Labeled label="Materials (comma-separated)"><input className="input" value={form.materials} onChange={(e) => setForm({ ...form, materials: e.target.value })} placeholder="Globe, flag, picture book" /></Labeled>
           <Labeled label="Learning goals (comma-separated)"><input className="input" value={form.objectives} onChange={(e) => setForm({ ...form, objectives: e.target.value })} placeholder="Turn-taking, Geography awareness" /></Labeled>
-          <button onClick={submitForm} disabled={!form.title || !form.time} className="btn-primary w-full"><Save size={16} /> {form.id ? 'Save changes' : 'Add to plan'}</button>
+          <button onClick={submitForm} disabled={busy || !form.title || !form.time} className="btn-primary w-full"><Save size={16} /> {form.id ? 'Save changes' : 'Add to plan'}</button>
         </Card>
       ) : (
         <button onClick={startAdd} className="flex w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-slate-200 bg-white py-4 font-bold text-slate-500 transition hover:border-brand-300 hover:text-brand-600">
@@ -315,21 +365,27 @@ function Builder({ plan, blocks, setTheme, addBlock, updateBlock, deleteBlock, p
 
 function TrainingManager({ resources, addResource, removeResource, pushToast }) {
   const [form, setForm] = useState(null)
+  const [busy,setBusy] = useState(false)
+  const [error,setError] = useState('')
   const startAdd = () => setForm({ title: '', url: '', type: 'video', note: '', category: '' })
-  const submit = () => {
-    addResource({ title: form.title, url: form.url, type: form.type, note: form.note, category: form.category || 'General' })
-    pushToast('Shared with all educators', { emoji: '📚', tone: 'mint' })
-    setForm(null)
+  const submit = async () => {
+    if(busy) return; setError('')
+    try { const url=new URL(form.url); if(!['https:','http:'].includes(url.protocol)) throw Error('Use a valid https:// link.') } catch {setError('Use a valid https:// training link.');return}
+    setBusy(true)
+    try { await addResource({title:form.title,url:form.url,type:form.type,note:form.note,category:form.category || 'General'}); pushToast('Shared with all educators',{emoji:'📚',tone:'mint'}); setForm(null) }
+    catch(err) {setError(err.message || 'Could not share. Your draft is still here.')} finally {setBusy(false)}
   }
+
   return (
     <div className="space-y-4">
       <p className="text-sm font-medium text-slate-500">Share websites and YouTube videos as ongoing training. Everything here appears in every educator’s <span className="font-bold text-slate-600">Training</span> tab.</p>
-      <TrainingList resources={resources} onRemove={(a) => { removeResource(a); pushToast('Removed', { emoji: '🗑️', tone: 'coral' }) }} />
+      {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
+      <TrainingList resources={resources} onRemove={async a => {if(busy) return; setBusy(true);setError('');try{await removeResource(a);pushToast('Removed',{emoji:'🗑️',tone:'coral'})}catch(err){setError(err.message || 'Could not remove training material.')}finally{setBusy(false)}}} />
       {form ? (
         <Card className="space-y-3 ring-2 ring-brand-200">
           <div className="flex items-center justify-between">
             <h3 className="font-extrabold text-slate-800">Add training material</h3>
-            <button onClick={() => setForm(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
+            <button disabled={busy} onClick={() => setForm(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
           </div>
           <Labeled label="Title"><input className="input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Serve & Return (video)" /></Labeled>
           <Labeled label="Link (website or YouTube)"><input className="input" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://…" /></Labeled>
@@ -344,7 +400,7 @@ function TrainingManager({ resources, addResource, removeResource, pushToast }) 
             <Labeled label="Category"><input className="input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Child development" /></Labeled>
           </div>
           <Labeled label="Note"><input className="input" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Why it matters" /></Labeled>
-          <button onClick={submit} disabled={!form.title || !form.url} className="btn-primary w-full"><Plus size={16} /> Share with educators</button>
+          <button onClick={submit} disabled={busy || !form.title || !form.url} className="btn-primary w-full"><Plus size={16} /> Share with educators</button>
         </Card>
       ) : (
         <button onClick={startAdd} className="flex w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-slate-200 bg-white py-4 font-bold text-slate-500 transition hover:border-brand-300 hover:text-brand-600">
@@ -360,12 +416,12 @@ function Labeled({ label, children }) {
 }
 
 const blankFamilyPlan = { title: '', period: 'week', startDate: '', endDate: '', room: '', overview: '', activities: '', goals: '' }
-function FamilyPlanManager() {
+function FamilyPlanManager({lessonPlan,lessonBlocks}) {
   const plans = useQuery(api.lessons.familyPlans, {})
   const save = useMutation(api.lessons.saveFamilyPlan)
   const publish = useMutation(api.lessons.publishFamilyPlan)
   const remove = useMutation(api.lessons.removeFamilyPlan)
-  const { lessonPlan, lessonBlocks, pushToast } = useApp()
+  const { pushToast } = useApp()
   const [form, setForm] = useState(null)
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -386,16 +442,17 @@ function FamilyPlanManager() {
   }
   const erase = async plan => {
     if (!window.confirm(`Delete the family plan “${plan.title}”?`)) return
-    try { await remove({ id: plan.id }) } catch (err) { setError(err.message || 'Could not remove the plan.') }
+    setBusy(true);setError('')
+    try { await remove({ id: plan.id }) } catch (err) { setError(err.message || 'Could not remove the plan.') } finally {setBusy(false)}
   }
   const copy = async plan => {
     try { await navigator.clipboard.writeText(`${plan.title}\n${plan.startDate} – ${plan.endDate}\n${plan.room || 'All rooms'}\n\n${plan.overview}\n\nActivities\n${plan.activities}\n\nLearning goals\n${plan.goals}`); pushToast('Plan copied for sharing', { emoji: '📋' }) }
     catch { setError('Copy unavailable. Open the preview to select the plan text.') }
   }
   const useWorkingPlan = () => {
-    const activities = [...lessonBlocks].sort((a, b) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(a.day) - ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexOf(b.day) || a.order - b.order).map(b => `${b.day} · ${b.title}\n${b.detail}`).join('\n\n')
+    const activities = [...lessonBlocks].sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || a.order - b.order).map(b => `${b.day} · ${b.title}\n${b.detail}`).join('\n\n')
     const goals = [...new Set(lessonBlocks.flatMap(b => b.objectives || []))].join('\n')
-    setForm({ ...blankFamilyPlan, title: lessonPlan?.theme || '', room: lessonPlan?.room || '', activities, goals })
+    setForm({ ...blankFamilyPlan, title: lessonPlan?.theme || '', room: lessonPlan?.room || '', startDate:lessonPlan?.startDate || '', endDate:lessonPlan?.endDate || '', activities, goals })
     setError('')
   }
   return <div className="space-y-4">

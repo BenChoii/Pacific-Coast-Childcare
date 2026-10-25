@@ -13,7 +13,7 @@ const result = await build({ entryPoints: ['convex/notifications.ts'], bundle: t
     server: 'export const query=x=>x,mutation=x=>x,internalQuery=x=>x,internalMutation=x=>x;',
     api: 'export const internal={ownerEmail:{deliver:"deliver"}};',
     values: 'export const v = new Proxy({}, {get:()=>()=>({})});',
-    lib: 'export const requireFacility=async ctx=>ctx.membership;',
+    lib: 'let token=0;export const randomToken=()=>String(++token);export const requireFacility=async ctx=>ctx.membership;',
   })[path] }))
 } }] })
 const api = await import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`)
@@ -30,11 +30,11 @@ test('owner event and delivery are recorded together; demo actions never send ma
 test('only one delivery can claim an event; destination resolves from correct facility owner',async()=>{
  const ctx=context();await api.recordOwnerEvent(ctx,{facilityId:'facility',type:'onboarded',summary:'A parent joined'})
  const event=await api.claim.handler(ctx,{id:'event'});assert.equal(event.email,'owner@example.com');assert.equal(await api.claim.handler(ctx,{id:'event'}),null)
- await api.finish.handler(ctx,{id:'event',ok:true});assert.equal(ctx.docs.event.status,'sent');assert.ok(ctx.docs.event.sentAt)
+ await api.finish.handler(ctx,{id:'event',ok:true,deliveryToken:event.deliveryToken});assert.equal(ctx.docs.event.status,'sent');assert.ok(ctx.docs.event.sentAt)
 })
 test('mail failures have bounded retries and remain visible; parents cannot manually resend',async()=>{
  const ctx=context();await api.recordOwnerEvent(ctx,{facilityId:'facility',type:'updated',summary:'Calendar updated'})
- for(let i=0;i<3;i++){await api.claim.handler(ctx,{id:'event'});await api.finish.handler(ctx,{id:'event',ok:false,error:'Delivery failed'})}
+ for(let i=0;i<3;i++){const claim=await api.claim.handler(ctx,{id:'event'});await api.finish.handler(ctx,{id:'event',ok:false,error:'Delivery failed',deliveryToken:claim.deliveryToken})}
  assert.equal(ctx.docs.event.status,'failed');assert.equal(ctx.docs.event.attempts,3);assert.equal(ctx.scheduled.length,3)
  ctx.membership.user.role='parent';await assert.rejects(api.retry.handler(ctx,{id:'event'}),/Directors only/)
 })

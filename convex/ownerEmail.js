@@ -15,9 +15,9 @@ export const deliver = internalAction({
         body: JSON.stringify(event), signal: AbortSignal.timeout(50_000),
       })
       if (!response.ok) throw new Error('Email relay failed')
-      await ctx.runMutation(internal.notifications.finish, { id, ok: true })
+      await ctx.runMutation(internal.notifications.finish, { id, ok: true, deliveryToken:event.deliveryToken })
     } catch {
-      await ctx.runMutation(internal.notifications.finish, { id, ok: false, error: 'Owner email could not be delivered. Retry from Activity & alerts or contact support.' })
+      await ctx.runMutation(internal.notifications.finish, { id, ok: false, deliveryToken:event.deliveryToken, error: 'Owner email could not be delivered. Retry from Activity & alerts or contact support.' })
     }
   },
 })

@@ -10,7 +10,9 @@ export const notificationTables = {
     createdAt: v.number(),
     status: v.string(),
     attempts: v.number(),
+    sendingAt: v.optional(v.number()),
+    deliveryToken: v.optional(v.string()),
     sentAt: v.optional(v.number()),
     error: v.optional(v.string()),
-  }).index('by_facility', ['facilityId', 'createdAt']),
+  }).index('by_facility', ['facilityId', 'createdAt']).index('by_status', ['status','createdAt']),
 }

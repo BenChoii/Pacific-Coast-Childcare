@@ -4,6 +4,7 @@ import {
   TrendingUp, UsersRound, GraduationCap, Settings, Sparkles, BookHeart, Banknote, Wind, ScanLine, PiggyBank, ReceiptText, Landmark, Inbox,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import {lazy,Suspense} from 'react'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { useApp } from './context/AppContext.jsx'
 import { getEntry } from './routes.js'
@@ -17,23 +18,37 @@ import Onboarding from './components/Onboarding.jsx'
 import Messages from './views/Messages.jsx'
 import Photos from './views/Photos.jsx'
 import Me from './views/Me.jsx'
-import { Account } from './views/account.jsx'
-import { ParentHome, ParentTimeline, ParentCalendar, ParentBilling, ParentProfile } from './views/parent.jsx'
-import { StaffHome, Attendance, LogActivity } from './views/staff.jsx'
-import { AdminHome, Enrollment, AdminBilling, Rooms, Reports } from './views/admin.jsx'
-import { Profitability, Families, EducatorsAdmin } from './views/director.jsx'
-import { EducatorLessons, DirectorCurriculum } from './views/lessons.jsx'
-import { MilestoneTracker, MemoryBook } from './views/milestones.jsx'
-import { Payroll } from './views/payroll.jsx'
-import { CalmCorner } from './views/calm.jsx'
-import { IntakeDesk } from './views/intake.jsx'
-import { FinanceStudio, ExtrasLogger } from './views/finance.jsx'
-import { InvoicingStudio } from './views/invoicing.jsx'
-import { SubsidiesStudio } from './views/subsidies.jsx'
-import { DirectorCalendar } from './views/calendar.jsx'
+const Account=lazy(()=>import('./views/account.jsx').then(module=>({default:module.Account})))
+const ParentCalendar=lazy(()=>import('./views/parent.jsx').then(module=>({default:module.ParentCalendar})))
+const ParentBilling=lazy(()=>import('./views/parent.jsx').then(module=>({default:module.ParentBilling})))
+const StaffHome=lazy(()=>import('./views/staff.jsx').then(module=>({default:module.StaffHome})))
+const Attendance=lazy(()=>import('./views/staff.jsx').then(module=>({default:module.Attendance})))
+const LogActivity=lazy(()=>import('./views/staff.jsx').then(module=>({default:module.LogActivity})))
+const Enrollment=lazy(()=>import('./views/admin.jsx').then(module=>({default:module.Enrollment})))
+const AdminBilling=lazy(()=>import('./views/admin.jsx').then(module=>({default:module.AdminBilling})))
+const Rooms=lazy(()=>import('./views/admin.jsx').then(module=>({default:module.Rooms})))
+const Profitability=lazy(()=>import('./views/director.jsx').then(module=>({default:module.Profitability})))
+const Families=lazy(()=>import('./views/director.jsx').then(module=>({default:module.Families})))
+const EducatorsAdmin=lazy(()=>import('./views/director.jsx').then(module=>({default:module.EducatorsAdmin})))
+const EducatorLessons=lazy(()=>import('./views/lessons.jsx').then(module=>({default:module.EducatorLessons})))
+const DirectorCurriculum=lazy(()=>import('./views/lessons.jsx').then(module=>({default:module.DirectorCurriculum})))
+const MilestoneTracker=lazy(()=>import('./views/milestones.jsx').then(module=>({default:module.MilestoneTracker})))
+const MemoryBook=lazy(()=>import('./views/milestones.jsx').then(module=>({default:module.MemoryBook})))
+const Payroll=lazy(()=>import('./views/payroll.jsx').then(module=>({default:module.Payroll})))
+const CalmCorner=lazy(()=>import('./views/calm.jsx').then(module=>({default:module.CalmCorner})))
+const IntakeDesk=lazy(()=>import('./views/intake.jsx').then(module=>({default:module.IntakeDesk})))
+const FinanceStudio=lazy(()=>import('./views/finance.jsx').then(module=>({default:module.FinanceStudio})))
+const ExtrasLogger=lazy(()=>import('./views/finance.jsx').then(module=>({default:module.ExtrasLogger})))
+const InvoicingStudio=lazy(()=>import('./views/invoicing.jsx').then(module=>({default:module.InvoicingStudio})))
+const SubsidiesStudio=lazy(()=>import('./views/subsidies.jsx').then(module=>({default:module.SubsidiesStudio})))
+const DirectorCalendar=lazy(()=>import('./views/calendar.jsx').then(module=>({default:module.DirectorCalendar})))
 import OwnerActivity from './views/owner-activity.jsx'
-import { Crm } from './views/crm.jsx'
-import { BookkeepingStudio } from './views/bookkeeping.jsx'
+const Crm=lazy(()=>import('./views/crm.jsx').then(module=>({default:module.Crm})))
+const BookkeepingStudio=lazy(()=>import('./views/bookkeeping.jsx').then(module=>({default:module.BookkeepingStudio})))
+import { FamilyToday, FamilyDailyLog, FamilyProfile, Incidents } from './views/care.jsx'
+import { DirectorToday, WorkingReports } from './views/today.jsx'
+
+function PostPhotos(){return <Photos canPost/>}
 
 function Loader() {
   return (
@@ -90,7 +105,7 @@ function AlreadySignedIn({ viewer, facility, joining }) {
 }
 
 export default function App() {
-  const { role, view, conversations, authResolving, isAuthenticated, viewer, facility, claimArea } = useApp()
+  const { role, view, conversations, authResolving, isAuthenticated, viewer, facility, claimArea, paymentReturnError, retryPaymentReturn } = useApp()
 
   if (authResolving) return <Loader />
   if (isAuthenticated && viewer?.accessStatus === 'suspended') return <AccessNotice suspended />
@@ -130,14 +145,15 @@ export default function App() {
 
   const navConfig = {
     parent: [
-      { id: 'home', label: 'Home', icon: Home, render: ParentHome, dock: true },
-      { id: 'timeline', label: 'Daily Log', icon: ListChecks, render: ParentTimeline, dock: true },
+      { id: 'home', label: 'Home', icon: Home, render: FamilyToday, dock: true },
+      { id: 'timeline', label: 'Daily Log', icon: ListChecks, render: FamilyDailyLog, dock: true },
       { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null, dock: true },
-      { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos /> },
+      { id: 'photos', label: 'Photos', icon: Image, render: Photos },
       { id: 'memories', label: 'Memory Book', icon: BookHeart, render: MemoryBook },
       { id: 'calendar', label: 'Calendar', icon: CalendarDays, render: ParentCalendar },
       { id: 'billing', label: 'Billing', icon: CreditCard, render: ParentBilling },
-      { id: 'profile', label: 'Child Profile', icon: Baby, render: ParentProfile },
+      { id: 'incidents', label: 'Incident reports', icon: ClipboardList, render: Incidents },
+      { id: 'profile', label: 'Child Profile', icon: Baby, render: FamilyProfile },
       { id: 'me', label: 'Me', icon: User, render: Me, dock: true },
     ],
     staff: [
@@ -145,8 +161,9 @@ export default function App() {
       { id: 'attendance', label: 'Attendance', icon: LogIn, render: Attendance, dock: true },
       { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null, dock: true },
       { id: 'log', label: 'Log Activity', icon: ClipboardList, render: LogActivity },
+      { id: 'incidents', label: 'Incident reports', icon: ClipboardList, render: Incidents },
       { id: 'extras', label: 'Extras', icon: ReceiptText, render: ExtrasLogger },
-      { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
+      { id: 'photos', label: 'Photos', icon: Image, render: PostPhotos },
       { id: 'milestones', label: 'Milestones', icon: Sparkles, render: MilestoneTracker },
       { id: 'calm', label: 'Calm Corner', icon: Wind, render: CalmCorner },
       { id: 'intake', label: 'Intake', icon: ScanLine, render: IntakeDesk },
@@ -154,8 +171,11 @@ export default function App() {
       { id: 'me', label: 'Me', icon: User, render: Me, dock: true },
     ],
     admin: [
-      { id: 'home', label: 'Dashboard', icon: Home, render: AdminHome, dock: true },
-      { id: 'account', label: 'Account', icon: Settings, render: Account, dock: true },
+      { id: 'home', label: 'Dashboard', icon: Home, render: DirectorToday, dock: true },
+      { id: 'attendance', label: 'Attendance', icon: LogIn, render: Attendance, dock: true },
+      { id: 'log', label: 'Log care activity', icon: ClipboardList, render: LogActivity },
+      { id: 'incidents', label: 'Incident reports', icon: ClipboardList, render: Incidents },
+      { id: 'account', label: 'Account', icon: Settings, render: Account },
       { id: 'finance', label: 'Finance', icon: PiggyBank, render: FinanceStudio },
       { id: 'invoices', label: 'Invoices', icon: ReceiptText, render: InvoicingStudio },
       { id: 'subsidies', label: 'Subsidies', icon: Landmark, render: SubsidiesStudio },
@@ -163,8 +183,8 @@ export default function App() {
       { id: 'books', label: 'Bookkeeping', icon: BookOpen, render: BookkeepingStudio },
       { id: 'families', label: 'Families', icon: UsersRound, render: Families, dock: true },
       { id: 'inquiries', label: 'Inquiries', icon: Inbox, render: Crm },
-      { id: 'photos', label: 'Photos', icon: Image, render: () => <Photos canPost /> },
-      { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null },
+      { id: 'photos', label: 'Photos', icon: Image, render: PostPhotos },
+      { id: 'messages', label: 'Messages', icon: MessageCircle, render: Messages, badge: unread || null, dock:true },
       { id: 'calendar', label: 'Calendar & closures', icon: CalendarDays, render: DirectorCalendar },
       { id: 'alerts', label: 'Activity & alerts', icon: Inbox, render: OwnerActivity },
       { id: 'curriculum', label: 'Curriculum', icon: GraduationCap, render: DirectorCurriculum },
@@ -176,8 +196,8 @@ export default function App() {
       { id: 'enrollment', label: 'Enrollment', icon: Sprout, render: Enrollment },
       { id: 'billing', label: 'Tuition', icon: Wallet, render: AdminBilling },
       { id: 'rooms', label: 'Rooms', icon: DoorOpen, render: Rooms },
-      { id: 'reports', label: 'Reports', icon: BarChart3, render: Reports },
-      { id: 'me', label: 'Me', icon: User, render: Me, dock: true },
+      { id: 'reports', label: 'Reports', icon: BarChart3, render: WorkingReports },
+      { id: 'me', label: 'Me', icon: User, render: Me },
     ],
   }
 
@@ -195,6 +215,7 @@ export default function App() {
   return (
     <>
       <Shell nav={nav}>
+        {paymentReturnError && <div role="alert" className="mb-5 rounded-2xl border border-coral-200 bg-coral-50 p-4"><p className="text-sm text-coral-700">{paymentReturnError}</p><button onClick={retryPaymentReturn} className="btn-ghost mt-3">Retry confirmation</button></div>}
         {/* Native-feel page transition: keyed remount — each page settles in with
             a refined fade + slide + whisper of scale on every navigation, and its
             cards cascade behind it. AnimatePresence (exit/cross-fade) is avoided:
@@ -206,7 +227,7 @@ export default function App() {
           transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         >
           <ErrorBoundary resetKey={active.id}>
-            <View />
+            <Suspense fallback={<div role="status" className="p-6 text-slate-500">Opening this page…</div>}><View /></Suspense>
           </ErrorBoundary>
         </motion.div>
       </Shell>
@@ -216,11 +237,13 @@ export default function App() {
 }
 
 function AccessNotice({ suspended = false }) {
-  const { logout } = useApp()
+  const { logout, membershipError, retryMembership, joiningFacility } = useApp()
   return <div className="aurora flex min-h-screen items-center justify-center px-5"><div className="max-w-lg rounded-3xl bg-white p-8 shadow-card">
     <BrandLockup variant="nav" />
     <h1 className="mt-6 text-3xl text-brand-700">{suspended ? 'Daycare access has ended' : 'Your family dashboard'}</h1>
     <p className="mt-3 text-slate-600">{suspended ? 'Your daycare has suspended this account’s access. Contact the owner if you need help.' : 'Your account is ready. The daycare needs to link your child’s active enrolment before their schedule and updates appear.'}</p>
+    {joiningFacility && <p role="status" className="mt-4 text-sm">Connecting your enrolment…</p>}
+    {membershipError && <div role="alert" className="mt-4"><p className="text-sm text-coral-600">{membershipError}</p><button disabled={joiningFacility} className="btn-ghost mt-3" onClick={retryMembership}>Retry joining</button></div>}
     <button className="btn-primary mt-6" onClick={logout}>Sign out</button>
   </div></div>
 }

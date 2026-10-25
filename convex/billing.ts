@@ -1,7 +1,11 @@
 import { action, internalQuery, internalMutation } from './_generated/server'
 import { v } from 'convex/values'
+import type { Id } from './_generated/dataModel'
 import { internal } from './_generated/api'
 import { monthlyCents, requireFacility, FREE_LIMIT } from './lib'
+import { paymentOrigin, localDate } from './financeUtils'
+import { applyVerifiedPayment } from './invoices'
+import { recordOwnerEvent } from './notifications'
 
 // ── Internal: the billing state the actions need (with auth identity) ──────
 export const state = internalQuery({
@@ -41,6 +45,7 @@ export const setStripe = internalMutation({
     const clean: any = {}
     for (const [k, val] of Object.entries(patch)) if (val !== undefined) clean[k] = val
     await ctx.db.patch(facilityId, clean)
+    await recordOwnerEvent(ctx, { facilityId, type: 'billing_updated', summary: 'The daycare billing settings were updated.' })
   },
 })
 
@@ -62,6 +67,7 @@ export const applySubscriptionStatus = internalMutation({
             ? 'canceled'
             : f.plan
     await ctx.db.patch(f._id, { plan })
+    if (f.plan !== plan) await recordOwnerEvent(ctx, { facilityId: f._id, type: 'billing_status_changed', summary: 'The daycare subscription status changed.' })
   },
 })
 
@@ -87,6 +93,7 @@ async function stripe(key: string, path: string, body?: Record<string, string | 
 
 // Build a subscription Checkout session for a given billable child count.
 async function makeCheckout(key: string, st: any, count: number, origin: string) {
+  origin = paymentOrigin(origin)
   const qty = Math.max(1, monthlyCents(count, st.freeLimit)) // 1-cent units → total = qty cents
   const params: Record<string, string | number> = {
     mode: 'subscription',
@@ -152,7 +159,7 @@ export const addChild = action({
     monthlyTuition: v.optional(v.number()),
     origin: v.string(),
   },
-  handler: async (ctx, { origin, ...child }) => {
+  handler: async (ctx, { origin, ...child }): Promise<{ ok?: boolean; childId?: Id<'children'>; billingSkipped?: boolean; needsBilling?: boolean; url?: string }> => {
     const st = await ctx.runQuery(internal.billing.state, {})
     const key = process.env.STRIPE_SECRET_KEY
     const willCount = st.childCount + 1
@@ -164,14 +171,14 @@ export const addChild = action({
     if (willBill && needsNewBilling) {
       if (!key) {
         // Stripe not configured yet — let them through so the app stays usable.
-        await ctx.runMutation(internal.children.insert, { facilityId: st.facilityId, ...child })
-        return { ok: true, billingSkipped: true }
+        const inserted = await ctx.runMutation(internal.children.insert, { facilityId: st.facilityId, ...child })
+        return { ok: true, childId: inserted.childId, billingSkipped: true }
       }
       const url = await makeCheckout(key, st, willCount, origin)
       return { needsBilling: true, url }
     }
 
-    const { count } = await ctx.runMutation(internal.children.insert, { facilityId: st.facilityId, ...child })
+    const { count, childId } = await ctx.runMutation(internal.children.insert, { facilityId: st.facilityId, ...child })
     if (willBill && key && st.stripeSubscriptionId) {
       try {
         await syncSubscription(key, st, count)
@@ -179,7 +186,7 @@ export const addChild = action({
         // Non-fatal: child is enrolled; quantity reconciles on next change.
       }
     }
-    return { ok: true }
+    return { ok: true, childId }
   },
 })
 
@@ -203,6 +210,7 @@ export const startCheckout = action({
     const st = await ctx.runQuery(internal.billing.state, {})
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) return { configured: false }
+    if (st.stripeSubscriptionId && st.plan !== 'canceled') return { configured: true, error: 'Billing is already set up. Use Manage billing to change the existing subscription.' }
     const url = await makeCheckout(key, st, Math.max(st.childCount, st.freeLimit + 1), origin)
     return { configured: true, url }
   },
@@ -218,7 +226,7 @@ export const billingPortal = action({
     if (!st.stripeCustomerId) return { configured: true, error: 'No billing account yet.' }
     const session = await stripe(key, 'billing_portal/sessions', {
       customer: st.stripeCustomerId,
-      return_url: `${origin}/app`,
+      return_url: `${paymentOrigin(origin)}/app`,
     })
     return { configured: true, url: session.url }
   },
@@ -238,6 +246,7 @@ export const activate = internalMutation({
       hasCard: true,
       plan: 'active',
     })
+    await recordOwnerEvent(ctx, { facilityId, type: 'billing_activated', summary: 'The daycare subscription was activated.' })
   },
 })
 
@@ -250,10 +259,11 @@ export const confirmSubscription = action({
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) return { ok: false }
     try {
-      const session = await stripe(key, `checkout/sessions/${sessionId}`)
-      const complete = session?.status === 'complete' || session?.payment_status === 'paid'
+      const st = await ctx.runQuery(internal.billing.state, {})
+      const session = await stripe(key, `checkout/sessions/${encodeURIComponent(sessionId)}`)
+      const complete = session?.mode === 'subscription' && session?.status === 'complete' && ['paid', 'no_payment_required'].includes(session?.payment_status)
       const facilityId = session?.metadata?.facilityId || session?.client_reference_id
-      if (complete && facilityId) {
+      if (complete && facilityId === st.facilityId && session.subscription) {
         await ctx.runMutation(internal.billing.activate, {
           facilityId,
           customerId: typeof session.customer === 'string' ? session.customer : session.customer?.id,
@@ -270,18 +280,31 @@ export const confirmSubscription = action({
 
 // Webhook entry point used by http.js after the event is verified.
 export const handleStripeEvent = internalMutation({
-  args: { type: v.string(), data: v.any() },
-  handler: async (ctx, { type, data }) => {
+  args: { type: v.string(), data: v.any(), eventId: v.string(), accountId: v.optional(v.string()) },
+  handler: async (ctx, { type, data, eventId, accountId }) => {
+    if (!eventId) throw new Error('Missing Stripe event id.')
+    const seen = await ctx.db.query('stripeWebhookEvents').withIndex('by_event', q => q.eq('eventId', eventId)).first()
+    if (seen) return
+
     const obj = data?.object ?? {}
-    if (type === 'checkout.session.completed') {
-      const facilityId = obj.metadata?.facilityId || obj.client_reference_id
-      if (facilityId) {
+    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(type) && obj.mode === 'payment' && obj.payment_status === 'paid' && obj.metadata?.invId) {
+      await applyVerifiedPayment(ctx, { id: obj.metadata.invId, sessionId: obj.id, amountCents: obj.amount_total, currency: obj.currency, accountId, paidOn: localDate() })
+    } else if (type === 'checkout.session.expired' && obj.mode === 'payment') {
+      const attempt = await ctx.db.query('paymentAttempts').withIndex('by_session', q => q.eq('stripeSessionId', obj.id)).first()
+      if (attempt && attempt.status !== 'paid') await ctx.db.patch(attempt._id, { status: 'expired', updatedAt: Date.now() })
+    } else if (type === 'checkout.session.completed' && obj.mode === 'subscription' && obj.status === 'complete' && obj.subscription) {
+      const reference = obj.metadata?.facilityId || obj.client_reference_id
+      const facilityId = typeof reference === 'string' ? ctx.db.normalizeId('facilities', reference) : null
+      if (facilityId && !accountId) {
+        const facility = await ctx.db.get(facilityId)
+        if (!facility) throw new Error('Billing facility not found.')
         await ctx.db.patch(facilityId, {
           stripeCustomerId: typeof obj.customer === 'string' ? obj.customer : obj.customer?.id,
           stripeSubscriptionId: typeof obj.subscription === 'string' ? obj.subscription : obj.subscription?.id,
           hasCard: true,
           plan: 'active',
         })
+        if (facility.plan !== 'active') await recordOwnerEvent(ctx, { facilityId, type: 'billing_activated', summary: 'The daycare subscription was activated.' })
       }
     } else if (type === 'customer.subscription.updated' || type === 'customer.subscription.deleted') {
       const subId = obj.id
@@ -300,6 +323,7 @@ export const handleStripeEvent = internalMutation({
                 ? 'canceled'
                 : f.plan
         await ctx.db.patch(f._id, { plan })
+        if (f.plan !== plan) await recordOwnerEvent(ctx, { facilityId: f._id, type: 'billing_status_changed', summary: 'The daycare subscription status changed.' })
       }
     } else if (type === 'invoice.payment_failed') {
       const subId = typeof obj.subscription === 'string' ? obj.subscription : obj.subscription?.id
@@ -308,8 +332,12 @@ export const handleStripeEvent = internalMutation({
           .query('facilities')
           .withIndex('by_subscription', (q) => q.eq('stripeSubscriptionId', subId))
           .first()
-        if (f) await ctx.db.patch(f._id, { plan: 'past_due' })
+        if (f) {
+          await ctx.db.patch(f._id, { plan: 'past_due' })
+          if (f.plan !== 'past_due') await recordOwnerEvent(ctx, { facilityId: f._id, type: 'billing_payment_failed', summary: 'The daycare subscription payment failed. Review billing.' })
+        }
       }
     }
+    await ctx.db.insert('stripeWebhookEvents', { eventId, type, createdAt: Date.now() })
   },
 })

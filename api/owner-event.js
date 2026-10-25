@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (!event.probe && (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(event.email || '') || !/^[a-z0-9]+$/.test(event.id || '') || typeof event.summary !== 'string' || event.summary.length > 500)) return res.status(400).json({ error: 'Invalid event' })
   if (!process.env.MITTEN_SMTP_PASSWORD) return res.status(503).json({ error: 'Owner email delivery is not configured.' })
   const port = Number(process.env.MITTEN_SMTP_PORT || 465)
-  const user = process.env.MITTEN_SMTP_USER || 'ben@mitten.care'
+  const user = process.env.MITTEN_SMTP_USER || 'onboarding@mitten.care'
   const transport = nodemailer.createTransport({
     host: process.env.MITTEN_SMTP_HOST || 'mail.spacemail.com', port, secure: port === 465,
     auth: { user, pass: process.env.MITTEN_SMTP_PASSWORD },

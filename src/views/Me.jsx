@@ -1,84 +1,24 @@
-import { motion } from 'framer-motion'
-import { Bell, Moon, ShieldCheck, HelpCircle, LogOut, ChevronRight, Globe, Star } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useMutation } from 'convex/react'
+import { LogOut, ShieldCheck, Bell, Copy } from 'lucide-react'
+import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
-import { BRAND } from '../brand.js'
-import { SectionHeader, Card } from '../components/ui.jsx'
+import { Card, SectionHeader } from '../components/ui.jsx'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 
-const roleLabel = { parent: 'Parent', staff: 'Lead Educator', admin: 'Academy Director' }
-const roleGradient = { parent: 'from-blush-300 to-blush-500', staff: 'from-brand-400 to-brand-600', admin: 'from-sky-400 to-brand-500' }
-const roleEmoji = { parent: '👨‍👩‍👧', staff: '🧑‍🏫', admin: '🏫' }
-const fallbackName = { parent: 'Jordan Rivera', staff: 'Ms. Dana', admin: 'Sam Carter' }
-
-const settings = [
-  { icon: Bell, label: 'Notifications', value: 'On', tone: 'text-brand-500' },
-  { icon: Moon, label: 'Appearance', value: 'Light', tone: 'text-grape-500' },
-  { icon: Globe, label: 'Language', value: 'English', tone: 'text-mint-500' },
-  { icon: ShieldCheck, label: 'Privacy & security', value: '', tone: 'text-sky-500' },
-  { icon: HelpCircle, label: 'Help & support', value: '', tone: 'text-coral-500' },
-]
-
-export default function Me() {
-  const { role, viewer, isAuthenticated, logout, setMyAvatar } = useApp()
-  const name = isAuthenticated && viewer?.name ? viewer.name : fallbackName[role]
-  const sub = isAuthenticated && viewer?.email ? viewer.email : roleLabel[role]
-
-  return (
-    <div className="space-y-6">
-      <SectionHeader eyebrow="Account" title="Me" />
-
-      <Card className="aurora relative overflow-hidden">
-        <div className={`blob blob-a -right-10 -top-10 h-40 w-40 bg-gradient-to-br ${roleGradient[role]} opacity-30`} />
-        <div className="blob blob-b -bottom-12 -left-8 h-36 w-36 bg-blush-300/50" />
-        <div className="relative flex items-center gap-4">
-          <div className="rounded-[1.6rem] bg-white/70 p-1 shadow-md backdrop-blur">
-            {isAuthenticated ? (
-              <AvatarUpload src={viewer?.imageUrl} fallback={roleEmoji[role]} size="h-16 w-16" gradient={roleGradient[role]} onUpload={setMyAvatar} />
-            ) : (
-              <div className={`flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br ${roleGradient[role]} text-3xl`}>{roleEmoji[role]}</div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <h2 className="truncate text-2xl text-slate-800">{name}</h2>
-            <p className="truncate text-sm font-semibold text-slate-500">{sub}</p>
-            <span className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-line bg-white/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-brand-600 backdrop-blur">
-              <Star size={11} /> {roleLabel[role]}
-            </span>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-2">
-        {settings.map((s, i) => (
-          <motion.button
-            key={s.label}
-            whileTap={{ scale: 0.985 }}
-            className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-slate-50 ${
-              i !== settings.length - 1 ? 'border-b border-line/70' : ''
-            }`}
-          >
-            <span className={`flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 ${s.tone}`}>
-              <s.icon size={18} />
-            </span>
-            <span className="flex-1 font-bold text-slate-700">{s.label}</span>
-            {s.value && <span className="text-sm font-semibold text-slate-400">{s.value}</span>}
-            <ChevronRight size={18} className="text-slate-300" />
-          </motion.button>
-        ))}
-      </Card>
-
-      <motion.button whileTap={{ scale: 0.97 }} onClick={logout} className="btn-ghost w-full text-coral-600">
-        <LogOut size={18} /> {isAuthenticated ? 'Sign out' : 'Leave demo'}
-      </motion.button>
-
-      <p className="text-center font-mono text-[10px] uppercase tracking-[0.16em] text-slate-400">
-        {BRAND.name} · v1.0
-      </p>
-      <p className="text-center text-[11px] font-semibold text-slate-400">
-        <a href="/terms" className="hover:text-brand-600">Terms</a>
-        <span className="mx-2 text-slate-300">·</span>
-        <a href="/privacy" className="hover:text-brand-600">Privacy</a>
-      </p>
-    </div>
-  )
+export default function Me(){
+  const {role,viewer,facility,isAuthenticated,logout,setMyAvatar,displayPreferences,pushToast}=useApp()
+  const savePreferences=useMutation(api.preferences.save),saveEmailMode=useMutation(api.preferences.setOwnerEmailMode),saveTimezone=useMutation(api.preferences.setTimezone)
+  const [density,setDensity]=useState('comfortable'),[textSize,setTextSize]=useState('standard'),[mode,setMode]=useState('all'),[timezone,setTimezone]=useState('America/Vancouver'),[error,setError]=useState(''),[busy,setBusy]=useState(false)
+  useEffect(()=>{if(displayPreferences){setDensity(displayPreferences.density);setTextSize(displayPreferences.textSize)}},[displayPreferences])
+  useEffect(()=>{if(facility){setMode(facility.ownerEmailMode||'all');setTimezone(facility.timezone||'America/Vancouver')}},[facility?.ownerEmailMode,facility?.timezone])
+  const perform=async(fn,message)=>{setBusy(true);setError('');try{await fn();pushToast(message)}catch(e){setError(e.message||'Could not save. Please retry.')}finally{setBusy(false)}}
+  return <div className="space-y-5"><SectionHeader title="My account" subtitle="Your identity, display preferences and support"/>{error&&<p role="alert" className="text-sm text-coral-600">{error}</p>}<Card><div className="flex items-center gap-4">{isAuthenticated&&<AvatarUpload src={viewer?.imageUrl} fallback="👤" size="h-16 w-16" gradient="from-brand-400 to-grape-500" onUpload={setMyAvatar}/>}<div className="min-w-0"><h2 className="break-words text-2xl">{viewer?.name||'Demo account'}</h2><p className="mt-1 break-all text-sm text-slate-500">{viewer?.email||'Sample data only'}</p><p className="mt-1 text-xs text-slate-500">{role==='admin'?'Director':role==='staff'?'Educator':'Parent / guardian'} · {facility?.name}</p></div></div><p className="mt-4 text-xs text-slate-500">Your sign-in email is read-only here so account identity cannot be changed without verification.</p></Card>
+    <Card><h3 className="text-xl">Display</h3><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-sm font-bold">Spacing<select className="input mt-1" value={density} onChange={e=>setDensity(e.target.value)}><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label><label className="text-sm font-bold">Text size<select className="input mt-1" value={textSize} onChange={e=>setTextSize(e.target.value)}><option value="standard">Standard</option><option value="large">Larger text</option></select></label></div><button disabled={busy||!isAuthenticated} className="btn-primary mt-4" onClick={()=>perform(()=>savePreferences({density,textSize}),'Display preferences saved.')}>Save display preferences</button>{!isAuthenticated&&<p className="mt-2 text-xs text-slate-500">Sign in to save account preferences.</p>}<p className="mt-3 text-xs text-slate-500">Current interface: English · light theme</p></Card>
+    {role==='admin'&&facility?.isOwner&&<Card><h3 className="flex items-center gap-2 text-xl"><Bell size={19}/>Owner email alerts</h3><p className="mt-2 text-sm text-slate-500">Sent to your owner account email. All relevant activity is retained in Activity & alerts, even when email is turned off.</p><label className="mt-4 block text-sm font-bold">Email delivery<select className="input mt-1" value={mode} onChange={e=>setMode(e.target.value)}><option value="all">All relevant activity</option><option value="important">Onboarding, access, incidents, billing and calendar changes</option><option value="off">Activity log only · no owner emails</option></select></label><button disabled={busy} className="btn-primary mt-3" onClick={()=>perform(()=>saveEmailMode({mode}),'Email preferences saved.')}>Save owner alerts</button></Card>}
+    {role==='admin'&&<Card><h3 className="text-xl">Daycare timezone</h3><p className="mt-2 text-sm text-slate-500">Used for today’s attendance, care logs and time-clock totals. Historical dated records keep their original dates.</p><select aria-label="Daycare timezone" className="input mt-3" value={timezone} onChange={e=>setTimezone(e.target.value)}>{['America/Vancouver','America/Edmonton','America/Regina','America/Winnipeg','America/Toronto','America/Halifax','America/St_Johns','America/Whitehorse','America/Los_Angeles','America/New_York','Europe/London','Australia/Sydney','Pacific/Auckland'].map(zone=><option key={zone}>{zone}</option>)}</select><button disabled={busy||!isAuthenticated} className="btn-primary mt-3" onClick={()=>perform(()=>saveTimezone({timezone}),'Daycare timezone saved.')}>Save timezone</button></Card>}
+    <Card><h3 className="flex items-center gap-2 text-xl"><ShieldCheck size={19}/>Privacy & security</h3><p className="mt-2 text-sm text-slate-600">Every person uses their own account. Your daycare controls access to active enrolments. Private documents are checked again when downloaded.</p><div className="mt-3 flex flex-wrap gap-2"><a href="/privacy" className="btn-ghost">Privacy policy</a><a href="/terms" className="btn-ghost">Terms</a>{isAuthenticated&&<button className="btn-ghost" onClick={async()=>{await logout();window.location.assign('/login?reset=1')}}>Sign out and reset password</button>}</div></Card>
+    <Card><h3 className="text-xl">Help & support</h3><p className="mt-2 text-sm text-slate-600">For attendance, enrolment or care information, contact your daycare. If something in Mitten is not working, copy these details and include what you expected and what happened. Do not include passwords, banking details or private child documents.</p><button className="btn-ghost mt-3" onClick={()=>perform(()=>navigator.clipboard.writeText(`Mitten support request\nWorkspace: ${facility?.name||'Not linked'}\nRole: ${role}\nDate: ${new Date().toISOString()}\nPage: My account\nProblem: `),'Support details copied.')}><Copy size={16}/>Copy support details</button></Card>
+    <button onClick={logout} className="btn-ghost w-full text-coral-600"><LogOut size={18}/>{isAuthenticated?'Sign out':'Leave demo'}</button>
+  </div>
 }

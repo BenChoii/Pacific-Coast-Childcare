@@ -399,27 +399,32 @@ export function StaffScheduling() {
 
 /* ---------------- Rooms ---------------- */
 export function Rooms() {
-  const { facility, childrenList, educators } = useApp()
+  const { facility, childrenList, educators, setView } = useApp()
   if (facility && !facility.isDemo) {
     const byRoom = {}
     childrenList.forEach((c) => { byRoom[c.room] = (byRoom[c.room] || 0) + 1 })
     const roomNames = Object.keys(byRoom)
     return (
       <div className="space-y-5">
-        <SectionHeader title="Rooms 🚪" subtitle="Live occupancy by room" />
+        <SectionHeader title="Rooms 🚪" subtitle="Enrolment, current attendance and assigned educators by classroom" />
         {roomNames.length === 0 ? (
           <Card className="text-center"><p className="text-sm font-semibold text-slate-400">Rooms appear here as you assign children to them.</p></Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {roomNames.map((name, i) => {
-              const staff = (educators || []).filter((e) => e.room === name).length
+              const team=(educators || []).filter((e) => e.room === name)
+              const staff=team.length
+              const present=childrenList.filter(c=>c.room===name&&['checked-in','napping'].includes(c.status)).length
               return (
                 <motion.div key={name} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="card p-5">
                   <div className="mb-2 flex items-center justify-between">
                     <h3 className="font-extrabold text-slate-800">{name}</h3>
                     <Pill className="bg-brand-50 text-brand-700">{byRoom[name]} {byRoom[name] === 1 ? 'child' : 'children'}</Pill>
                   </div>
-                  <div className="text-sm font-bold text-slate-400">{staff} {staff === 1 ? 'educator' : 'educators'} assigned</div>
+                  <div className="mt-3 text-sm text-slate-600">{present} checked in now · {team.filter(e=>e.status==='in').length} assigned educators clocked in</div>
+                  <div className="mt-1 text-sm text-slate-500">{staff} {staff === 1 ? 'educator' : 'educators'} assigned in total</div>
+                  <p className="mt-2 text-xs text-slate-400">Occupancy counts are not a ratio or qualification assessment.</p>
+                  <button className="btn-ghost mt-3" onClick={()=>setView('attendance')}>Open attendance</button>
                 </motion.div>
               )
             })}
@@ -465,39 +470,4 @@ export function Rooms() {
   )
 }
 
-/* ---------------- Reports ---------------- */
-export function Reports() {
-  const reports = [
-    { name: 'Attendance summary', desc: 'Daily headcounts & ratios', emoji: '📊', tone: 'from-brand-400 to-brand-600' },
-    { name: 'CACFP meal report', desc: 'Food program reimbursement', emoji: '🍎', tone: 'from-coral-400 to-pink-500' },
-    { name: 'Revenue & aging', desc: 'Tuition collected & overdue', emoji: '💰', tone: 'from-mint-400 to-mint-500' },
-    { name: 'Immunization status', desc: 'Health compliance by child', emoji: '💉', tone: 'from-grape-400 to-grape-600' },
-    { name: 'Staff hours', desc: 'Payroll-ready time totals', emoji: '⏱️', tone: 'from-sunshine-400 to-coral-500' },
-    { name: 'Enrollment funnel', desc: 'Inquiry → enrolled conversion', emoji: '🌱', tone: 'from-brand-400 to-mint-500' },
-  ]
-  return (
-    <div className="space-y-5">
-      <SectionHeader title="Reports 📈" subtitle="One-tap exports for compliance & ops" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {reports.map((r, i) => (
-          <motion.button
-            key={r.name}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="card p-5 text-left transition hover:-translate-y-1 hover:shadow-playful"
-          >
-            <span className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${r.tone} text-2xl shadow-md`}>
-              {r.emoji}
-            </span>
-            <div className="font-extrabold text-slate-800">{r.name}</div>
-            <div className="text-sm font-semibold text-slate-400">{r.desc}</div>
-            <div className="mt-3 inline-flex items-center gap-1 text-sm font-extrabold text-brand-600">
-              Export <ArrowUpRight size={15} />
-            </div>
-          </motion.button>
-        ))}
-      </div>
-    </div>
-  )
-}
+export {WorkingReports as Reports} from './today.jsx'

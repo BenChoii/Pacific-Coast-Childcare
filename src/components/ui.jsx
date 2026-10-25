@@ -8,7 +8,7 @@ export function StatCard({ icon: Icon, label, value, sub, gradient = 'from-brand
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="card p-5 transition-shadow duration-300 hover:shadow-playful sm:p-6"
+      className="card min-w-0 p-4 transition-shadow duration-300 hover:shadow-playful sm:p-6"
     >
       <div className="flex items-start justify-between gap-3">
         <span className="eyebrow pt-1">{label}</span>
@@ -18,7 +18,7 @@ export function StatCard({ icon: Icon, label, value, sub, gradient = 'from-brand
           </span>
         )}
       </div>
-      <div className="serif-num mt-3 text-[2.1rem] leading-none text-slate-800 sm:text-[2.6rem]">{value}</div>
+      <div className="serif-num mt-3 break-words text-[1.6rem] leading-tight text-slate-800 sm:text-[2.6rem]">{value}</div>
       {sub && <div className="mt-2 text-xs font-semibold text-slate-400">{sub}</div>}
     </motion.div>
   )
@@ -26,7 +26,7 @@ export function StatCard({ icon: Icon, label, value, sub, gradient = 'from-brand
 
 export function SectionHeader({ title, subtitle, eyebrow, action }) {
   return (
-    <div className="mb-5 flex items-end justify-between gap-3">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div>
         {eyebrow && <p className="eyebrow mb-1.5">{eyebrow}</p>}
         <h2 className="text-2xl leading-tight text-slate-800 sm:text-3xl">{title}</h2>
@@ -57,7 +57,7 @@ export function Card({ children, className = '', delay = 0, hover = false }) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className={`card p-5 ${hover ? 'transition-all hover:-translate-y-1 hover:shadow-playful' : ''} ${className}`}
+      className={`card min-w-0 p-5 ${hover ? 'transition-all hover:-translate-y-1 hover:shadow-playful' : ''} ${className}`}
     >
       {children}
     </motion.div>

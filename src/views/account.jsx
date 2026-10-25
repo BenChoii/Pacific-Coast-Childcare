@@ -528,7 +528,7 @@ function FamilyPanel() {
       </Card>
 
       <p className="text-sm text-slate-600">Create a separate invite link for each person. Each link can be accepted once.</p>
-      <label className="block text-sm font-bold text-slate-600">Child for parent invitation<select className="input mt-2" value={inviteChildId} onChange={e => setInviteChildId(e.target.value)}><option value="">Choose child…</option>{childrenList.filter(c => !c.parentUserId).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+      <label className="block text-sm font-bold text-slate-600">Child for parent invitation<select className="input mt-2" value={inviteChildId} onChange={e => setInviteChildId(e.target.value)}><option value="">Choose child…</option>{childrenList.filter(c => !c.archivedAt).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
       <div className="grid gap-3 sm:grid-cols-2">
         <button onClick={() => make('parent')} disabled={busy === 'parent'} className="card flex items-center gap-3 p-4 text-left transition hover:shadow-playful">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blush-300 to-blush-500 text-white">{busy === 'parent' ? <Loader2 size={18} className="animate-spin" /> : <Users size={18} />}</span>

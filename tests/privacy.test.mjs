@@ -1,3 +1,4 @@
+import { queryRows } from './test-db-query.mjs'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { build } from 'esbuild'
@@ -17,7 +18,7 @@ const bundled = await build({
     b.onLoad({ filter: /.*/, namespace: 'test-mock' }, ({ path }) => ({ contents:
       path.includes('auth/server') ? 'export async function getAuthUserId(ctx) { return ctx.uid ?? null }' :
       path.includes('notifications') ? 'export async function recordOwnerEvent() { throw new Error("Unexpected notification in privacy test") }' :
-      'export const query = x => x; export const mutation = x => x; export const internalMutation = x => x; export const internalQuery = x => x;'
+      'export const query = x => x; export const mutation = x => x; export const internalMutation = x => x; export const internalQuery = x => x; export const action = x => x;'
     }))
   } }],
 })
@@ -33,17 +34,12 @@ function fixture(extra = []) {
     ['other', { _id: 'other', table: 'children', name: 'Other Child', parentUserId: 'otherParent', facilityId: 'facility', room: 'Toddlers' }],
     ...extra.map(row => [row._id, row]),
   ])
+  for (const row of rows.values()) row._creationTime ??= 1
   const ctx = { uid: 'parent', rows, writes: [], storage: { getUrl: async id => `mock-storage:${id}` }, db: {
     async get(id) { return rows.get(id) ?? null },
     async patch(id, values) { ctx.writes.push({ id, values }); Object.assign(rows.get(id), values) },
     async insert(table, values) { ctx.writes.push({ table, values }); return 'new-record' },
-    query(table) {
-      let selected = [...rows.values()].filter(row => row.table === table)
-      return { withIndex(_name, callback) {
-        const q = { eq(key, value) { selected = selected.filter(row => row[key] === value); return q } }
-        callback(q); return this
-      }, order() { return this }, async collect() { return selected }, async first() { return selected[0] ?? null } }
-    },
+    query(table) { return queryRows(() => [...rows.values()].filter(row => row.table === table)) },
   } }
   return ctx
 }

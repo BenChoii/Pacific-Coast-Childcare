@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useAction } from 'convex/react'
 import { LockKeyhole, RotateCcw, Users, AlertTriangle } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
@@ -84,6 +84,7 @@ export function ChildEnrollmentControls({ child, onReleased }) {
   const [action, setAction] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  useEffect(()=>{setRoom(child.room||'');setDays(child.enrollmentDays||[])},[child.room,JSON.stringify(child.enrollmentDays)])
   if (!facility || facility.isDemo || viewer?.role !== 'admin') return null
   const save = async () => {
     setBusy(true); setError('')

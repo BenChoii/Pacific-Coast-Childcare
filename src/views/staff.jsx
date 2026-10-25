@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useMutation } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import { dayKey } from '../lib/careData.js'
 import {
   Users, Moon, UserX, Scale, QrCode, LogIn, LogOut, Smile, Apple, BookOpen,
   Camera, MessageCircle, Plus, Check, Sparkles, ClipboardList, Clock, Utensils, Bandage, CalendarDays, Loader2,
@@ -7,7 +10,7 @@ import {
 import { useApp } from '../context/AppContext.jsx'
 import { StatCard, Card, SectionHeader, Pill, Avatar, ListSkeleton, HomeSkeleton, Skeleton, YarnConfetti } from '../components/ui.jsx'
 import {
-  lessonPlan, ACTIVITY_TYPES, quickMeals, quickMoods, diaperOptions, rooms,
+  lessonPlan, ACTIVITY_TYPES, quickMeals, quickMoods, diaperOptions,
 } from '../data/mockData.js'
 
 const statusMeta = {
@@ -21,24 +24,38 @@ const statusMeta = {
 const TILES = [
   { label: 'Log Activity', icon: ClipboardList, grad: 'from-grape-400 to-grape-600', go: 'log' },
   { label: 'Log Meal', icon: Utensils, grad: 'from-coral-400 to-coral-600', go: 'log' },
-  { label: 'Incident', icon: Bandage, grad: 'from-blush-400 to-blush-600', go: 'log' },
+  { label: 'Incident', icon: Bandage, grad: 'from-blush-400 to-blush-600', go: 'incidents' },
   { label: 'Photo', icon: Camera, grad: 'from-sunshine-400 to-sunshine-500', go: 'photos' },
 ]
 
 export function StaffHome() {
-  const { roster, setView, setAttendance, pushToast, loading, viewer } = useApp()
-  const present = roster.filter((r) => r.status === 'checked-in' || r.status === 'napping').length
-  const absent = roster.filter((r) => r.status === 'absent').length
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+  const { roster, setView, setAttendance, pushToast, loading, viewer, facility } = useApp()
+  const setChildStatus = useMutation(api.roster.setChildStatus)
+  const [activeRoom, setActiveRoom] = useState('All rooms')
+  const [busyRows, setBusyRows] = useState({})
+  const [error, setError] = useState('')
+  const roomNames = [...new Set(roster.map(row => row.room || 'Unassigned'))]
+  const visibleRoster = activeRoom === 'All rooms' ? roster : roster.filter(row => (row.room || 'Unassigned') === activeRoom)
+  const present = visibleRoster.filter((r) => r.status === 'checked-in' || r.status === 'napping').length
+  const absent = visibleRoster.filter((r) => r.status === 'absent').length
+  const today = new Date().toLocaleDateString('en-US', { timeZone: facility?.timezone || 'America/Vancouver', weekday: 'long', month: 'short', day: 'numeric' })
   // Educators often go by "Ms./Mr. <First>" — greet with the actual first name,
   // not the title, so it never reads "Hi, Ms.".
-  const nameParts = (viewer?.name || 'Ms. Dana').trim().split(/\s+/)
+  const nameParts = (viewer?.name || 'Educator').trim().split(/\s+/)
   const firstName = /^(ms|mr|mrs|mx|dr|miss)\.?$/i.test(nameParts[0]) && nameParts[1] ? nameParts[1] : nameParts[0]
 
-  const apply = (r, status, label, emoji, tone) => {
-    setAttendance(r.id, status)
-    pushToast(`${r.name.split(' ')[0]} ${label} — family notified`, { emoji, tone })
+  const apply = async (r, status, label, emoji, tone) => {
+    const key = r.childId || r.id
+    if (busyRows[key]) return
+    setBusyRows(current => ({ ...current, [key]: true })); setError('')
+    try {
+      if (r.childId) await setChildStatus({ childId: r.childId, status })
+      else await setAttendance(r.id, status)
+      pushToast(`${r.name.split(' ')[0]} ${label} — attendance saved`, { emoji, tone })
+    } catch { setError('Attendance could not be saved. Check the child’s current status and try again.') }
+    finally { setBusyRows(current => ({ ...current, [key]: false })) }
   }
+
 
   if (loading && roster.length === 0) return <HomeSkeleton />
 
@@ -71,30 +88,12 @@ export function StaffHome() {
         ))}
       </div>
 
-      <RoomPills />
-
-      {/* Today's schedule */}
+      <RoomPills rooms={roomNames} active={activeRoom} onChange={setActiveRoom} />
+      {error && <p role="alert" className="rounded-2xl bg-coral-50 p-3 text-sm font-semibold text-coral-700">{error}</p>}
       <Card className="!p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-800">
-            <CalendarDays size={18} className="text-brand-500" /> Today’s Schedule
-          </h3>
-          <button onClick={() => setView('lesson')} className="text-sm font-bold text-brand-600">Full schedule</button>
-        </div>
-        <div className="flex items-stretch gap-3 rounded-2xl bg-tint p-3">
-          <div className="flex flex-col items-center justify-center px-1 font-mono text-[11px] uppercase tracking-wide text-slate-400">
-            <span className="text-slate-700">7:30a</span>
-            <span>–</span>
-            <span className="text-slate-700">4:00p</span>
-          </div>
-          <div className="w-1 rounded-full bg-brand-400" />
-          <div className="flex-1">
-            <div className="flex items-center gap-2 font-extrabold text-slate-700">
-              Navigators Room <span className="pill bg-brand-100 text-brand-700">Home</span>
-            </div>
-            <div className="text-sm font-semibold text-slate-400">Lead Educator · ratio 1:8 ✓</div>
-          </div>
-        </div>
+        <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-800"><BookOpen size={18} className="text-brand-500" /> Your program</h3>
+        <p className="mt-2 text-sm text-slate-500">Open your daycare’s lesson plans for classroom activities. Confirm your shift and room assignment with your director.</p>
+        <button onClick={() => setView('lesson')} className="btn-ghost mt-3 text-sm">Open lesson plans</button>
       </Card>
 
       {/* Children */}
@@ -109,13 +108,13 @@ export function StaffHome() {
 
         {/* avatar status row */}
         <div className="-mx-4 mb-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          {roster.map((r) => {
+          {visibleRoster.map((r) => {
             const ring =
               r.status === 'absent' ? 'ring-slate-200' :
               r.status === 'checked-out' ? 'ring-coral-400' :
               r.status === 'napping' ? 'ring-grape-400' : 'ring-mint-400'
             return (
-              <div key={r.id} className="flex w-14 shrink-0 flex-col items-center gap-1">
+              <div key={r.childId || r.id} className="flex w-14 shrink-0 flex-col items-center gap-1">
                 <div className={`rounded-[18px] p-0.5 ring-2 ${ring} ${r.status === 'absent' ? 'opacity-50' : ''}`}>
                   <Avatar emoji={r.emoji} size="h-12 w-12" gradient="from-brand-300 to-grape-400" />
                 </div>
@@ -129,12 +128,13 @@ export function StaffHome() {
           <ListSkeleton rows={4} />
         ) : (
           <div className="space-y-2.5">
-            {roster.map((r, i) => {
-              const s = statusMeta[r.status]
+            {!visibleRoster.length && <p className="rounded-2xl bg-white p-4 text-sm text-slate-500">No children in this room.</p>}
+            {visibleRoster.map((r, i) => {
+              const s = statusMeta[r.status] || statusMeta['checked-out']
               const inRoom = r.status === 'checked-in' || r.status === 'napping'
               return (
                 <motion.div
-                  key={r.id}
+                  key={r.childId || r.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
@@ -152,8 +152,8 @@ export function StaffHome() {
                         {r.status === 'absent'
                           ? 'Absent today'
                           : r.status === 'checked-out'
-                            ? `Checked out at ${r.time}`
-                            : <span className="text-mint-500">● Checked in at {r.time}</span>}
+                            ? r.time === '—' ? 'Not checked in today' : `Checked out at ${r.time}`
+                            : <span className="text-mint-500">● Checked in at {r.checkInTime || r.time}</span>}
                       </div>
                     </div>
                     <Pill className={s.class}>{s.label}</Pill>
@@ -161,17 +161,13 @@ export function StaffHome() {
                   <div className="mt-3 flex gap-2 pl-1.5">
                     {inRoom ? (
                       <>
-                        <motion.button whileTap={{ scale: 0.96 }} onClick={() => apply(r, 'absent', 'marked absent', '📋', 'coral')} className="btn-ghost flex-1 !py-2 text-sm !text-coral-600">
-                          <UserX size={15} /> Mark Absent
-                        </motion.button>
-                        <motion.button whileTap={{ scale: 0.96 }} onClick={() => apply(r, 'checked-out', 'checked out', '👋', 'coral')} className="btn flex-1 !py-2 text-sm bg-sunshine-400/20 text-amber-600">
+                        <motion.button disabled={busyRows[r.childId || r.id]} whileTap={{ scale: 0.96 }} onClick={() => apply(r, 'checked-out', 'checked out', '👋', 'coral')} className="btn flex-1 !py-2 text-sm bg-sunshine-400/20 text-amber-600">
                           <LogOut size={15} /> Check Out
                         </motion.button>
                       </>
                     ) : (
-                      <motion.button whileTap={{ scale: 0.96 }} onClick={() => apply(r, 'checked-in', 'checked in', '✅', 'mint')} className="btn-primary flex-1 !py-2 text-sm">
-                        <LogIn size={15} /> Check In
-                      </motion.button>
+                      <><motion.button disabled={busyRows[r.childId || r.id]} whileTap={{ scale: 0.96 }} onClick={() => apply(r, 'checked-in', 'checked in', '✅', 'mint')} className="btn-primary flex-1 !py-2 text-sm"><LogIn size={15} /> Check In</motion.button>
+                      {r.status !== 'absent' && <button disabled={busyRows[r.childId || r.id]} onClick={() => apply(r, 'absent', 'marked absent', '📋', 'coral')} className="btn-ghost flex-1 !py-2 text-sm"><UserX size={15} /> Absent</button>}</>
                     )}
                   </div>
                 </motion.div>
@@ -186,11 +182,11 @@ export function StaffHome() {
 
 // Live clock card — wired to Convex so the director's Staff view updates too.
 function ClockCard() {
-  const { educators, clockEducator, pushToast, viewer } = useApp()
-  const me =
-    educators.find((e) => viewer?.id && e.userId === viewer.id) ||
-    educators.find((e) => viewer?.name && e.name === viewer.name) ||
-    educators[0]
+  const { educators, clockEducator, pushToast, viewer, isAuthenticated, loading } = useApp()
+  const ownRecords = educators.filter(e => viewer?.id && e.userId === viewer.id)
+  const me = isAuthenticated ? ownRecords.length === 1 ? ownRecords[0] : null : educators[0]
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const [now, setNow] = useState(Date.now())
   const [justIn, setJustIn] = useState(0)
   useEffect(() => {
@@ -198,22 +194,24 @@ function ClockCard() {
     return () => clearInterval(t)
   }, [])
 
-  if (!me) return <Skeleton className="h-[88px] rounded-4xl" />
+  if (!me) return loading ? <Skeleton className="h-[88px] rounded-4xl" /> : <Card><p className="font-bold text-slate-700">Your time clock needs to be linked</p><p className="mt-1 text-sm text-slate-500">Ask your director to link your account to one educator record before recording a shift.</p></Card>
 
   const clockedIn = me.status === 'in'
   const sec = me.todaySeconds + (clockedIn && me.clockInAt ? (now - me.clockInAt) / 1000 : 0)
   const h = Math.floor(sec / 3600)
   const m = Math.floor((sec % 3600) / 60)
 
-  const toggle = () => {
-    clockEducator(me.id)
-    pushToast(clockedIn ? 'Clocked out — timesheet updated' : 'Clocked in — have a great shift!', {
-      emoji: clockedIn ? '👋' : '⏰',
-      tone: clockedIn ? 'coral' : 'mint',
-    })
-    // a little shower of yarn to start the shift
-    if (!clockedIn) { setJustIn(Date.now()); setTimeout(() => setJustIn(0), 2200) }
+  const toggle = async () => {
+    if (busy) return
+    setBusy(true); setError('')
+    try {
+      await clockEducator(me.id)
+      pushToast(clockedIn ? 'Clocked out — timesheet updated' : 'Clocked in — have a great shift!', { emoji: clockedIn ? '👋' : '⏰', tone: clockedIn ? 'coral' : 'mint' })
+      if (!clockedIn) { setJustIn(Date.now()); setTimeout(() => setJustIn(0), 2200) }
+    } catch { setError('Your clock entry could not be saved. Try again before leaving this screen.') }
+    finally { setBusy(false) }
   }
+
 
   return (
     <motion.div
@@ -234,57 +232,49 @@ function ClockCard() {
         <motion.button
           whileTap={{ scale: 0.94 }}
           onClick={toggle}
+          disabled={busy}
           className={clockedIn ? 'btn-ghost !text-coral-600' : 'btn-primary'}
         >
-          {clockedIn ? 'Clock Out' : 'Clock In'}
+          {busy ? 'Saving…' : clockedIn ? 'Clock Out' : 'Clock In'}
         </motion.button>
       </div>
+      {error && <p role="alert" className="mt-3 text-sm font-semibold text-coral-700">{error}</p>}
     </motion.div>
   )
 }
 
-function RoomPills() {
-  const [active, setActive] = useState('Navigators')
-  return (
-    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-      {rooms.map((rm) => {
-        const isActive = rm.name === active
-        const isHome = rm.name === 'Navigators'
-        return (
-          <motion.button
-            key={rm.name}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setActive(rm.name)}
-            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition ${
-              isActive ? 'border-transparent bg-brand-600 text-white shadow-md' : 'border-line bg-white text-slate-600'
-            }`}
-          >
-            {rm.name}
-            {isHome && <span className={`text-xs ${isActive ? 'text-white/80' : 'text-slate-400'}`}>(Home)</span>}
-          </motion.button>
-        )
-      })}
-    </div>
-  )
+function RoomPills({ rooms, active, onChange }) {
+  return <div role="group" aria-label="Filter children by room" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+    {['All rooms', ...rooms].map(room => <button key={room} onClick={() => onChange(room)} aria-pressed={room === active} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-bold ${room === active ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-white text-slate-600'}`}>{room}</button>)}
+  </div>
 }
 
 /* ---------------- Attendance ---------------- */
 export function Attendance() {
-  const { roster, toggleAttendance, pushToast } = useApp()
+  const { roster, setAttendance, pushToast } = useApp()
+  const setChildStatus = useMutation(api.roster.setChildStatus)
+  const [busyRows, setBusyRows] = useState({})
+  const [error, setError] = useState('')
   const present = roster.filter((r) => r.status === 'checked-in' || r.status === 'napping').length
 
-  const handleToggle = (r) => {
-    toggleAttendance(r.id)
-    const goingOut = r.status === 'checked-in'
-    pushToast(`${r.name.split(' ')[0]} checked ${goingOut ? 'out' : 'in'} — parent notified`, {
-      emoji: goingOut ? '👋' : '✅',
-      tone: goingOut ? 'coral' : 'mint',
-    })
+  const handleToggle = async (r) => {
+    const key = r.childId || r.id
+    if (busyRows[key]) return
+    setBusyRows(current => ({ ...current, [key]: true })); setError('')
+    const goingOut = ['checked-in', 'napping'].includes(r.status)
+    const status = goingOut ? 'checked-out' : 'checked-in'
+    try {
+      if (r.childId) await setChildStatus({ childId: r.childId, status })
+      else await setAttendance(r.id, status)
+      pushToast(`${r.name.split(' ')[0]} checked ${goingOut ? 'out' : 'in'} — saved to the family portal`, { emoji: goingOut ? '👋' : '✅', tone: goingOut ? 'coral' : 'mint' })
+    } catch { setError('The attendance change could not be saved. Please try again.') }
+    finally { setBusyRows(current => ({ ...current, [key]: false })) }
   }
+
 
   return (
     <div className="space-y-5">
-      <SectionHeader title="Attendance ✅" subtitle="One-tap check-in · parents notified instantly" />
+      <SectionHeader title="Attendance ✅" subtitle="Record check-in and check-out in the family portal" />
 
       <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
         <Card className="flex items-center gap-4 bg-gradient-to-br from-brand-50 to-grape-400/10">
@@ -296,24 +286,19 @@ export function Attendance() {
             <div className="text-sm font-bold text-slate-400">Children present right now</div>
           </div>
         </Card>
-        <Card className="flex items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-white">
-            <QrCode size={36} />
-          </div>
-          <div>
-            <div className="font-extrabold text-slate-800">Kiosk QR</div>
-            <div className="text-xs font-semibold text-slate-400">Parents scan to<br />self check-in</div>
-          </div>
-        </Card>
+        <Card className="flex items-center gap-3"><ClipboardList size={28} className="text-brand-500" /><p className="text-sm text-slate-500">Educators record arrivals and departures here. Confirm each child’s handoff before saving.</p></Card>
       </div>
 
+      {error && <p role="alert" className="rounded-2xl bg-coral-50 p-3 text-sm font-semibold text-coral-700">{error}</p>}
       <Card className="p-0">
+        {!roster.length && <p className="p-4 text-sm text-slate-500">No active children are enrolled yet.</p>}
         {roster.map((r, i) => {
-          const s = statusMeta[r.status]
-          const canToggle = r.status === 'checked-in' || r.status === 'checked-out'
+          const s = statusMeta[r.status] || statusMeta['checked-out']
+          const goingOut = ['checked-in', 'napping'].includes(r.status)
+          const canToggle = !!(r.childId || r.id)
           return (
             <motion.div
-              key={r.id}
+              key={r.childId || r.id}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
@@ -331,9 +316,10 @@ export function Attendance() {
               {canToggle && (
                 <button
                   onClick={() => handleToggle(r)}
-                  className={r.status === 'checked-in' ? 'btn-ghost !py-2 text-sm' : 'btn-primary !py-2 text-sm'}
+                  disabled={busyRows[r.childId || r.id]}
+                  className={goingOut ? 'btn-ghost !py-2 text-sm' : 'btn-primary !py-2 text-sm'}
                 >
-                  {r.status === 'checked-in' ? <><LogOut size={15} /> Out</> : <><LogIn size={15} /> In</>}
+                  {busyRows[r.childId || r.id] ? 'Saving…' : goingOut ? <><LogOut size={15} /> Out</> : <><LogIn size={15} /> In</>}
                 </button>
               )}
             </motion.div>
@@ -346,8 +332,8 @@ export function Attendance() {
 
 /* ---------------- Log Activity ---------------- */
 export function LogActivity() {
-  const { roster, childrenList, addActivity, pushToast, viewer, draftNote } = useApp()
-  const by = viewer?.name || 'Ms. Dana'
+  const { roster, childrenList, addActivity, pushToast, viewer, draftNote, facility } = useApp()
+  const by = viewer?.name || 'Educator'
   const kids = childrenList.filter((c) => {
     const row = roster.find((r) => r.childId === c.id) || (childrenList.filter((other) => other.name === c.name).length === 1 ? roster.find((r) => r.name === c.name) : null)
     return row?.status !== 'absent'
@@ -360,10 +346,13 @@ export function LogActivity() {
   const [amount, setAmount] = useState(quickMeals[0])
   const [aiBusy, setAiBusy] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [duration, setDuration] = useState('')
 
   const draftWithAI = async () => {
     if (!child) { pushToast('Pick a child first.', { emoji: '🧒', tone: 'coral' }); return }
-    setAiBusy(true)
+    if (!detail.trim()) { setError('Write what actually happened first. AI can help polish your observations.'); return }
+    setAiBusy(true); setError('')
     try {
       const r = await draftNote({ childName: child, kind: type, keywords: detail })
       if (r?.text) setDetail(r.text)
@@ -381,21 +370,25 @@ export function LogActivity() {
   const submit = async () => {
     if (!selectedChild || saving) return
     const meta = ACTIVITY_TYPES[type]
-    setSaving(true)
+    if (type === 'nap' && duration !== '' && (!Number.isFinite(Number(duration)) || Number(duration) < 0 || Number(duration) > 1440)) { setError('Enter nap minutes from 0 to 1,440.'); return }
+    setSaving(true); setError('')
     try {
       await addActivity({
         childId: selectedChild.id,
         childName: selectedChild.name,
         type,
-        time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        date: dayKey(Date.now(), facility?.timezone || 'America/Vancouver'),
+        durationMinutes: type === 'nap' && duration !== '' ? Number(duration) : undefined,
+        mood: type === 'note' ? amount : undefined,
         title: `${meta.label} · ${selectedChild.first || child.split(' ')[0]}`,
         detail: detail || `${meta.label} logged`,
         amount: amountOptions ? amount : undefined,
         by,
       })
       pushToast(`${meta.label} saved to ${child.split(' ')[0]}'s family log`, { emoji: meta.emoji, tone: 'mint' })
-      setDetail('')
+      setDetail(''); setDuration('')
     } catch {
+      setError('The update could not be saved. Your entry is still here. Try again.');
       pushToast('The update could not be saved. Please try again.', { emoji: '📝', tone: 'coral' })
     } finally { setSaving(false) }
   }
@@ -405,6 +398,7 @@ export function LogActivity() {
       <SectionHeader title="Log activity 📝" subtitle="Updates post to families in real time" />
 
       <Card className="space-y-5">
+        <fieldset disabled={saving || aiBusy} className="min-w-0 space-y-5">
         {/* Child picker */}
         <div>
           <Label>Child</Label>
@@ -425,6 +419,9 @@ export function LogActivity() {
           </div>
         </div>
 
+        {!kids.length && <p className="text-sm text-slate-500">No children are available for a daily update. Check today’s attendance first.</p>}
+        {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm font-semibold text-coral-700">{error}</p>}
+        {type === 'nap' && <label className="block text-sm font-semibold text-slate-600">Rest duration (minutes, optional)<input type="number" min="0" max="1440" step="1" value={duration} onChange={e => setDuration(e.target.value)} className="input mt-2" /></label>}
         {/* Type picker */}
         <div>
           <Label>What happened?</Label>
@@ -472,7 +469,7 @@ export function LogActivity() {
             <button
               type="button"
               onClick={draftWithAI}
-              disabled={aiBusy}
+              disabled={aiBusy || saving || !detail.trim() || !selectedChild}
               className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-grape-500 px-3 py-1.5 text-xs font-extrabold text-white shadow-sm transition hover:-translate-y-0.5 disabled:opacity-60"
             >
               {aiBusy ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} Draft with AI
@@ -487,9 +484,10 @@ export function LogActivity() {
           />
         </div>
 
-        <button onClick={submit} disabled={!selectedChild || saving} className="btn-primary w-full">
+        <button onClick={submit} disabled={!selectedChild || saving || aiBusy} className="btn-primary w-full">
           <Plus size={18} /> {saving ? 'Saving…' : 'Post update'} to {child ? child.split(' ')[0] + "'s" : ''} family
         </button>
+        </fieldset>
       </Card>
     </div>
   )
@@ -501,9 +499,11 @@ function Label({ children }) {
 
 /* ---------------- Lesson Plan ---------------- */
 export function LessonPlan() {
+  const { isAuthenticated, facility, setView } = useApp()
+  if (isAuthenticated && !facility?.isDemo) return <Card><h2 className="text-xl text-slate-800">Your daycare’s lesson plans</h2><p className="mt-2 text-sm text-slate-500">Open the current plans prepared by your care team.</p><button onClick={() => setView('lesson')} className="btn-primary mt-4">Open lesson plans</button></Card>
   return (
     <div className="space-y-5">
-      <SectionHeader title="Lesson plans 📚" subtitle={`${lessonPlan.week} · ${lessonPlan.theme}`} />
+      <SectionHeader title="Lesson plans 📚" subtitle={`Sample plan · ${lessonPlan.week} · ${lessonPlan.theme}`} />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {lessonPlan.days.map((d, i) => (
           <motion.div
