@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { useQuery, useMutation, useAction, useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import { api } from '../../convex/_generated/api'
+import { getEntry } from '../routes.js'
 
 const AppContext = createContext(null)
 
@@ -18,6 +19,7 @@ export function AppProvider({ children }) {
   // --- UI-only state ---
   const [demoRole, setDemoRole] = useState(null) // set when exploring without an account
   const [view, setView] = useState('home')
+  const entryRef = useRef(getEntry())
   // A daycare claiming its public directory listing arrives via
   // mitten.care/childcare/<area> → /signup?claim=<area>. Stash the area so it
   // survives signup + onboarding (which rewrite the URL), then route them to
@@ -236,7 +238,7 @@ export function AppProvider({ children }) {
     let pendJoin = null
     try {
       pendFac = sessionStorage.getItem('cubby_pending_facility')
-      pendJoin = sessionStorage.getItem('cubby_pending_join')
+      pendJoin = sessionStorage.getItem('cubby_pending_join') || (['join', 'slug'].includes(entryRef.current.kind) ? entryRef.current.token : null)
     } catch {}
     if (pendJoin) {
       if (pendingMembershipRef.current === pendJoin) return

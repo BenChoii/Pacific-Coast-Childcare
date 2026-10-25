@@ -26,7 +26,8 @@ export default async function handler(req, res) {
       messageId: `<owner-event-${event.id}@mitten.care>`,
     })
     return res.status(200).json({ ok: true })
-  } catch {
+  } catch (error) {
+    if (event.probe === true) return res.status(502).json({ error: 'Owner email connection failed.', code: error.code || 'UNKNOWN', responseCode: error.responseCode || null })
     return res.status(502).json({ error: 'Owner email delivery failed.' })
   }
 }
