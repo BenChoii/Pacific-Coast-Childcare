@@ -3,6 +3,17 @@
 // retained the ID. Only the authenticated HTTP service decrypts their contents.
 const MAGIC = new TextEncoder().encode('MITTEN-PRIVATE-1\n')
 const IV_LENGTH = 12
+const MAX_STORED_BYTES = 8 * 1024 * 1024 + 512
+
+// Convex storage.get returns a one-use stream-backed Blob. Its arrayBuffer()
+// consumes that stream; hashing an original after sealing it must use an
+// independent, bounded in-memory Blob rather than re-read the stored stream.
+export async function materializePrivateBlob(blob: Blob): Promise<Blob> {
+  if (!Number.isSafeInteger(blob.size) || blob.size < 1 || blob.size > MAX_STORED_BYTES) throw new Error('Private file exceeds the supported 8 MiB size limit.')
+  const bytes = await blob.arrayBuffer()
+  if (bytes.byteLength !== blob.size) throw new Error('Private file could not be read completely.')
+  return new Blob([bytes], { type: blob.type })
+}
 
 async function key() {
   const encoded=process.env.PRIVATE_FILES_KEY
@@ -17,6 +28,7 @@ export async function isPrivateBlob(blob:Blob) {
   return prefix.length===MAGIC.length && prefix.every((byte,index)=>byte===MAGIC[index])
 }
 export async function sealPrivateBlob(blob:Blob):Promise<Blob> {
+  blob = await materializePrivateBlob(blob)
   if(await isPrivateBlob(blob))return blob
   const cryptoKey=await key()
   const mime=blob.type||'application/octet-stream'
@@ -28,6 +40,7 @@ export async function sealPrivateBlob(blob:Blob):Promise<Blob> {
   return new Blob([MAGIC,iv,encrypted],{type:'application/octet-stream'})
 }
 export async function openPrivateBlob(blob:Blob,fallbackMime='application/octet-stream'):Promise<Blob> {
+  blob = await materializePrivateBlob(blob)
   // Legacy objects are readable only behind the same authorization gate until
   // the bounded migration has copied, verified and revoked their old URLs.
   if(!await isPrivateBlob(blob))return blob

@@ -310,7 +310,7 @@ export function Attendance() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-extrabold text-slate-700">{r.name}</div>
-                <div className="text-xs font-bold text-slate-400">{r.time !== '—' ? `Since ${r.time}` : 'Not in today'} · {r.mood}</div>
+                <div className="text-xs font-bold text-slate-400">{r.time !== '—' ? `${s.label} at ${r.time}` : 'Not checked in today'}{r.mood && r.mood !== '—' ? ` · ${r.mood}` : ''}</div>
               </div>
               <Pill className={`${s.class} hidden sm:inline-flex`}>{s.label}</Pill>
               {canToggle && (

@@ -7,7 +7,7 @@ import { queryRows } from './test-db-query.mjs'
 // Entire migration is local: fake database + Blob store. No Convex call,
 // customer file download, actual encryption key, or production mutation.
 process.env.PRIVATE_FILES_KEY=Buffer.alloc(32,27).toString('base64')
-const result=await build({stdin:{contents:"export * from './convex/privateFileMigration'; export {openPrivateBlob} from './convex/fileEncryption';",resolveDir:fileURLToPath(new URL('../',import.meta.url)),loader:'ts'},bundle:true,write:false,platform:'node',format:'esm',logLevel:'silent',plugins:[{name:'migration-transport',setup(b){
+const result=await build({stdin:{contents:"export * from './convex/privateFileMigration'; export {openPrivateBlob,sealPrivateBlob,materializePrivateBlob} from './convex/fileEncryption';",resolveDir:fileURLToPath(new URL('../',import.meta.url)),loader:'ts'},bundle:true,write:false,platform:'node',format:'esm',logLevel:'silent',plugins:[{name:'migration-transport',setup(b){
  b.onResolve({filter:/@convex-dev\/auth\/server|\.\/_generated\/(server|api)$/},args=>({path:args.path,namespace:'mock'}))
  b.onLoad({filter:/.*/,namespace:'mock'},({path})=>({contents:path.includes('auth/server')?'export const getAuthUserId=async ctx=>ctx.uid??null;':path.endsWith('/api')?"const ref=path=>new Proxy(()=>{}, {get:(_,key)=>key==='path'?path:ref(path?path+'.'+key:String(key))});export const internal=ref('');":'export const internalQuery=x=>x,internalMutation=x=>x,internalAction=x=>x;'}))
 }}]})
@@ -141,4 +141,36 @@ test('one MiB synthetic crypto preflight validates the actual large-blob path wi
  const ctx=fixture(),result=await api.cryptoPreflight.handler(ctx,{bytes:1024*1024})
  assert.equal(result.ok,true);assert.equal(result.plaintextBytes,1024*1024);assert.ok(result.ciphertextBytes>result.plaintextBytes)
  assert.equal(ctx.writes.length,0);assert.deepEqual(ctx.deletions,[])
+})
+
+
+// Convex's actual runtime uses Blob.fromStream and explicitly refuses a second
+// stream read. Node's ordinary Blob is repeatable and hid this production bug.
+class SingleUseStorageBlob extends Blob {
+ reads=0
+ async arrayBuffer(){if(this.reads++)throw new TypeError("Can't re-read streaming Blob");return await super.arrayBuffer()}
+ slice(...args){if(this.reads)throw new TypeError("Can't re-read streaming Blob");return super.slice(...args)}
+}
+test('real-size legacy migration materializes one-use storage streams before sealing and hash rereads',async()=>{
+ const ctx=fixture(),bytes=new Uint8Array(939615);bytes.set([255,216,255]);
+ ctx.files.set('legacy',new Blob([bytes],{type:'image/jpeg'}))
+ const streams=[]
+ ctx.storage.get=async id=>{const stored=ctx.files.get(id);if(!stored)return null;const stream=new SingleUseStorageBlob([await stored.arrayBuffer()],{type:stored.type});streams.push(stream);return stream}
+ const result=await api.rotateBatch.handler(ctx,{facilityId:'f',storageIds:['legacy'],dryRun:false})
+ assert.equal(result.results[0].status,'revoked')
+ assert.ok(streams.length>=3);assert.ok(streams.every(stream=>stream.reads===1))
+ const job=ctx.rows.get(result.results[0].jobId)
+ const opened=await api.openPrivateBlob(ctx.files.get(job.replacementId))
+ assert.equal(opened.type,'image/jpeg');assert.deepEqual(new Uint8Array(await opened.arrayBuffer()),bytes)
+})
+test('private open/seal entry points consume each incoming stream once and return independently readable bytes',async()=>{
+ const source=new SingleUseStorageBlob(['synthetic JPEG bytes'],{type:'image/jpeg'})
+ const original=await api.openPrivateBlob(source)
+ const sealed=await api.sealPrivateBlob(original)
+ assert.equal(source.reads,1)
+ const cipherStream=new SingleUseStorageBlob([await sealed.arrayBuffer()],{type:sealed.type})
+ const opened=await api.openPrivateBlob(cipherStream)
+ assert.equal(cipherStream.reads,1);assert.equal(await opened.text(),'synthetic JPEG bytes')
+ assert.equal(await original.text(),await opened.text())
+ await assert.rejects(api.materializePrivateBlob({size:8*1024*1024+513,arrayBuffer:()=>{throw Error('Must refuse before allocating')}}),/size limit/)
 })

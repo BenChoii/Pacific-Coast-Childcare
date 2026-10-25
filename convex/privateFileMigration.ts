@@ -123,6 +123,7 @@ function errorCode(error: unknown, stage: MigrationStage) {
   const message = error instanceof Error ? error.message : ''
   if (message.includes('temporarily unavailable') || message.includes('encryption is not configured')) return 'PRIVATE_KEY_UNAVAILABLE'
   if (message.includes('lease changed')) return 'COPY_LEASE_CHANGED'
+  if (message.includes("Can't re-read streaming Blob")) return 'STREAM_ALREADY_CONSUMED'
   if (message.includes('not a function')) return 'RUNTIME_API_UNAVAILABLE'
   if (message.includes('copy failed byte verification')) return 'COPY_VERIFICATION_FAILED'
   if (message.includes('Source is still referenced') || message.includes('Public ')) return 'REFERENCE_CHECK_REFUSED'
