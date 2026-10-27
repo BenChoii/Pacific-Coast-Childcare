@@ -11,6 +11,16 @@ export function currentPath() {
   return window.location.pathname.replace(/\/+$/, '') || '/'
 }
 
+// Older iPhone Home Screen icons keep the URL they were created from, often
+// `/`. They must still enter the authenticated portal instead of the sales
+// page, which never mounts the provider that restores the saved session.
+export function isInstalledApp() {
+  if (typeof window === 'undefined') return false
+  if (window.navigator?.standalone === true) return true
+  try { return window.matchMedia?.('(display-mode: standalone)').matches === true }
+  catch { return false }
+}
+
 // What is this URL asking for?
 //   { kind: 'owner' }                 → /signup (create a daycare)
 //   { kind: 'join', token }           → /join?t=… (invited parent/staff)
@@ -34,6 +44,6 @@ export function isAppPath() {
   if (SALES_ROUTES.includes(path)) return false
   const e = getEntry()
   const returnParams=new URLSearchParams(window.location.search)
-  if(path==='/' && (returnParams.has('stripe') || returnParams.has('billing'))) return true
+  if(path==='/' && (isInstalledApp() || returnParams.has('stripe') || returnParams.has('billing'))) return true
   return APP_ROUTES.includes(path) || e.kind !== 'normal'
 }

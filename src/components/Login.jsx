@@ -5,7 +5,7 @@ import { Heart, GraduationCap, Building2, ArrowRight, LogIn, Sparkles, Loader2 }
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { BRAND } from '../brand.js'
-import { getEntry, currentPath } from '../routes.js'
+import { getEntry, currentPath, isInstalledApp } from '../routes.js'
 import BrandLockup from './BrandLockup.jsx'
 import Auth from './Auth.jsx'
 
@@ -29,13 +29,16 @@ function Blob({ className, anim, delay = 0 }) {
 
 export default function Login() {
   const entry = getEntry()
+  const installed = isInstalledApp()
   if (entry.kind === 'owner') return <Auth intent={{ kind: 'owner' }} onBack={go('/app')} />
   if (entry.kind === 'join') return <Auth intent={{ kind: 'join', token: entry.token }} onBack={go('/app')} />
   if (entry.kind === 'slug') return <SlugLanding slug={entry.slug} token={entry.token} />
   // /portal is the families' door — e.g. a daycare's marketing site hands parents
   // off to mitten.care/portal?email=…. Drop them straight into the family sign-in
   // ("Welcome back"), not the owner-facing "start your daycare" landing.
-  if (['/portal', '/login', '/onboarding'].includes(currentPath())) return <Auth intent={{ kind: 'default' }} onBack={go('/app')} />
+  // An installed app with no saved session should offer sign-in immediately.
+  // A warm resume keeps AppProvider and the current screen/draft untouched.
+  if (['/portal', '/login', '/onboarding'].includes(currentPath()) || (installed && ['/', '/app'].includes(currentPath()))) return <Auth intent={{ kind: 'default' }} onBack={installed ? undefined : go('/app')} />
   return <DefaultLanding />
 }
 

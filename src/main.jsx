@@ -18,8 +18,8 @@ import './index.css'
 //   • The Mitten whitelabel sales page — no backend.
 //
 // Sales routes always show Sales; app routes always show the app. The root (/)
-// depends on the domain: the Mitten domain leads with the sales pitch; every
-// other domain leads with the portal.
+// opens the portal for installed Home Screen apps (including older icons saved
+// at `/`). An ordinary browser visit to the Mitten root keeps the sales page.
 const path = currentPath()
 const entry = getEntry()
 
