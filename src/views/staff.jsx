@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { dayKey } from '../lib/careData.js'
+import { educatorTodaySeconds } from '../lib/staffAttendance.js'
+import ClassSchedulePanel from '../components/ClassSchedulePanel.jsx'
 import {
   Users, Moon, UserX, Scale, QrCode, LogIn, LogOut, Smile, Apple, BookOpen,
   Camera, MessageCircle, Plus, Check, Sparkles, ClipboardList, Clock, Utensils, Bandage, CalendarDays, Loader2,
@@ -67,6 +69,7 @@ export function StaffHome() {
       </div>
 
       <ClockCard />
+      <ClassSchedulePanel />
 
       {/* Colorful quick-action tiles */}
       <div className="grid grid-cols-4 gap-2.5 sm:gap-4">
@@ -182,7 +185,7 @@ export function StaffHome() {
 
 // Live clock card — wired to Convex so the director's Staff view updates too.
 function ClockCard() {
-  const { educators, clockEducator, pushToast, viewer, isAuthenticated, loading } = useApp()
+  const { educators, educatorsLoading, clockEducator, pushToast, viewer, isAuthenticated, loading } = useApp()
   const ownRecords = educators.filter(e => viewer?.id && e.userId === viewer.id)
   const me = isAuthenticated ? ownRecords.length === 1 ? ownRecords[0] : null : educators[0]
   const [busy, setBusy] = useState(false)
@@ -194,10 +197,10 @@ function ClockCard() {
     return () => clearInterval(t)
   }, [])
 
-  if (!me) return loading ? <Skeleton className="h-[88px] rounded-4xl" /> : <Card><p className="font-bold text-slate-700">Your time clock needs to be linked</p><p className="mt-1 text-sm text-slate-500">Ask your director to link your account to one educator record before recording a shift.</p></Card>
+  if (!me) return educatorsLoading || loading ? <Skeleton className="h-[88px] rounded-4xl" /> : <Card><p className="font-bold text-slate-700">Your time clock needs to be linked</p><p className="mt-1 text-sm text-slate-500">Ask your director to link your account to one educator record before recording a shift.</p></Card>
 
   const clockedIn = me.status === 'in'
-  const sec = me.todaySeconds + (clockedIn && me.clockInAt ? (now - me.clockInAt) / 1000 : 0)
+  const sec = educatorTodaySeconds(me, now)
   const h = Math.floor(sec / 3600)
   const m = Math.floor((sec % 3600) / 60)
 
@@ -205,7 +208,7 @@ function ClockCard() {
     if (busy) return
     setBusy(true); setError('')
     try {
-      await clockEducator(me.id)
+      await clockEducator(me.id, clockedIn ? 'out' : 'in')
       pushToast(clockedIn ? 'Clocked out — timesheet updated' : 'Clocked in — have a great shift!', { emoji: clockedIn ? '👋' : '⏰', tone: clockedIn ? 'coral' : 'mint' })
       if (!clockedIn) { setJustIn(Date.now()); setTimeout(() => setJustIn(0), 2200) }
     } catch { setError('Your clock entry could not be saved. Try again before leaving this screen.') }
@@ -226,7 +229,8 @@ function ClockCard() {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600"><Clock size={24} /></span>
           <div>
             <p className="eyebrow">{clockedIn ? 'Clocked in' : 'Clocked out'}</p>
-            <p className="font-display text-4xl leading-none text-slate-800">{clockedIn ? `${h}h ${m}m` : '—'}</p>
+            <p className="font-display text-4xl leading-none text-slate-800">{h}h {m}m</p>
+            <p className="mt-1 text-xs text-slate-500">Recorded today</p>
           </div>
         </div>
         <motion.button

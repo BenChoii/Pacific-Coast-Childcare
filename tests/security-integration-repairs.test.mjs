@@ -166,6 +166,33 @@ test('suspended viewer never subscribes to child/photo/workspace data',async()=>
  finally{current.cleanup()}
 })
 
+test('schedule email deep-link opens Calendar and consumes only the known navigation parameter',async()=>{
+ const current=await providerCase({url:'https://mitten.care/app?open=calendar&source=family-email'})
+ try {
+   assert.equal(current.h.app.view,'calendar')
+   assert.equal(window.location.pathname,'/app');assert.equal(window.location.search,'?source=family-email')
+   current.h.app.setView('messages');await current.render()
+   assert.equal(current.h.app.view,'messages','ordinary renders must preserve in-progress navigation')
+ } finally {current.cleanup()}
+})
+test('schedule email intent survives unresolved authentication and StrictMode effect replay',async()=>{
+ const current=await providerCase({url:'https://mitten.care/app?open=calendar',authenticated:false})
+ try {
+   assert.equal(window.location.search,'?open=calendar')
+   current.h.auth={isAuthenticated:true,isLoading:false}
+   current.h.viewer={id:'parent',role:'parent',hasFacility:true,hasActiveChildren:true,accessStatus:'active'}
+   await current.render();assert.equal(current.h.app.view,'calendar');assert.equal(window.location.search,'')
+   for(const slot of current.h.slots)if(slot&&'deps'in slot)slot.deps=undefined
+   await current.render();assert.equal(current.h.app.view,'calendar')
+ } finally {current.cleanup()}
+})
+test('unknown navigation intent starts on the dashboard and a payment callback retains precedence',async()=>{
+ let current=await providerCase({url:'https://mitten.care/app?open=unknown'})
+ try{assert.equal(current.h.app.view,'home')}finally{current.cleanup()}
+ current=await providerCase({url:'https://mitten.care/app?open=calendar&stripe=success&inv=INV&session_id=cs_mock'})
+ try{assert.equal(current.h.app.view,'billing');assert.equal(current.h.calls.filter(([name])=>name==='payments.confirmCheckout').length,1);assert.equal(window.location.search,'')}finally{current.cleanup()}
+})
+
 
 test('owner delivery action passes its lease token and a second active worker never reaches the relay',async()=>{
  const ctx=fixture();await api.notifications.recordOwnerEvent(ctx,{facilityId:'f',type:'invoice_created',summary:'Invoice issued'})

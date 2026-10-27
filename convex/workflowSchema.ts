@@ -3,6 +3,12 @@ import { v } from 'convex/values'
 
 // Additive workflow tables. Existing fields remain readable during migration.
 export const workflowTables = {
+  familyPlanEmails: defineTable({
+    facilityId: v.id('facilities'), planId: v.id('parentPlans'), parentUserId: v.id('users'), revision: v.string(),
+    status: v.string(), attempts: v.number(), createdAt: v.number(), updatedAt: v.number(),
+    sendingAt: v.optional(v.number()), deliveryToken: v.optional(v.string()), sentAt: v.optional(v.number()), error: v.optional(v.string()),
+  }).index('by_plan_user_revision', ['planId', 'parentUserId', 'revision'])
+    .index('by_plan', ['planId']).index('by_facility', ['facilityId']).index('by_status', ['status']),
   attendanceEvents: defineTable({
     facilityId: v.id('facilities'), childId: v.id('children'), date: v.string(),
     status: v.string(), occurredAt: v.number(), displayTime: v.string(), byUserId: v.optional(v.id('users')),

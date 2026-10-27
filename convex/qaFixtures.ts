@@ -13,7 +13,7 @@ function namespace(runId: string) {
 }
 async function exactFixture(ctx: QueryCtx | MutationCtx, runId: string, facilityId: Id<'facilities'>) {
   const ns = namespace(runId), facility = await ctx.db.get(facilityId)
-  if (!facility || facility.slug !== ns.slug || facility.name !== `Mitten QA ${runId}` || facility.isDemo !== false || facility.ownerEmailMode !== 'off' || !facility.ownerUserId || facility.stripeCustomerId || facility.stripeSubscriptionId || facility.stripeAccountId) throw new Error('Not the exact synthetic, muted, non-billing QA fixture.')
+  if (!facility || facility.slug !== ns.slug || facility.name !== `Mitten QA ${runId}` || facility.isDemo !== false || facility.ownerEmailMode !== 'off' || facility.familyEmailMode !== 'off' || !facility.ownerUserId || facility.stripeCustomerId || facility.stripeSubscriptionId || facility.stripeAccountId) throw new Error('Not the exact synthetic, muted, non-billing QA fixture.')
   const owner = await ctx.db.get(facility.ownerUserId)
   if (!owner || owner.email !== ns.ownerEmail || owner.facilityId !== facilityId) throw new Error('Synthetic fixture owner does not match.')
   return { ns, facility, owner }
@@ -31,7 +31,7 @@ export const setup = internalMutation({
     }
     if (Date.now() - owner._creationTime > 3_600_000) throw new Error('Sign up a fresh synthetic owner for this QA run.')
     if (owner.facilityId || owner.accessStatus === 'suspended') throw new Error('Only an unaffiliated fresh synthetic owner can create this fixture.')
-    const facilityId = await ctx.db.insert('facilities', { name: `Mitten QA ${runId}`, slug: ns.slug, ownerUserId, plan: 'free', freeLimit: 1000, ownerEmailMode: 'off', autoInvoice: false, isDemo: false, timezone: 'America/Vancouver', addons: { bookkeeping: true }, createdAt: Date.now() })
+    const facilityId = await ctx.db.insert('facilities', { name: `Mitten QA ${runId}`, slug: ns.slug, ownerUserId, plan: 'free', freeLimit: 1000, ownerEmailMode: 'off', familyEmailMode: 'off', autoInvoice: false, isDemo: false, timezone: 'America/Vancouver', addons: { bookkeeping: true }, createdAt: Date.now() })
     await ctx.db.patch(ownerUserId, { facilityId, accessStatus: 'active' })
     return { facilityId, slug: ns.slug, reused: false }
   },
@@ -58,7 +58,7 @@ const facilityTables = [
   ['milestones','by_facility'],['resources','by_facility'],['educators','by_facility'],['employeeProfiles','by_facility'],['extraServices','by_facility'],
   ['extraCharges','by_facility'],['planSubscriptions','by_facility'],['payRuns','by_facility'],['inquiries','by_facility'],['bookkeepingDocs','by_facility'],
   ['calendarEvents','by_facility'],['parentPlans','by_facility'],['attendanceEvents','by_facility_date'],['storedUploads','by_facility'],['childDocuments','by_facility'],
-  ['incidents','by_facility'],['ownerEvents','by_facility'],['clockSessions','by_facility'],
+  ['incidents','by_facility'],['ownerEvents','by_facility'],['clockSessions','by_facility'],['familyPlanEmails','by_facility'],
 ] as const
 async function collectCleanup(ctx: any, runId: string, facilityId: any, userIds: any[]) {
   const ns = namespace(runId)
@@ -109,6 +109,12 @@ async function collectCleanup(ctx: any, runId: string, facilityId: any, userIds:
     add('users',[user])
   }
   const storageIds = new Set<any>()
+  // Attachment IDs live in an array rather than an indexed storageId field.
+  // Inspect a bounded set before deleting any learning-plan fixture files;
+  // refuse cleanup rather than overlook a reference in another tenant.
+  const attachedPlans = uploads.some(upload => upload.purpose === 'learning-plan')
+    ? await ctx.db.query('parentPlans').take(MAX_PER_QUERY + 1) : []
+  if (attachedPlans.length > MAX_PER_QUERY) throw new Error('Family attachment reference inspection limit exceeded; cleanup refused.')
   for (const upload of uploads) {
     if (upload.uploadedBy && !userIds.includes(upload.uploadedBy)) throw new Error('Non-test upload owner; cleanup refused.')
     if (!upload.uploadedBy) {
@@ -127,6 +133,7 @@ async function collectCleanup(ctx: any, runId: string, facilityId: any, userIds:
       const refs = await rowsBy(table,'by_storage','storageId',upload.storageId)
       if (refs.some((row: any) => row.facilityId !== facilityId)) throw new Error('Private file has an outside document reference; cleanup refused.')
     }
+    if (attachedPlans.some((plan: { facilityId: string; attachments?: { storageId: string }[] }) => plan.facilityId !== facilityId && plan.attachments?.some(file => file.storageId === upload.storageId))) throw new Error('Private file has an outside family-plan reference; cleanup refused.')
     const migrations = await rowsBy('privateFileRotations','by_source','sourceId',upload.storageId)
     const replacements = await rowsBy('privateFileRotations','by_replacement','replacementId',upload.storageId)
     if ([...migrations,...replacements].some((row: any) => row.facilityId !== facilityId)) throw new Error('File migration belongs to another tenant.')

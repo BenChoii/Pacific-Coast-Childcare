@@ -4,6 +4,7 @@ import { resolveFacilityId, requireAdmin, requireStaff, childBelongsToParent } f
 import { getAuthUserId } from '@convex-dev/auth/server'
 import { recordOwnerEvent } from './notifications'
 import { checkedDate, localDate, cleanText, facilityChildren } from './workflowUtils'
+import { queuePlanNotifications } from './familyNotifications'
 
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 function weekday(date: string) { return days[new Date(`${date}T12:00:00Z`).getUTCDay()] }
@@ -150,11 +151,46 @@ export const toggleChild = mutation({
 })
 // Family-facing plans are separate published snapshots, never educator completion records.
 const parentFields = {
-  title: v.string(), period: v.union(v.literal('week'), v.literal('month')),
+  title: v.string(), period: v.union(v.literal('day'), v.literal('week'), v.literal('month')),
+  kind: v.optional(v.union(v.literal('learning'), v.literal('schedule'))),
   startDate: v.string(), endDate: v.string(), room: v.optional(v.string()),
   overview: v.string(), activities: v.string(), goals: v.string(),
+  attachments: v.optional(v.array(v.object({ storageId: v.id('_storage'), name: v.string(), mimeType: v.string(), size: v.number() }))),
+  agenda: v.optional(v.array(v.object({ startTime: v.string(), endTime: v.string(), title: v.string(), location: v.optional(v.string()), detail: v.optional(v.string()), weekdays: v.optional(v.array(v.string())) }))),
 }
 const validDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s + 'T12:00:00Z')) && new Date(s + 'T12:00:00Z').toISOString().slice(0, 10) === s
+const familyFileTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']
+export function validateFamilyAgenda(rows: any[]) {
+  if (rows.length > 50) throw new Error('Keep one class schedule to 50 time blocks.')
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const result = rows.map(row => {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(row.startTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(row.endTime) || row.endTime <= row.startTime) throw new Error('Choose valid start and end times, with the end later on the same day.')
+    if (row.weekdays && (!row.weekdays.length || row.weekdays.some((day: string) => !weekdays.includes(day)))) throw new Error('Choose one or more valid weekdays for each time block.')
+    return { startTime: row.startTime, endTime: row.endTime, title: cleanText(row.title, 'Activity title', 160, true),
+      location: row.location ? cleanText(row.location, 'Location', 100) : undefined,
+      detail: row.detail ? cleanText(row.detail, 'Activity notes', 1500) : undefined,
+      weekdays: row.weekdays ? weekdays.filter(day => row.weekdays.includes(day)) : undefined }
+  })
+  for (const day of weekdays) {
+    const occurrences = result.filter(row => !row.weekdays || row.weekdays.includes(day)).sort((a, b) => a.startTime.localeCompare(b.startTime))
+    for (let i = 1; i < occurrences.length; i++) if (occurrences[i].startTime < occurrences[i - 1].endTime) throw new Error(`Schedule times overlap on ${day}. Adjust the time blocks before saving.`)
+  }
+  return result
+}
+async function familyAttachments(ctx: any, rows: any[], facilityId: any, userId: any, retainedIds = new Set<string>()) {
+  if (rows.length > 5 || new Set(rows.map(row => row.storageId)).size !== rows.length) throw new Error('Attach up to five different photos or PDF files.')
+  const result = []
+  for (const row of rows) {
+    const upload = await ctx.db.query('storedUploads').withIndex('by_storage', (q: any) => q.eq('storageId', row.storageId)).first()
+    if (!upload || upload.facilityId !== facilityId || upload.purpose !== 'learning-plan' || (!retainedIds.has(row.storageId) && upload.uploadedBy !== userId)) throw new Error('Upload this schedule or learning-plan file from your own account before attaching it.')
+    if (!familyFileTypes.includes(upload.mimeType) || !Number.isInteger(upload.size) || upload.size < 1 || upload.size > 8 * 1024 * 1024) throw new Error('Use photos or PDF files of up to 8 MB each.')
+    if (row.mimeType !== upload.mimeType || row.size !== upload.size) throw new Error('This file’s details changed. Remove it and upload it again.')
+    if (ctx.db.system && !await ctx.db.system.get(row.storageId)) throw new Error('This file is no longer available. Remove it and upload it again.')
+    const name = cleanText(String(row.name || '').replace(/[\u0000-\u001f\u007f]/g, ''), 'File name', 160, true)
+    result.push({ storageId: row.storageId, name, mimeType: upload.mimeType, size: upload.size })
+  }
+  return result
+}
 
 export const familyPlans = query({
   args: { childId: v.optional(v.id('children')) },
@@ -170,12 +206,12 @@ export const familyPlans = query({
       if (childId && !mine.some(k => k._id === childId)) return []
       const selected = childId ? mine.filter(k => k._id === childId) : mine
       if (!selected.length) return []
-      rooms = new Set(selected.map(k => k.room))
+      rooms = new Set(selected.map(k => k.room).filter(room => room && room !== 'Unassigned'))
     }
     const rows = await ctx.db.query('parentPlans').withIndex('by_facility', q => q.eq('facilityId', fid)).collect()
     return rows.filter(r => (user?.role === 'admin' || r.status === 'published') && (!rooms || !r.room || rooms.has(r.room)))
       .sort((a, b) => b.startDate.localeCompare(a.startDate))
-      .map(({ _id, facilityId, createdBy, ...r }) => ({ id: _id, ...r }))
+      .map(({ _id, facilityId, createdBy, ...r }) => ({ id: _id, ...r, attachments: user ? r.attachments || [] : [] }))
   },
 })
 
@@ -183,16 +219,20 @@ export const saveFamilyPlan = mutation({
   args: { id: v.optional(v.id('parentPlans')), ...parentFields },
   handler: async (ctx, { id, ...args }) => {
     const { facilityId, userId } = await requireAdmin(ctx)
+    const prior = id ? await ctx.db.get(id) : null
+    if (id && (!prior || prior.facilityId !== facilityId)) throw new Error('Plan not found.')
     if (!args.title.trim() || args.title.length > 160) throw new Error('Add a title of up to 160 characters.')
     if (!validDate(args.startDate) || !validDate(args.endDate) || args.endDate < args.startDate) throw new Error('Choose a valid date range.')
+    if (args.period === 'day' && args.startDate !== args.endDate) throw new Error('A daily schedule or plan uses one calendar date.')
     if ([args.overview, args.activities, args.goals].some(s => s.length > 15000) || (args.room?.length ?? 0) > 100) throw new Error('Please shorten the plan.')
-    const data = { ...args, title: args.title.trim(), room: args.room?.trim() || undefined, updatedAt: Date.now() }
+    const retainedIds = new Set<string>((prior?.attachments || []).map(row => row.storageId))
+    const attachments = await familyAttachments(ctx, args.attachments ?? prior?.attachments ?? [], facilityId, userId, retainedIds)
+    const agenda = validateFamilyAgenda(args.agenda ?? prior?.agenda ?? [])
+    const data = { ...args, attachments, agenda, kind: args.kind || prior?.kind || 'learning', title: args.title.trim(), room: args.room?.trim() || undefined, updatedAt: Date.now() }
     if (id) {
-      const p = await ctx.db.get(id)
-      if (!p || p.facilityId !== facilityId) throw new Error('Plan not found.')
       // Saving edits returns the plan to draft; publishing is an explicit step.
       await ctx.db.patch(id, { ...data, status: 'draft' })
-      if (p.status === 'published') await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: 'lesson-plan.updated', summary: `Updated published family plan ${args.title.trim()} and returned it to draft for review before republication.` })
+      if (prior?.status === 'published') await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: 'lesson-plan.updated', summary: `Updated published family plan ${args.title.trim()} and returned it to draft for review before republication.` })
     } else id = await ctx.db.insert('parentPlans', { ...data, facilityId, status: 'draft', createdBy: userId, createdAt: Date.now() })
     return id
   },
@@ -204,10 +244,14 @@ export const publishFamilyPlan = mutation({
     const { facilityId, userId } = await requireAdmin(ctx)
     const p = await ctx.db.get(id)
     if (!p || p.facilityId !== facilityId) throw new Error('Plan not found.')
-    if (published && !p.overview.trim() && !p.activities.trim()) throw new Error('Add an overview or activities before publishing.')
-    if ((p.status === 'published') === published) return
-    await ctx.db.patch(id, { status: published ? 'published' : 'draft', publishedAt: published ? Date.now() : p.publishedAt, updatedAt: Date.now() })
-    await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: published ? 'lesson-plan.published' : 'lesson-plan.unpublished', summary: `${published ? 'Published' : 'Unpublished'} ${p.period === 'week' ? 'weekly' : 'monthly'} family plan: ${p.title} (${p.startDate} to ${p.endDate}).` })
+    if (published && !p.overview.trim() && !p.activities.trim() && !p.attachments?.length && !p.agenda?.length) throw new Error('Add an overview or activities, or attach a schedule or learning plan before publishing.')
+    if (published) { await familyAttachments(ctx, p.attachments || [], facilityId, userId, new Set((p.attachments || []).map(row => row.storageId))); validateFamilyAgenda(p.agenda || []) }
+    if ((p.status === 'published') === published) return { queued: 0, recorded: 0, skipped: 0 }
+    const now = Date.now()
+    await ctx.db.patch(id, { status: published ? 'published' : 'draft', publishedAt: published ? now : p.publishedAt, updatedAt: now })
+    const delivery = published && p.attachments?.length ? await queuePlanNotifications(ctx, { ...p, status: 'published', publishedAt: now, updatedAt: now }) : { queued: 0, recorded: 0, skipped: 0 }
+    await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: published ? 'lesson-plan.published' : 'lesson-plan.unpublished', summary: `${published ? 'Published' : 'Unpublished'} ${p.period === 'day' ? 'daily' : p.period === 'week' ? 'weekly' : 'monthly'} family ${p.kind === 'schedule' ? 'schedule' : 'plan'}: ${p.title} (${p.startDate} to ${p.endDate}).` })
+    return delivery
   },
 })
 

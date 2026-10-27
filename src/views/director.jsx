@@ -17,6 +17,7 @@ import AvatarUpload from '../components/AvatarUpload.jsx'
 import { MembershipManager, ChildEnrollmentControls, ReleasedChildren } from '../components/AccessManagement.jsx'
 import { CareProfilePanel } from './care.jsx'
 import { GuardianManager } from './today.jsx'
+import { EducatorTeam } from '../components/EducatorAttendance.jsx'
 import { financials, childProfiles, families } from '../data/mockData.js'
 
 const tip = {
@@ -600,20 +601,26 @@ function InviteEmployee() {
   const [link, setLink] = useState(null)
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [error, setError] = useState('')
 
   // Hidden in the unauthenticated demo (createLink requires a real admin).
   if (!isAuthenticated || !facility || facility.isDemo) return null
 
   const gen = async () => {
-    setBusy(true)
+    setBusy(true); setError('')
     try {
       const { token } = await createLink({ name, role })
       setLink(`${window.location.origin}/onboard?t=${token}`)
       setName('')
       setCopied(false)
-    } finally { setBusy(false) }
+    } catch { setError('The onboarding link could not be created. Please try again.') }
+    finally { setBusy(false) }
   }
-  const copy = () => { navigator.clipboard?.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1800) }
+  const copy = async () => {
+    setError('')
+    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1800) }
+    catch { setError('Copy is unavailable. Select the link and copy it manually.') }
+  }
 
   return (
     <Card className="p-4">
@@ -632,6 +639,7 @@ function InviteEmployee() {
           <button onClick={gen} disabled={busy} className="btn-primary !py-2 disabled:opacity-50">{busy ? <Loader2 size={15} className="animate-spin" /> : <Link2 size={15} />} Create link</button>
         </div>
       )}
+      {error && <p role="alert" className="mt-3 text-sm font-semibold text-coral-700">{error}</p>}
       {link && (
         <div className="mt-3 flex items-center gap-2 rounded-2xl border border-brand-200 bg-brand-50 p-2.5">
           <Link2 size={15} className="shrink-0 text-brand-500" />
@@ -644,134 +652,7 @@ function InviteEmployee() {
 }
 
 export function EducatorsAdmin() {
-  const { educators } = useApp()
-  const [selId, setSelId] = useState(null)
-  const now = useTick()
-
-  const sel = educators.find((e) => e.id === selId)
-  if (sel) return <EducatorProfile e={sel} now={now} onBack={() => setSelId(null)} />
-
-  const onFloor = educators.filter((e) => e.status === 'in').length
-  const elapsed = (e) => {
-    const sec = e.todaySeconds + (e.status === 'in' && e.clockInAt ? (now - e.clockInAt) / 1000 : 0)
-    return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
-  }
-
-  return (
-    <div className="space-y-5">
-      <SectionHeader eyebrow="Team" title="Educators 🧑‍🏫" subtitle={`${onFloor} clocked in · live time tracking`} />
-
-      <InviteEmployee />
-      <MembershipManager audience="staff" />
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Users} label="On the floor" value={onFloor} gradient="from-mint-400 to-mint-500" />
-        <StatCard icon={Clock} label="Hours today" value={`${educators.reduce((a, e) => a + (e.todaySeconds + (e.status === 'in' && e.clockInAt ? (now - e.clockInAt) / 1000 : 0)) / 3600, 0).toFixed(1)}`} gradient="from-brand-400 to-brand-600" delay={0.05} />
-        <StatCard icon={Gauge} label="Ratio assessment" value="Not assessed" sub="Check room occupancy and staffing" gradient="from-grape-400 to-grape-600" delay={0.1} />
-        <StatCard icon={Award} label="Certification records" value={educators.filter(e=>e.certifications?.length).length} sub="Recorded only · verify expiry separately" gradient="from-sunshine-400 to-coral-500" delay={0.15} />
-      </div>
-
-      <Card className="p-0">
-        {educators.map((e, i) => {
-          const live = e.status === 'in'
-          return (
-            <motion.button key={e.id} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }} whileTap={{ scale: 0.995 }}
-              onClick={() => setSelId(e.id)}
-              className={`flex w-full items-center gap-3 p-4 text-left ${i !== educators.length - 1 ? 'border-b border-line' : ''}`}>
-              <div className="relative">
-                <Avatar emoji={e.emoji} gradient="from-brand-400 to-grape-500" src={e.imageUrl} />
-                <span className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white ${live ? 'bg-mint-500' : 'bg-slate-300'}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-extrabold text-slate-700">{e.name}</div>
-                <div className="text-xs font-bold text-slate-400">{e.role} · {e.room}</div>
-              </div>
-              <div className="text-right">
-                {live ? (
-                  <span className="inline-flex items-center gap-1.5 font-mono text-sm font-bold text-mint-500"><span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" />{elapsed(e)}</span>
-                ) : (
-                  <span className="font-mono text-sm font-bold text-slate-400">{e.hoursWeek > 0 ? elapsed(e) : 'Off'}</span>
-                )}
-                <div className="text-[11px] font-bold text-slate-400">{e.hoursWeek}/{e.hoursTarget}h wk</div>
-              </div>
-              <ChevronRight size={18} className="text-slate-300" />
-            </motion.button>
-          )
-        })}
-      </Card>
-    </div>
-  )
-}
-
-function EducatorProfile({ e, now, onBack }) {
-  const { setEducatorPhoto } = useApp()
-  const live = e.status === 'in'
-  const sec = e.todaySeconds + (live && e.clockInAt ? (now - e.clockInAt) / 1000 : 0)
-  const today = `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
-  return (
-    <div className="space-y-5">
-      <Back onBack={onBack} />
-      <Card className="overflow-hidden p-0">
-        <div className="flex items-center gap-4 p-6">
-          <div className="relative">
-            <AvatarUpload src={e.imageUrl} fallback={e.emoji} size="h-20 w-20" gradient="from-brand-300 to-grape-400" onUpload={(f) => setEducatorPhoto(e.id, f)} />
-            <span className={`absolute bottom-0 right-0 h-4 w-4 rounded-full ring-2 ring-white ${live ? 'bg-mint-400' : 'bg-slate-300'}`} />
-          </div>
-          <div>
-            <h2 className="text-3xl text-slate-800">{e.name}</h2>
-            <p className="text-sm font-medium text-slate-500">{e.role} · {e.room}</p>
-            <span className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] ${live ? 'bg-mint-400/15 text-mint-600' : 'bg-slate-100 text-slate-500'}`}>
-              {live ? <><span className="h-2 w-2 animate-pulse rounded-full bg-mint-500" /> Clocked in · {today}</> : 'Clocked out'}
-            </span>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3 border-t border-line p-4">
-          <Mini label="Today" value={today} tone="text-brand-600" />
-          <Mini label="This week" value={`${e.hoursWeek}h`} tone="text-grape-600" />
-          <Mini label="PTO left" value={e.pto} tone="text-mint-500" />
-        </div>
-      </Card>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <H icon={Clock} tone="text-brand-500">Today's punches</H>
-          {e.punches.length ? (
-            <div className="space-y-2">
-              {e.punches.map((p, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl bg-tint p-2.5">
-                  <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${p.type === 'in' ? 'bg-mint-400/20 text-mint-500' : 'bg-coral-400/15 text-coral-600'}`}>
-                    {p.type === 'in' ? '↧' : '↥'}
-                  </span>
-                  <span className="font-bold capitalize text-slate-700">Clock {p.type}</span>
-                  <span className="ml-auto font-mono text-sm font-bold text-slate-500">{p.time}</span>
-                </div>
-              ))}
-              {live && <p className="text-xs font-bold text-mint-500">● Currently on the floor</p>}
-            </div>
-          ) : <p className="text-sm font-semibold text-slate-400">Not scheduled today.</p>}
-        </Card>
-
-        <Card>
-          <H icon={Gauge} tone="text-grape-500">Weekly hours</H>
-          <div className="mb-2 flex items-end justify-between">
-            <span className="serif-num text-3xl text-slate-800">{e.hoursWeek}<span className="text-base font-bold text-slate-400">/{e.hoursTarget}h</span></span>
-            <Pill className="bg-mint-400/15 text-mint-500">{Math.round((e.hoursWeek / e.hoursTarget) * 100)}%</Pill>
-          </div>
-          <ProgressBar value={e.hoursWeek} max={e.hoursTarget} gradient="from-brand-400 to-grape-500" />
-          <p className="mt-3 text-sm font-semibold text-slate-500">Hired {e.hireDate}</p>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <H icon={Award} tone="text-mint-500">Certifications</H>
-          <div className="flex flex-wrap gap-2">
-            {e.certifications.map((c) => (
-              <Pill key={c} className="bg-mint-400/15 text-mint-500"><CheckCircle2 size={13} /> {c}</Pill>
-            ))}
-          </div>
-        </Card>
-      </div>
-    </div>
-  )
+  return <EducatorTeam><InviteEmployee /><MembershipManager audience="staff" /></EducatorTeam>
 }
 
 /* ---- small helpers ---- */

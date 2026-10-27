@@ -22,7 +22,7 @@ test('setup refuses customer emails, customer membership, demo and mismatched sy
 test('setup creates only a muted isolated fixture and retries recover the same tenant',async()=>{
  const ctx=fixture(),a=await api.setup.handler(ctx,{runId,ownerUserId:'owner'}),b=await api.setup.handler(ctx,{runId,ownerUserId:'owner'})
  assert.equal(a.facilityId,b.facilityId)
- const facility=ctx.rows.get(a.facilityId);assert.equal(facility.ownerEmailMode,'off');assert.equal(facility.isDemo,false);assert.equal(facility.freeLimit,1000)
+ const facility=ctx.rows.get(a.facilityId);assert.equal(facility.ownerEmailMode,'off');assert.equal(facility.familyEmailMode,'off');assert.equal(facility.isDemo,false);assert.equal(facility.freeLimit,1000)
 })
 test('cleanup dry run preserves everything; confirmed cleanup removes only exact synthetic tenant/auth/file records',async()=>{
  const ctx=fixture(),{facilityId}=await api.setup.handler(ctx,{runId,ownerUserId:'owner'})
@@ -64,4 +64,14 @@ test('cleanup can remove interrupted unaffiliated synthetic accounts but cannot 
  assert.ok(ctx.rows.has('owner'))
  await api.cleanup.handler(ctx,{runId,userIds:['owner'],dryRun:false})
  assert.deepEqual([...ctx.rows.keys()],['real'])
+})
+test('fixture cleanup preserves shared schedule files referenced by another tenant and refuses unbounded inspection',async()=>{
+ for(const outsideCount of [1,101]){
+  const ctx=fixture(),{facilityId}=await api.setup.handler(ctx,{runId,ownerUserId:'owner'})
+  ctx.rows.set('upload',{_id:'upload',table:'storedUploads',facilityId,storageId:'qa-schedule',uploadedBy:'owner',purpose:'learning-plan'})
+  for(let i=0;i<outsideCount;i++)ctx.rows.set(`plan-${i}`,{_id:`plan-${i}`,table:'parentPlans',facilityId:'customer',attachments:outsideCount===1?[{storageId:'qa-schedule'}]:[]})
+  const before=ctx.rows.size
+  await assert.rejects(api.cleanup.handler(ctx,{runId,facilityId,userIds:['owner'],dryRun:false}),/outside family-plan reference|inspection limit/)
+  assert.equal(ctx.rows.size,before);assert.deepEqual(ctx.deletedFiles,[])
+ }
 })

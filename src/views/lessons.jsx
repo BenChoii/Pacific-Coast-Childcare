@@ -9,6 +9,9 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { Card, SectionHeader, Pill, ProgressBar } from '../components/ui.jsx'
+import { PlanAttachmentEditor } from '../components/PlanAttachments.jsx'
+import { ScheduleAgendaEditor } from '../components/ClassSchedule.jsx'
+import FamilyPlanEmailStatus from '../components/FamilyPlanEmailStatus.jsx'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const PROGRAMS = ['Little Leaders', 'Global Citizens', 'Real Life Skills', 'Smart Minds STEM', 'Mindful Hearts', 'Routine']
@@ -415,32 +418,40 @@ function Labeled({ label, children }) {
   return <label className="block"><span className="eyebrow mb-1.5 block">{label}</span>{children}</label>
 }
 
-const blankFamilyPlan = { title: '', period: 'week', startDate: '', endDate: '', room: '', overview: '', activities: '', goals: '' }
-function FamilyPlanManager({lessonPlan,lessonBlocks}) {
+const blankFamilyPlan = { title: '', kind: 'learning', period: 'week', startDate: '', endDate: '', room: '', overview: '', activities: '', goals: '', attachments: [], agenda: [] }
+export function FamilyPlanManager({lessonPlan,lessonBlocks}) {
   const plans = useQuery(api.lessons.familyPlans, {})
   const save = useMutation(api.lessons.saveFamilyPlan)
   const publish = useMutation(api.lessons.publishFamilyPlan)
   const remove = useMutation(api.lessons.removeFamilyPlan)
-  const { pushToast } = useApp()
+  const { pushToast, childrenList = [], facility } = useApp()
   const [form, setForm] = useState(null)
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
-  const set = key => e => setForm({ ...form, [key]: e.target.value })
+  const set = key => e => {
+    const value = e.target.value
+    setForm(current => ({ ...current, [key]: value, ...(key === 'period' && value === 'day' ? { endDate: current.startDate } : {}), ...(key === 'startDate' && current.period === 'day' ? { endDate: value } : {}) }))
+  }
+  const rooms = [...new Set([...childrenList.map(child => child.room), ...(plans || []).map(plan => plan.room), lessonPlan?.room].filter(room => room && room !== 'Unassigned'))].sort()
   const submit = async e => {
-    e.preventDefault(); setBusy(true); setError('')
+    e.preventDefault(); if (busy || uploading) return; setBusy(true); setError('')
     try {
       const fields = Object.fromEntries(Object.keys(blankFamilyPlan).map(k => [k, k === 'room' ? form[k] || undefined : form[k]]))
+      if (fields.period === 'day') fields.endDate = fields.startDate
       await save({ ...fields, ...(form.id ? { id: form.id } : {}) })
       setForm(null); pushToast('Draft saved. Publish when you’re ready for families to see it.', { emoji: '📚', tone: 'mint' })
     } catch (err) { setError(err.message || 'Could not save the plan.') } finally { setBusy(false) }
   }
   const changePublish = async plan => {
+    if (busy || uploading) return
     setError(''); setBusy(true)
-    try { await publish({ id: plan.id, published: plan.status !== 'published' }); pushToast(plan.status === 'published' ? 'Plan returned to draft' : 'Plan is now visible to families', { emoji: '📚', tone: 'mint' }) }
+    try { const delivery = await publish({ id: plan.id, published: plan.status !== 'published' }); pushToast(plan.status === 'published' ? 'Plan returned to draft' : `Update is now visible to families${delivery?.queued ? `. ${delivery.queued} parent email ${delivery.queued === 1 ? 'alert' : 'alerts'} queued.` : ''}`, { emoji: '📚', tone: 'mint' }) }
     catch (err) { setError(err.message || 'Could not update publication.') } finally { setBusy(false) }
   }
   const erase = async plan => {
+    if (busy || uploading) return
     if (!window.confirm(`Delete the family plan “${plan.title}”?`)) return
     setBusy(true);setError('')
     try { await remove({ id: plan.id }) } catch (err) { setError(err.message || 'Could not remove the plan.') } finally {setBusy(false)}
@@ -455,20 +466,31 @@ function FamilyPlanManager({lessonPlan,lessonBlocks}) {
     setForm({ ...blankFamilyPlan, title: lessonPlan?.theme || '', room: lessonPlan?.room || '', startDate:lessonPlan?.startDate || '', endDate:lessonPlan?.endDate || '', activities, goals })
     setError('')
   }
+  const uploadSchedule = () => {
+    const startDate = dateInFacility(facility)
+    setForm({ ...blankFamilyPlan, title: 'Class schedule', kind: 'schedule', room: lessonPlan?.room || '', startDate, endDate: moveDate(startDate, 6) })
+    setError('')
+  }
   return <div className="space-y-4">
-    <Card><h3 className="text-xl text-slate-800">Share the week or month with families</h3><p className="mt-2 text-sm text-slate-600">Write a simple overview of the learning ahead. Save a draft, preview it, then publish it to the family calendar. Educator completion notes and children’s names stay private. Saving edits returns a published plan to draft until you publish again.</p><div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary" onClick={() => { setForm({ ...blankFamilyPlan }); setError('') }}><Plus size={16} />New family plan</button><button className="btn-ghost" onClick={useWorkingPlan}>Start from current lesson plan</button></div></Card>
+    <Card><h3 className="text-xl text-slate-800">Share class schedules and learning plans</h3><p className="mt-2 text-sm text-slate-600">Upload a photo or PDF, add a daily, weekly or monthly overview, and choose the class. A shared class schedule photo appears prominently on parents’ Dashboard throughout its date range. Save a draft and preview it before sharing. Sharing new files adds them to the family calendar and queues email alerts for parents with an enrolled child in that class. Drafts do not send emails. Saving changes returns a shared update to draft until you share it again.</p><div className="mt-4 flex flex-wrap gap-2"><button disabled={busy || uploading} className="btn-primary" onClick={uploadSchedule}><FileText size={16} />Upload class schedule</button><button disabled={busy || uploading} className="btn-ghost" onClick={() => { setForm({ ...blankFamilyPlan, room: lessonPlan?.room || '' }); setError('') }}><Plus size={16} />New family update</button><button disabled={busy || uploading} className="btn-ghost" onClick={useWorkingPlan}>Start from current lesson plan</button></div></Card>
     {error && <p role="alert" className="rounded-xl bg-coral-50 p-3 text-sm text-coral-700">{error}</p>}
     {form && <Card><form className="space-y-3" onSubmit={submit}>
-      <div className="flex justify-between"><h3 className="text-xl">{form.id ? 'Edit family plan' : 'New family plan'}</h3><button type="button" aria-label="Close family plan editor" onClick={() => setForm(null)}><X size={18} /></button></div>
+      <div className="flex justify-between"><h3 className="text-xl">{form.id ? 'Edit family update' : 'New family update'}</h3><button type="button" disabled={busy || uploading} aria-label="Close family plan editor" onClick={() => setForm(null)}><X size={18} /></button></div>
       <label className="block text-sm font-semibold">Title<input className="input mt-1" required maxLength={160} value={form.title} onChange={set('title')} /></label>
-      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">Period<select className="input mt-1" value={form.period} onChange={set('period')}><option value="week">Weekly plan</option><option value="month">Monthly plan</option></select></label><label className="text-sm font-semibold">Room<input className="input mt-1" value={form.room} maxLength={100} onChange={set('room')} placeholder="Leave empty for all rooms" /></label></div>
-      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">From<input type="date" className="input mt-1" required value={form.startDate} onChange={set('startDate')} /></label><label className="text-sm font-semibold">Through<input type="date" className="input mt-1" required min={form.startDate} value={form.endDate} onChange={set('endDate')} /></label></div>
+      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">Update type<select className="input mt-1" value={form.kind} onChange={set('kind')}><option value="learning">Learning plan</option><option value="schedule">Class schedule</option></select></label><label className="text-sm font-semibold">Period<select className="input mt-1" value={form.period} onChange={set('period')}><option value="day">Daily</option><option value="week">Weekly</option><option value="month">Monthly</option></select></label></div>
+      <label className="block text-sm font-semibold">Class<input className="input mt-1" list="family-plan-classes" value={form.room} maxLength={100} onChange={set('room')} placeholder="Leave empty for all classes" /><datalist id="family-plan-classes">{rooms.map(room => <option value={room} key={room} />)}</datalist></label><p className="text-xs text-slate-500">Choose the class name used on the children’s enrolments. Leave empty only when this update applies to every class.</p>
+      <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">{form.period === 'day' ? 'Date' : 'From'}<input type="date" className="input mt-1" required value={form.startDate} onChange={set('startDate')} /></label>{form.period !== 'day' && <label className="text-sm font-semibold">Through<input type="date" className="input mt-1" required min={form.startDate} value={form.endDate} onChange={set('endDate')} /></label>}</div>
+      {form.kind === 'schedule' && <p className="text-sm text-slate-600">Check the dates for how long families should see this schedule. A photo is enough to share it; no time blocks are required. Add optional time blocks below to show parents and educators what is scheduled now and next. Text and times are not read automatically from the photo.</p>}
+      <PlanAttachmentEditor attachments={form.attachments || []} onChange={attachments => setForm(current => ({ ...current, attachments }))} disabled={busy} onBusyChange={setUploading} />
+      {form.kind === 'schedule' && <ScheduleAgendaEditor value={form.agenda || []} onChange={agenda => setForm(current => ({ ...current, agenda }))} disabled={busy || uploading} />}
       {[['overview', 'Overview for parents'], ['activities', 'Activities to look forward to'], ['goals', 'Learning goals']].map(([key, label]) => <label key={key} className="block text-sm font-semibold">{label}<textarea rows={key === 'activities' ? 6 : 3} maxLength={15000} className="input mt-1" value={form[key]} onChange={set(key)} /></label>)}
-      <button className="btn-primary" disabled={busy}><Save size={16} />{busy ? 'Saving…' : 'Save draft'}</button>
+      <button className="btn-primary" disabled={busy || uploading}><Save size={16} />{uploading ? 'Wait for files to finish uploading…' : busy ? 'Saving…' : 'Save draft'}</button>
     </form></Card>}
-    {plans === undefined ? <p className="text-sm text-slate-500">Loading plans…</p> : !plans.length ? <Card><p className="text-sm text-slate-600">No family plans yet. Create a weekly or monthly plan above.</p></Card> : plans.map(plan => <Card key={plan.id}>
-      <div className="flex flex-wrap items-start justify-between gap-3"><div><Pill className={plan.status === 'published' ? 'bg-mint-100 text-mint-700' : 'bg-slate-100 text-slate-500'}>{plan.status === 'published' ? 'Visible to families' : 'Draft · private'}</Pill><h3 className="mt-2 text-xl">{plan.title}</h3><p className="mt-1 text-sm text-slate-500">{plan.startDate} – {plan.endDate} · {plan.room || 'All rooms'}</p></div><button onClick={() => erase(plan)} className="p-2 text-coral-500" aria-label={`Delete ${plan.title}`}><Trash2 size={16} /></button></div>
-      <div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary !py-2 text-sm" disabled={busy} onClick={() => changePublish(plan)}>{plan.status === 'published' ? 'Unpublish' : 'Publish for families'}</button><button className="btn-ghost !py-2 text-sm" onClick={() => { setForm({ ...blankFamilyPlan, ...plan, room: plan.room || '' }); setError('') }}><Pencil size={14} />Edit</button><button className="btn-ghost !py-2 text-sm" onClick={() => setPreview(preview === plan.id ? null : plan.id)}>Preview</button><button className="btn-ghost !py-2 text-sm" onClick={() => copy(plan)}>Copy for sharing</button></div>
+    {plans === undefined ? <p className="text-sm text-slate-500">Loading plans…</p> : !plans.length ? <Card><p className="text-sm text-slate-600">No family updates yet. Add a schedule photo or a daily, weekly or monthly learning plan above.</p></Card> : plans.map(plan => <Card key={plan.id}>
+      <div className="flex flex-wrap items-start justify-between gap-3"><div><Pill className={plan.status === 'published' ? 'bg-mint-100 text-mint-700' : 'bg-slate-100 text-slate-500'}>{plan.status === 'published' ? 'Visible to families' : 'Draft · private'}</Pill><h3 className="mt-2 text-xl">{plan.title}</h3><p className="mt-1 text-sm text-slate-500">{plan.startDate} – {plan.endDate} · {plan.room || 'All rooms'}</p></div><button disabled={busy || uploading} onClick={() => erase(plan)} className="p-2 text-coral-500" aria-label={`Delete ${plan.title}`}><Trash2 size={16} /></button></div>
+      {plan.attachments?.length > 0 && <p className="mt-2 text-sm text-slate-500">{plan.attachments.length} attached {plan.attachments.length === 1 ? 'file' : 'files'}</p>}
+      <div className="mt-4 flex flex-wrap gap-2"><button className="btn-primary !py-2 text-sm" disabled={busy || uploading} onClick={() => changePublish(plan)}>{plan.status === 'published' ? 'Unpublish' : 'Share with parents'}</button><button disabled={busy || uploading} className="btn-ghost !py-2 text-sm" onClick={() => { setForm({ ...blankFamilyPlan, ...plan, attachments: plan.attachments || [], agenda: plan.agenda || [], room: plan.room || '' }); setError('') }}><Pencil size={14} />Edit</button><button className="btn-ghost !py-2 text-sm" onClick={() => setPreview(preview === plan.id ? null : plan.id)}>Preview</button><button className="btn-ghost !py-2 text-sm" onClick={() => copy(plan)}>Copy for sharing</button></div>
+      {plan.attachments?.length > 0 && <FamilyPlanEmailStatus planId={plan.id} />}
       {preview === plan.id && <div className="mt-4 border-t border-line pt-4"><FamilyLearningPlan plan={plan} /></div>}
     </Card>)}
   </div>

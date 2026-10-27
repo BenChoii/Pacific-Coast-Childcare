@@ -84,6 +84,8 @@ export default defineSchema({
     })),
     timezone: v.optional(v.string()),
     ownerEmailMode: v.optional(v.string()),
+    familyEmailMode: v.optional(v.union(v.literal('on'), v.literal('off'))),
+    parentContactEmail: v.optional(v.string()), parentContactName: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index('by_slug', ['slug'])
@@ -516,9 +518,12 @@ export default defineSchema({
 
   // Published snapshots for families; educator working plans remain private.
   parentPlans: defineTable({
-    facilityId: v.id('facilities'), title: v.string(), period: v.union(v.literal('week'), v.literal('month')),
+    facilityId: v.id('facilities'), title: v.string(), period: v.union(v.literal('day'), v.literal('week'), v.literal('month')),
+    kind: v.optional(v.union(v.literal('learning'), v.literal('schedule'))),
     startDate: v.string(), endDate: v.string(), room: v.optional(v.string()),
     overview: v.string(), activities: v.string(), goals: v.string(),
+    attachments: v.optional(v.array(v.object({ storageId: v.id('_storage'), name: v.string(), mimeType: v.string(), size: v.number() }))),
+    agenda: v.optional(v.array(v.object({ startTime: v.string(), endTime: v.string(), title: v.string(), location: v.optional(v.string()), detail: v.optional(v.string()), weekdays: v.optional(v.array(v.string())) }))),
     status: v.union(v.literal('draft'), v.literal('published')),
     publishedAt: v.optional(v.number()), sourceKey: v.optional(v.string()), createdBy: v.id('users'), createdAt: v.number(), updatedAt: v.number(),
   }).index('by_facility', ['facilityId']),

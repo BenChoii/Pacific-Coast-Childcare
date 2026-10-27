@@ -22,6 +22,7 @@ import type * as directory from "../directory.js";
 import type * as educators from "../educators.js";
 import type * as extras from "../extras.js";
 import type * as facilities from "../facilities.js";
+import type * as familyNotifications from "../familyNotifications.js";
 import type * as fileEncryption from "../fileEncryption.js";
 import type * as files from "../files.js";
 import type * as financeUtils from "../financeUtils.js";
@@ -75,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   educators: typeof educators;
   extras: typeof extras;
   facilities: typeof facilities;
+  familyNotifications: typeof familyNotifications;
   fileEncryption: typeof fileEncryption;
   files: typeof files;
   financeUtils: typeof financeUtils;

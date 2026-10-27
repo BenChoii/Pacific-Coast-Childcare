@@ -6,7 +6,7 @@ import { requireFacility, childBelongsToParent } from './lib'
 import { sealPrivateBlob } from './fileEncryption'
 
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
-const publicPurposes = ['photo', 'avatar', 'child-photo', 'child-document', 'bookkeeping', 'intake']
+const publicPurposes = ['photo', 'avatar', 'child-photo', 'child-document', 'bookkeeping', 'intake', 'learning-plan']
 export function validateFileBytes(bytes: Uint8Array, mimeType: string) {
   if (!bytes.length || bytes.length > MAX_UPLOAD_BYTES) throw new Error('Upload a file of up to 8 MiB.')
   const prefix = (...values: number[]) => values.every((value, i) => bytes[i] === value)
@@ -30,7 +30,7 @@ export const registerStoredUpload = internalMutation({
     } else {
       const user = args.uploadedBy ? await ctx.db.get(args.uploadedBy) : null
       if (!user || user.facilityId !== args.facilityId || user.accessStatus === 'suspended') throw new Error('Active upload owner required.')
-      if (args.purpose === 'bookkeeping' && user.role !== 'admin') throw new Error('Director access required.')
+      if (['bookkeeping', 'learning-plan'].includes(args.purpose) && user.role !== 'admin') throw new Error('Director access required.')
       if (['photo', 'intake'].includes(args.purpose) && !['admin', 'staff'].includes(user.role || '')) throw new Error('Educator access required.')
     }
     const existing = await ctx.db.query('storedUploads').withIndex('by_storage', q => q.eq('storageId', args.storageId)).first()
@@ -64,8 +64,9 @@ export const uploadFile = action({
     const membership = await ctx.runQuery(internal.files.uploadContext, {})
     if (!publicPurposes.includes(purpose)) throw new Error('Invalid upload purpose.')
     if (purpose === 'bookkeeping' && membership.role !== 'admin') throw new Error('Only the owner/director can upload bookkeeping documents.')
+    if (purpose === 'learning-plan' && membership.role !== 'admin') throw new Error('Only the owner/director can upload family schedules and learning plans.')
     if (['photo', 'intake'].includes(purpose) && !['admin', 'staff'].includes(membership.role || '')) throw new Error('Educator or director access required.')
-    if (!['child-document', 'bookkeeping', 'intake'].includes(purpose) && !mimeType.startsWith('image/')) throw new Error('Choose an image for this upload.')
+    if (!['child-document', 'bookkeeping', 'intake', 'learning-plan'].includes(purpose) && !mimeType.startsWith('image/')) throw new Error('Choose an image for this upload.')
     if ((base64 === undefined) === (raw === undefined)) throw new Error('Provide exactly one file payload.')
     let bytes: Uint8Array
     if (raw !== undefined) bytes = new Uint8Array(raw)

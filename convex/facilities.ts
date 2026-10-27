@@ -61,6 +61,46 @@ export const current = query({
   },
 })
 
+const contactEmailIsValid = (value: string) => value.length <= 254 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(value)
+
+// A family can see its own daycare's contact after an active child is linked.
+// Directors may read this during setup, before the first family is enrolled.
+export const parentContact = query({
+  args: {},
+  handler: async (ctx) => {
+    const { facility, facilityId, user, userId } = await requireFacility(ctx)
+    if (user.role === 'parent') {
+      const children = await ctx.db.query('children').withIndex('by_facility', q => q.eq('facilityId', facilityId)).collect()
+      if (!children.some(child => !child.archivedAt && childBelongsToParent(child, userId))) throw new Error('An active child enrolment is required.')
+    } else if (user.role !== 'admin') throw new Error('Families and directors only.')
+    const owner = facility.ownerUserId ? await ctx.db.get(facility.ownerUserId) : null
+    const ownerEmail = owner?.email?.trim() || ''
+    const configuredEmail = facility.parentContactEmail?.trim() || ''
+    const fallbackEmail = ownerEmail || facility.billingEmail?.trim() || ''
+    const email = configuredEmail || fallbackEmail
+    return {
+      email: contactEmailIsValid(email) ? email : null,
+      name: facility.parentContactName?.trim() || owner?.name?.trim() || '',
+      facilityName: facility.name,
+      ...(user.role === 'admin' ? { configuredEmail, configuredName: facility.parentContactName || '', fallbackEmail } : {}),
+    }
+  },
+})
+
+export const setParentContact = mutation({
+  args: { email: v.optional(v.string()), name: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const { facilityId, userId } = await requireAdmin(ctx)
+    const email = args.email?.trim() || ''
+    const name = args.name?.trim().replace(/\s+/g, ' ') || ''
+    if (email && !contactEmailIsValid(email)) throw new Error('Enter a valid parent contact email address.')
+    if (name.length > 120) throw new Error('Use a contact name of up to 120 characters.')
+    await ctx.db.patch(facilityId, { parentContactEmail: email || undefined, parentContactName: name || undefined })
+    await recordOwnerEvent(ctx, { facilityId, actorId: userId, type: 'parent_contact_updated', summary: 'The parent email contact was updated.' })
+    return { ok: true }
+  },
+})
+
 // Admin helper — turn the paid director add-ons (CRM, bookkeeping) on/off for a
 // facility by slug. Internal (not in the public client API), so it can only be
 // run from the Convex dashboard or `npx convex run … --prod`. Until Stripe wiring

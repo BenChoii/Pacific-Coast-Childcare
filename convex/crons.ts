@@ -9,5 +9,6 @@ const crons = cronJobs()
 crons.monthly('generate tuition invoices', { day: 1, hourUTC: 16, minuteUTC: 0 }, internal.invoices.generateMonthly, {})
 
 crons.interval('recover interrupted owner alerts', {minutes:5}, internal.notifications.recoverInterrupted, {})
+crons.interval('recover interrupted family plan emails', {minutes:5}, internal.familyNotifications.recoverInterrupted, {})
 
 export default crons

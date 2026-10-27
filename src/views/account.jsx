@@ -8,6 +8,7 @@ import {
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
 import { SectionHeader, Card, Pill, ProgressBar, Avatar } from '../components/ui.jsx'
+import { ParentContactSettings } from '../components/ParentContact.jsx'
 
 const TIERS = [
   { range: '1–5 children', rate: 'Free', highlight: true },
@@ -41,7 +42,7 @@ export function Account() {
       </div>
       {tab === 'plan' && <PlanPanel />}
       {tab === 'children' && <ChildrenPanel />}
-      {tab === 'family' && <FamilyPanel />}
+      {tab === 'family' && <><ParentContactSettings /><FamilyPanel /></>}
       {tab === 'listing' && <ListingPanel />}
     </div>
   )

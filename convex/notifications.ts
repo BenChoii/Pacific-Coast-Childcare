@@ -4,7 +4,7 @@ import { v } from 'convex/values'
 import { randomToken, requireFacility } from './lib'
 import { getAuthUserId } from '@convex-dev/auth/server'
 
-export function isImportantEvent(type: string) { return /onboard|invite|access|member|release|restor|incident|paid|payment|invoice|payroll|closure|calendar|plan.published/.test(type) }
+export function isImportantEvent(type: string) { return /onboard|invite|access|member|release|restor|incident|paid|payment|invoice|payroll|closure|calendar|plan.published|account_linked|account_unlinked|attendance_corrected/.test(type) }
 
 // Write the activity and schedule delivery in the same database transaction.
 // Summaries contain action labels only, never message bodies or child health/HR data.

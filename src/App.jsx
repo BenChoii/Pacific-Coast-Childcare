@@ -168,6 +168,7 @@ export default function App() {
       { id: 'calm', label: 'Calm Corner', icon: Wind, render: CalmCorner },
       { id: 'intake', label: 'Intake', icon: ScanLine, render: IntakeDesk },
       { id: 'lesson', label: 'Lesson Plans', icon: BookOpen, render: EducatorLessons },
+      { id: 'calendar', label: 'Calendar', icon: CalendarDays, render: ParentCalendar },
       { id: 'me', label: 'Me', icon: User, render: Me, dock: true },
     ],
     admin: [

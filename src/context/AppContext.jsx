@@ -21,7 +21,11 @@ function todayLabel() {
 export function AppProvider({ children }) {
   // --- UI-only state ---
   const [demoRole, setDemoRole] = useState(null) // set when exploring without an account
-  const [view, setView] = useState('home')
+  // Only this explicit, known email-link intent changes a cold launch. Normal
+  // app launches still start on the dashboard; warm resumes keep current work.
+  const launchViewRef = useRef(new URLSearchParams(window.location.search).get('open') === 'calendar' ? 'calendar' : 'home')
+  const launchViewHandledRef = useRef(false)
+  const [view, setView] = useState(() => launchViewRef.current)
   const entryRef = useRef(getEntry())
   try {if(['join','slug'].includes(entryRef.current.kind)&&entryRef.current.token)sessionStorage.setItem('cubby_pending_join',entryRef.current.token)} catch {}
   const paymentReturnRef = useRef(new URLSearchParams(window.location.search))
@@ -81,12 +85,23 @@ export function AppProvider({ children }) {
   // A removed membership must never subscribe to workspace data, even with an old token.
   const canReadWorkspace = !isAuthenticated || (!!viewer?.hasFacility && viewer?.accessStatus !== 'suspended' && viewer?.hasActiveChildren !== false)
   useEffect(() => {
-    if (!isAuthenticated || !viewer?.id) return
-    setView('home')
-    if (!new URLSearchParams(window.location.search).get('claim')) {
-      try { sessionStorage.removeItem('cubby_fresh_auth') } catch {}
-      window.history.replaceState(null, '', '/app' + window.location.search)
+    if (!isAuthenticated || !viewer?.id) {
+      if (launchViewHandledRef.current) launchViewRef.current = 'home'
+      return
     }
+    setView(launchViewRef.current)
+    // Keep this idempotent during React StrictMode's mount-effect replay.
+    launchViewHandledRef.current = true
+    const params = new URLSearchParams(window.location.search)
+    params.delete('open')
+    // A later payment reconciliation uses its original snapshot. Consume the
+    // navigation hint there too so it cannot reappear after a payment succeeds.
+    paymentReturnRef.current.delete('open')
+    if (!params.get('claim')) {
+      try { sessionStorage.removeItem('cubby_fresh_auth') } catch {}
+    }
+    const nextPath = params.get('claim') ? window.location.pathname : '/app'
+    window.history.replaceState(null, '', nextPath + (params.toString() ? '?' + params.toString() : ''))
   }, [isAuthenticated, viewer?.id])
 
   // --- Live data from Convex ---
@@ -99,7 +114,7 @@ export function AppProvider({ children }) {
   const invoicesQ = useQuery(api.invoices.list, canReadWorkspace ? {} : 'skip')
   const rosterQ = useQuery(api.roster.list, canReadWorkspace ? datedArgs : 'skip')
   const photosQ = useQuery(api.photos.list, canReadWorkspace ? {limit:12} : 'skip')
-  const educatorsQ = useQuery(api.educators.list, canReadWorkspace ? {} : 'skip')
+  const educatorsQ = useQuery(api.educators.list, canReadWorkspace ? { asOfDay: dayKey(clockNow, facilityQ?.timezone) } : 'skip')
   const lessonPlanQ = useQuery(api.lessons.plan, canReadWorkspace ? {} : 'skip')
   const lessonBlocksQ = useQuery(api.lessons.blocks, canReadWorkspace ? {} : 'skip')
   const resourcesQ = useQuery(api.resources.list, canReadWorkspace ? {} : 'skip')
@@ -146,7 +161,7 @@ export function AppProvider({ children }) {
   const toggleMut = useMutation(api.roster.toggle)
   const setStatusMut = useMutation(api.roster.setStatus)
   const likeMut = useMutation(api.photos.like)
-  const clockMut = useMutation(api.educators.clock)
+  const clockMut = useMutation(api.educators.setClock)
   const confirmCheckout = useAction(api.payments.confirmCheckout)
   // --- Tenant / billing ---
   const createFacilityMut = useMutation(api.facilities.createForCurrentUser)
@@ -265,6 +280,7 @@ export function AppProvider({ children }) {
   }, [])
   const logout = useCallback(async () => {
     if (isAuthenticated) await signOut()
+    launchViewRef.current = 'home'; launchViewHandledRef.current = false
     pendingMembershipRef.current=null
     setMembershipError('');setJoiningFacility(false)
     setDemoRole(null)
@@ -288,7 +304,7 @@ export function AppProvider({ children }) {
   const toggleAttendance = useCallback((id) => toggleMut({ id, time: nowTime(facility?.timezone) }), [toggleMut,facility?.timezone])
   const setAttendance = useCallback((id, status) => setStatusMut({ id, status, time: nowTime(facility?.timezone) }), [setStatusMut,facility?.timezone])
   const likePhoto = useCallback((id) => likeMut({ id }), [likeMut])
-  const clockEducator = useCallback((id) => clockMut({ id, time: nowTime(facility?.timezone) }), [clockMut,facility?.timezone])
+  const clockEducator = useCallback((id, status) => clockMut({ id, status }), [clockMut])
 
   // --- Tenant / billing wrappers ---
   const createFacility = useCallback((name) => createFacilityMut({ name }), [createFacilityMut])
@@ -392,6 +408,7 @@ export function AppProvider({ children }) {
     photos,
     likePhoto,
     educators,
+    educatorsLoading: educatorsQ === undefined,
     clockEducator,
     lessonPlan,
     lessonBlocks,

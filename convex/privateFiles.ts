@@ -38,6 +38,16 @@ export const authorizeDownload = internalQuery({
     const avatars = children.filter(child => child.imageId === storageId)
     if (avatars.some(child => staff || childBelongsToParent(child, userId))) return await fileInfo(ctx, storageId, 'child-photo')
     const mine = children.filter(child => childBelongsToParent(child, userId))
+    const plans = await ctx.db.query('parentPlans').withIndex('by_facility', q => q.eq('facilityId', facilityId)).collect()
+    for (const plan of plans) {
+      const attachment = plan.attachments?.find(file => file.storageId === storageId)
+      if (!attachment) continue
+      const visible = user.role === 'admin' || (plan.status === 'published' && (user.role === 'staff' || (user.role === 'parent' && mine.some(child => !plan.room || (child.room !== 'Unassigned' && child.room === plan.room)))))
+      if (!visible) continue
+      const upload = await ctx.db.query('storedUploads').withIndex('by_storage', q => q.eq('storageId', storageId)).first()
+      if (!upload || upload.facilityId !== facilityId || upload.purpose !== 'learning-plan') continue
+      return await fileInfo(ctx, storageId, attachment.name, attachment.mimeType)
+    }
     const photos = await ctx.db.query('photos').withIndex('by_image', q => q.eq('imageId', storageId)).collect()
     for (const photo of photos.filter(row => row.facilityId === facilityId)) {
       const shared = photo.audience === 'family'

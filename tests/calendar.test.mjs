@@ -13,6 +13,7 @@ async function handlers(filename) {
     values: 'const value=(...a)=>({}); export const v=new Proxy({}, {get:()=>value});',
     auth: 'export const getAuthUserId=async ctx=>ctx.uid;',
     notifications: 'export const recordOwnerEvent=async(ctx,event)=>{ctx.events.push(event)};',
+    familyNotifications: 'export const queuePlanNotifications=async()=>({queued:0,skipped:0});',
     lib: `export const childBelongsToParent=(child,id)=>!!id&&!child?.archivedAt&&(child?.parentUserId===id||(child?.guardianUserIds||[]).includes(id));
       export const resolveFacilityId=async ctx=>ctx.blocked?null:ctx.fid;
       export const requireAdmin=async ctx=>{if(ctx.role!=='admin'||ctx.blocked)throw Error('Directors only');return {facilityId:ctx.fid,userId:ctx.uid,user:{role:ctx.role}}};
@@ -24,6 +25,7 @@ async function handlers(filename) {
     b.onResolve({ filter: /^@convex-dev\/auth\/server$/ }, () => ({ path: 'auth', namespace: 'fixture' }))
     b.onResolve({ filter: /^\.\/lib$/ }, () => ({ path: 'lib', namespace: 'fixture' }))
     b.onResolve({ filter: /^\.\/notifications$/ }, () => ({ path: 'notifications', namespace: 'fixture' }))
+    b.onResolve({ filter: /^\.\/familyNotifications$/ }, () => ({ path: 'familyNotifications', namespace: 'fixture' }))
     b.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: modules[args.path], loader: 'js' }))
   } }] })
   return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`)

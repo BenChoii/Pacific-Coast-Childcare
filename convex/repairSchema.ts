@@ -9,6 +9,13 @@ export const financeTables = {
     stripeAccountId: v.optional(v.string()), checkoutUrl: v.optional(v.string()), paidAt: v.optional(v.number()),
   }).index('by_invoice', ['invoiceId', 'createdAt']).index('by_session', ['stripeSessionId']),
   stripeWebhookEvents: defineTable({eventId: v.string(), type: v.string(), createdAt: v.number()}).index('by_event', ['eventId']),
-  clockSessions: defineTable({facilityId: v.id('facilities'), educatorId: v.id('educators'), startedAt: v.number(), endedAt: v.optional(v.number())})
+  clockSessions: defineTable({
+    facilityId: v.id('facilities'), educatorId: v.id('educators'), startedAt: v.number(), endedAt: v.optional(v.number()),
+    createdAt: v.optional(v.number()), createdBy: v.optional(v.id('users')), source: v.optional(v.string()),
+    updatedAt: v.optional(v.number()), updatedBy: v.optional(v.id('users')),
+    corrections: v.optional(v.array(v.object({
+      startedAt: v.number(), endedAt: v.optional(v.number()), changedAt: v.number(), changedBy: v.id('users'), reason: v.string(),
+    }))),
+  })
     .index('by_facility', ['facilityId', 'startedAt']).index('by_educator', ['educatorId', 'startedAt']),
 }

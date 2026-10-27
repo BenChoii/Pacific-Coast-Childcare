@@ -14,6 +14,8 @@ import { ParentExtrasCard } from './finance.jsx'
 import { CalendarEntry, MonthCalendar, localDateLabel } from './calendar.jsx'
 import { ACTIVITY_TYPES } from '../data/mockData.js'
 import { dayKey } from '../lib/careData.js'
+import { PlanAttachments } from '../components/PlanAttachments.jsx'
+import { ClassScheduleNow } from '../components/ClassSchedule.jsx'
 
 // Families only see children linked by the daycare; demo data stays in the demo workspace.
 function useMyKids() {
@@ -28,35 +30,54 @@ export { FamilyToday as ParentHome, FamilyDailyLog as ParentTimeline, FamilyProf
 
 /* ---------------- Parent Calendar ---------------- */
 export function ParentCalendar() {
-  const { activeChildId, setActiveChildId, facility } = useApp()
+  const { activeChildId, setActiveChildId, facility, role, viewer, educators = [], childrenList = [] } = useApp()
   const { kids } = useMyKids()
+  const team = role === 'staff' || role === 'admin'
   const child = kids.find(c => c.id === activeChildId) || kids[0]
-  const events = useQuery(api.calendar.list, child ? { childId: child.id } : {})
-  const plans = useQuery(api.lessons.familyPlans, child ? { childId: child.id } : {})
+  // Staff use the class calendar without needing to be linked as a guardian.
+  // A family without a selected linked child must not query an aggregate view.
+  const scope = team ? {} : child ? { childId: child.id } : 'skip'
+  const allEvents = useQuery(api.calendar.list, scope)
+  const allPlans = useQuery(api.lessons.familyPlans, scope)
+  const [roomChoice, setRoomChoice] = useState(null)
+  const assignedRoom = role === 'staff' ? educators.find(e => e.userId === viewer?.id)?.room || '' : ''
+  const room = team ? roomChoice ?? assignedRoom : child?.room
+  const published = allPlans?.filter(plan => plan.status === 'published')
+  const matchesRoom = row => !room || !row.room || row.room === room
+  const events = allEvents?.filter(matchesRoom)
+  const plans = published?.filter(matchesRoom)
+  const rooms = [...new Set([
+    ...childrenList.filter(c => !c.archivedAt).map(c => c.room),
+    ...educators.map(e => e.room),
+    ...(published || []).map(p => p.room), ...(allEvents || []).map(e => e.room),
+  ].filter(Boolean))].sort()
   const [showPast, setShowPast] = useState(false)
   const today = dayKey(Date.now(),facility?.timezone)
   const visible = (events || []).filter(e => showPast || e.endDate >= today)
   const days = child?.enrollmentDays || child?.attendanceDays
   return <div className="space-y-5">
-    <SectionHeader title="Calendar & learning plans" subtitle={`Dates and learning updates from ${facility?.name || 'your daycare'}`} />
-    {kids.length > 1 && <label className="block text-sm font-semibold">Child<select className="input mt-1" value={child?.id || ''} onChange={e => setActiveChildId(e.target.value)}>{kids.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
-    {!child ? <Card><p className="text-sm text-slate-600">Your daycare will link your child before their calendar and learning plans appear here.</p></Card> : <>
-      <Card className="bg-brand-50/50"><h3 className="text-xl text-slate-800">{child.first}'s schedule</h3><p className="mt-2 text-sm text-slate-600">{Array.isArray(days) ? (days.length ? `Enrolled days: ${days.join(', ')}.` : 'No recurring attendance days are currently selected. Please contact your daycare before attending.') : 'Your daycare can confirm your child’s enrolled days with you.'} Closure dates below override regular attendance. Please do not attend on days marked closed.</p></Card>
+    <SectionHeader title="Calendar, schedules & learning plans" subtitle={`Dates and class updates from ${facility?.name || 'your daycare'}`} />
+    {team ? <label className="block text-sm font-semibold">Class<select className="input mt-1" value={room || ''} onChange={e => setRoomChoice(e.target.value)}><option value="">All classes</option>{rooms.map(name => <option key={name} value={name}>{name}</option>)}</select></label> : kids.length > 1 && <label className="block text-sm font-semibold">Child<select className="input mt-1" value={child?.id || ''} onChange={e => setActiveChildId(e.target.value)}>{kids.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
+    {!team && !child ? <Card><p className="text-sm text-slate-600">Your daycare will link your child before their calendar and learning plans appear here.</p></Card> : <>
+      {!team && <Card className="bg-brand-50/50"><h3 className="text-xl text-slate-800">{child.first}'s schedule</h3><p className="mt-2 text-sm text-slate-600">{Array.isArray(days) ? (days.length ? `Enrolled days: ${days.join(', ')}.` : 'No recurring attendance days are currently selected. Please contact your daycare before attending.') : 'Your daycare can confirm your child’s enrolled days with you.'} Closure dates below override regular attendance. Please do not attend on days marked closed.</p></Card>}
       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-xl text-slate-800">Calendar & closures</h3><label className="flex items-center gap-2 text-sm text-slate-500"><input type="checkbox" checked={showPast} onChange={e => setShowPast(e.target.checked)} />Show past dates</label></div>
-      {events && <MonthCalendar key={child.id} events={events} attendanceDays={days}/>}
-      {events === undefined ? <p className="text-sm text-slate-500">Loading dates…</p> : visible.length ? <div className="grid gap-3">{visible.map(event => <CalendarEntry key={event.id} event={event} />)}</div> : <Card><p className="text-sm text-slate-600">No {showPast ? '' : 'upcoming '}calendar dates have been posted for your child.</p></Card>}
-      <h3 className="pt-3 text-2xl text-slate-800">What we're learning</h3>
-      {plans === undefined ? <p className="text-sm text-slate-500">Loading learning plans…</p> : plans.length ? plans.map(plan => <FamilyLearningPlan key={plan.id} plan={plan} />) : <Card><p className="text-sm text-slate-600">Your daycare’s weekly and monthly learning plans will appear here when published.</p></Card>}
+      {events && <MonthCalendar key={team ? `class:${room || 'all'}` : child.id} events={events} attendanceDays={team ? undefined : days}/>}
+      {events === undefined ? <p className="text-sm text-slate-500">Loading dates…</p> : visible.length ? <div className="grid gap-3">{visible.map(event => <CalendarEntry key={event.id} event={event} />)}</div> : <Card><p className="text-sm text-slate-600">No {showPast ? '' : 'upcoming '}calendar dates have been posted for {team ? room || 'these classes' : 'your child'}.</p></Card>}
+      <h3 className="pt-3 text-2xl text-slate-800">Class schedules & learning plans</h3>
+      {plans === undefined ? <p className="text-sm text-slate-500">Loading class updates…</p> : plans.length ? plans.map(plan => <FamilyLearningPlan key={plan.id} plan={plan} />) : <Card><p className="text-sm text-slate-600">Your daycare’s daily, weekly and monthly class updates will appear here when published.</p></Card>}
     </>}
   </div>
 }
 
 export function FamilyLearningPlan({ plan }) {
+  const { facility } = useApp()
   return <Card>
-    <div className="mb-2"><Pill className="bg-mint-100 text-mint-700">{plan.period === 'month' ? 'Monthly learning plan' : 'Weekly learning plan'}</Pill></div>
+    <div className="mb-2"><Pill className="bg-mint-100 text-mint-700">{plan.period === 'day' ? 'Daily' : plan.period === 'month' ? 'Monthly' : 'Weekly'} {plan.kind === 'schedule' ? 'class schedule' : 'learning plan'}</Pill></div>
     <h3 className="text-2xl text-slate-800">{plan.title}</h3>
     <p className="mt-1 text-sm font-bold text-slate-500">{localDateLabel(plan.startDate)} – {localDateLabel(plan.endDate)} · {plan.room || 'All rooms'}</p>
     {[['This period', plan.overview], ['Activities to look forward to', plan.activities], ['Learning goals', plan.goals]].filter(([, value]) => value).map(([heading, value]) => <div key={heading} className="mt-4"><h4 className="text-sm font-extrabold text-slate-700">{heading}</h4><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{value}</p></div>)}
+    {plan.kind === 'schedule' && plan.agenda?.length > 0 && <ClassScheduleNow plans={[plan]} timeZone={facility?.timezone || 'America/Vancouver'} room={plan.room} preview={plan.status === 'draft'} showTimeline />}
+    <PlanAttachments attachments={plan.attachments || []} />
   </Card>
 }
 

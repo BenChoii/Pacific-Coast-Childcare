@@ -8,6 +8,8 @@ import { ACTIVITY_TYPES } from '../data/mockData.js'
 import { dayKey, nextAttendance } from '../lib/careData.js'
 import { usePrivateDownload } from '../lib/files.js'
 import AvatarUpload from '../components/AvatarUpload.jsx'
+import { ParentContact } from '../components/ParentContact.jsx'
+import ParentScheduleSpotlight from '../components/ParentScheduleSpotlight.jsx'
 
 function useSelectedChild(){
   const {childrenList,activeChildId,setActiveChildId}=useApp()
@@ -51,6 +53,8 @@ export function FamilyToday(){
   return <div className="min-w-0 space-y-5">
     <SectionHeader eyebrow={`Family · ${today}`} title={`Hello, ${(viewer?.name||'there').split(' ')[0]}`} subtitle={`${child.first}’s day, from the classroom records`}/>
     <ChildPicker {...{kids,child,select}}/>
+    <ParentScheduleSpotlight child={child} plans={plans} events={events||[]} timeZone={facility?.timezone} onCalendar={()=>setView('calendar')}/>
+    <ParentContact compact/>
     <Card className="border-brand-100 bg-brand-50/40"><div className="flex items-center gap-3"><Avatar emoji={child.emoji} gradient={child.color} src={child.imageUrl}/><div className="min-w-0"><h2 className="break-words text-2xl">{child.first} · {inRoom?(child.status==='napping'?'Napping':'Checked in'):'Not currently checked in'}</h2><p className="mt-1 text-sm text-slate-600">{inRoom&&child.checkInTime!=='—'?`Arrived at ${child.checkInTime} · `:''}{child.room||'Class assignment pending'}</p></div></div><p className="mt-4 text-sm text-slate-600">{next?`Next scheduled day: ${next}${next===today?' (today)':''}.`:Array.isArray(child.enrollmentDays)?'No upcoming regular attendance day is selected. Please check with your daycare.':'Your daycare will confirm your regular attendance days.'} Closure dates take priority.</p><button className="btn-ghost mt-3" onClick={()=>setView('calendar')}><CalendarDays size={16}/>View calendar & closures</button></Card>
     {(unread>0||due.length>0||awaiting.length>0)&&<Card><h3 className="text-xl">Needs your attention</h3><div className="mt-3 flex flex-wrap gap-2">{unread>0&&<button className="btn-ghost" onClick={()=>setView('messages')}>{unread} unread messages</button>}{due.length>0&&<button className="btn-ghost" onClick={()=>setView('billing')}>{due.length} invoice{due.length>1?'s':''} to review</button>}{awaiting.length>0&&<button className="btn-ghost text-coral-600" onClick={()=>setView('incidents')}>{awaiting.length} incident report{awaiting.length>1?'s':''} to acknowledge</button>}</div></Card>}
     <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-4"><StatCard icon={Smile} label="Recorded mood" value={summary.mood||'Not recorded'} gradient="from-sunshine-400 to-coral-500"/><StatCard icon={Moon} label="Recorded nap" value={summary.napMinutes==null?'Not recorded':`${summary.napMinutes} min`} gradient="from-grape-400 to-grape-600"/><StatCard icon={Apple} label="Meal entries" value={summary.mealCount||'None yet'} gradient="from-coral-400 to-pink-500"/><StatCard icon={Camera} label="Child photos today" value={summary.photoCount||0} gradient="from-brand-400 to-brand-600"/></div>
