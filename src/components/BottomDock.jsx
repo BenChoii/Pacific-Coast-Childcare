@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext.jsx'
 
 // Floating, blurred bottom dock for mobile (<lg). Desktop keeps the sidebar.
 export default function BottomDock({ nav }) {
-  const { view, setView, conversations } = useApp()
+  const { view, setView, conversations, announcements } = useApp()
   const [moreOpen, setMoreOpen] = useState(false)
   const dialogRef=useRef(null)
   useEffect(()=>{
@@ -25,7 +25,7 @@ export default function BottomDock({ nav }) {
     document.addEventListener('keydown',key)
     return ()=>{document.body.style.overflow=overflow;document.removeEventListener('keydown',key);previous?.focus?.()}
   },[moreOpen])
-  const unread = conversations.reduce((n, c) => n + c.unread, 0)
+  const unread = conversations.reduce((n, c) => n + c.unread, 0) + (announcements?.unread || 0)
 
   const dockItems = nav.filter((n) => n.dock)
   const moreItems = nav.filter((n) => !n.dock)

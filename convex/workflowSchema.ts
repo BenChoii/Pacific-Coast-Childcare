@@ -9,6 +9,20 @@ export const workflowTables = {
     sendingAt: v.optional(v.number()), deliveryToken: v.optional(v.string()), sentAt: v.optional(v.number()), error: v.optional(v.string()),
   }).index('by_plan_user_revision', ['planId', 'parentUserId', 'revision'])
     .index('by_plan', ['planId']).index('by_facility', ['facilityId']).index('by_status', ['status']),
+  // Director broadcasts to everyone, families only or educators only.
+  announcements: defineTable({
+    facilityId: v.id('facilities'), title: v.string(), body: v.string(),
+    audience: v.union(v.literal('everyone'), v.literal('families'), v.literal('staff')),
+    authorId: v.id('users'), authorName: v.optional(v.string()), emailed: v.boolean(), createdAt: v.number(),
+  }).index('by_facility', ['facilityId', 'createdAt']),
+  announcementReads: defineTable({
+    facilityId: v.id('facilities'), userId: v.id('users'), lastSeenAt: v.number(),
+  }).index('by_user', ['userId']),
+  announcementEmails: defineTable({
+    facilityId: v.id('facilities'), announcementId: v.id('announcements'), userId: v.id('users'),
+    status: v.string(), attempts: v.number(), createdAt: v.number(), updatedAt: v.number(),
+    sendingAt: v.optional(v.number()), deliveryToken: v.optional(v.string()), sentAt: v.optional(v.number()), error: v.optional(v.string()),
+  }).index('by_announcement', ['announcementId']).index('by_status', ['status']),
   attendanceEvents: defineTable({
     facilityId: v.id('facilities'), childId: v.id('children'), date: v.string(),
     status: v.string(), occurredAt: v.number(), displayTime: v.string(), byUserId: v.optional(v.id('users')),

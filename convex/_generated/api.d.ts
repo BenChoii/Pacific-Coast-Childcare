@@ -10,6 +10,7 @@
 
 import type * as activities from "../activities.js";
 import type * as ai from "../ai.js";
+import type * as announcements from "../announcements.js";
 import type * as auth from "../auth.js";
 import type * as billing from "../billing.js";
 import type * as bookkeeping from "../bookkeeping.js";
@@ -39,6 +40,7 @@ import type * as onboarding from "../onboarding.js";
 import type * as ownerEmail from "../ownerEmail.js";
 import type * as payments from "../payments.js";
 import type * as payroll from "../payroll.js";
+import type * as pccaImports from "../pccaImports.js";
 import type * as photos from "../photos.js";
 import type * as preferences from "../preferences.js";
 import type * as privateFileHttp from "../privateFileHttp.js";
@@ -64,6 +66,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   activities: typeof activities;
   ai: typeof ai;
+  announcements: typeof announcements;
   auth: typeof auth;
   billing: typeof billing;
   bookkeeping: typeof bookkeeping;
@@ -93,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   ownerEmail: typeof ownerEmail;
   payments: typeof payments;
   payroll: typeof payroll;
+  pccaImports: typeof pccaImports;
   photos: typeof photos;
   preferences: typeof preferences;
   privateFileHttp: typeof privateFileHttp;

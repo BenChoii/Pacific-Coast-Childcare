@@ -23,7 +23,7 @@ export function AppProvider({ children }) {
   const [demoRole, setDemoRole] = useState(null) // set when exploring without an account
   // Only this explicit, known email-link intent changes a cold launch. Normal
   // app launches still start on the dashboard; warm resumes keep current work.
-  const launchViewRef = useRef(new URLSearchParams(window.location.search).get('open') === 'calendar' ? 'calendar' : 'home')
+  const launchViewRef = useRef({ calendar: 'calendar', messages: 'messages' }[new URLSearchParams(window.location.search).get('open')] || 'home')
   const launchViewHandledRef = useRef(false)
   const [view, setView] = useState(() => launchViewRef.current)
   const entryRef = useRef(getEntry())
@@ -111,6 +111,7 @@ export function AppProvider({ children }) {
   const datedArgs=isAuthenticated?{date:dayKey(clockNow,facilityQ?.timezone)}:{}
   const timelineQ = useQuery(api.activities.list, canReadWorkspace ? datedArgs : 'skip')
   const conversationsQ = useQuery(api.conversations.list, canReadWorkspace ? {} : 'skip')
+  const announcementsQ = useQuery(api.announcements.list, canReadWorkspace && isAuthenticated ? {} : 'skip')
   const invoicesQ = useQuery(api.invoices.list, canReadWorkspace ? {} : 'skip')
   const rosterQ = useQuery(api.roster.list, canReadWorkspace ? datedArgs : 'skip')
   const photosQ = useQuery(api.photos.list, canReadWorkspace ? {limit:12} : 'skip')
@@ -398,6 +399,7 @@ export function AppProvider({ children }) {
     timeline,
     addActivity,
     conversations,
+    announcements: announcementsQ ?? null,
     sendMessage,
     markConversationRead,
     invoices,

@@ -3,6 +3,7 @@ import { Send, ArrowLeft, Loader2 } from 'lucide-react'
 import { useApp } from '../context/AppContext.jsx'
 import { KnitEmpty } from '../components/ui.jsx'
 import { ParentContact } from '../components/ParentContact.jsx'
+import Announcements from '../components/Announcements.jsx'
 
 export default function Messages() {
   const {conversations,sendMessage,markConversationRead,role}=useApp()
@@ -25,8 +26,8 @@ export default function Messages() {
     catch {setError('Message was not sent. Your draft is still here; please retry.')}
     finally {setBusy(false)}
   }
-  if(!conversations.length) return <div className="space-y-4"><ParentContact compact/><KnitEmpty image="/cinema/spots/letter.webp" title="No conversations yet" hint={role==='parent'?'Your daycare will start a family conversation after linking your child.':'A private family thread appears when a parent joins. Invite a guardian from Families or Account.'}/></div>
-  return <div className="space-y-4"><ParentContact compact/><div className={`grid min-h-0 gap-4 lg:grid-cols-[300px_minmax(0,1fr)] ${role==='parent'?'lg:h-[calc(100dvh-17rem)]':'lg:h-[calc(100dvh-11rem)]'}`}>
+  if(!conversations.length) return <div className="space-y-4"><Announcements/><ParentContact compact/><KnitEmpty image="/cinema/spots/letter.webp" title="No conversations yet" hint={role==='parent'?'Your daycare will start a family conversation after linking your child.':'A private family thread appears when a parent joins. Invite a guardian from Families or Account.'}/></div>
+  return <div className="space-y-4"><Announcements/><ParentContact compact/><div className={`grid min-h-0 gap-4 lg:grid-cols-[300px_minmax(0,1fr)] ${role==='parent'?'lg:h-[calc(100dvh-17rem)]':'lg:h-[calc(100dvh-11rem)]'}`}>
     <section aria-label="Conversation inbox" className={`card min-h-0 flex-col overflow-hidden !p-0 ${activeId?'hidden lg:flex':'flex'}`}>
       <div className="border-b border-line p-4"><h2 className="text-xl">Messages</h2><p className="text-sm text-slate-500">Private conversations with {role==='parent'?'your daycare':'families'}</p></div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">{conversations.map(c=><button key={c.id} onClick={()=>{setActiveId(c.id);setError('')}} className={`mb-1 flex min-h-20 w-full items-center gap-3 rounded-2xl p-3 text-left ${c.id===active?.id?'bg-brand-50':'hover:bg-slate-50'}`}>

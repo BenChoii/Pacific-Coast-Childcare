@@ -5,6 +5,7 @@ import { api } from '../../convex/_generated/api'
 import { dayKey } from '../lib/careData.js'
 import { educatorTodaySeconds } from '../lib/staffAttendance.js'
 import ClassSchedulePanel from '../components/ClassSchedulePanel.jsx'
+import { AnnouncementBanner } from '../components/Announcements.jsx'
 import {
   Users, Moon, UserX, Scale, QrCode, LogIn, LogOut, Smile, Apple, BookOpen,
   Camera, MessageCircle, Plus, Check, Sparkles, ClipboardList, Clock, Utensils, Bandage, CalendarDays, Loader2,
@@ -69,6 +70,7 @@ export function StaffHome() {
       </div>
 
       <ClockCard />
+      <AnnouncementBanner />
       <ClassSchedulePanel />
 
       {/* Colorful quick-action tiles */}

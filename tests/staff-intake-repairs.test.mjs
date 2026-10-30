@@ -13,12 +13,13 @@ async function load(file){
   convex:`export const useMutation=name=>args=>globalThis.__MITTEN_UI_TEST__.mutate(name,args);`,
   api:`export const api={roster:{setChildStatus:'setChildStatus'},children:{updateProfile:'updateProfile'},educators:{ensureSelf:'ensureSelf'}};`,
   schedule:`export default 'class-schedule-panel';`,
+  announcements:`export const AnnouncementBanner='announcement-banner';`,
   app:`export const useApp=()=>globalThis.__MITTEN_UI_TEST__.app;`,
   ui:`export const StatCard='card',Card='card',SectionHeader='heading',Pill='pill',Avatar='avatar',ListSkeleton='skeleton',HomeSkeleton='skeleton',Skeleton='skeleton',YarnConfetti='confetti';`,
   icons:icons.map(name=>`export const ${name}='${name}';`).join('\n'),
  }
  const result=await build({entryPoints:[root+file],bundle:true,write:false,format:'esm',platform:'node',logLevel:'silent',jsxFactory:'globalThis.__MITTEN_UI_TEST__.h',jsxFragment:'globalThis.__MITTEN_UI_TEST__.fragment',plugins:[{name:'local-ui-boundaries',setup(b){
-  for(const [filter,path] of [[/^react$/,'react'],[/^framer-motion$/,'motion'],[/^convex\/react$/,'convex'],[/_generated\/api$/,'api'],[/context\/AppContext.jsx$/,'app'],[/components\/ui.jsx$/,'ui'],[/components\/ClassSchedulePanel.jsx$/,'schedule'],[/^lucide-react$/,'icons']])b.onResolve({filter},()=>({path,namespace:'fixture'}))
+  for(const [filter,path] of [[/^react$/,'react'],[/^framer-motion$/,'motion'],[/^convex\/react$/,'convex'],[/_generated\/api$/,'api'],[/context\/AppContext.jsx$/,'app'],[/components\/ui.jsx$/,'ui'],[/components\/ClassSchedulePanel.jsx$/,'schedule'],[/components\/Announcements.jsx$/,'announcements'],[/^lucide-react$/,'icons']])b.onResolve({filter},()=>({path,namespace:'fixture'}))
   b.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:fixtures[args.path],loader:'js'}))
  }}]})
  return import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'))

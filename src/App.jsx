@@ -105,7 +105,7 @@ function AlreadySignedIn({ viewer, facility, joining }) {
 }
 
 export default function App() {
-  const { role, view, conversations, authResolving, isAuthenticated, viewer, facility, claimArea, paymentReturnError, retryPaymentReturn } = useApp()
+  const { role, view, conversations, announcements, authResolving, isAuthenticated, viewer, facility, claimArea, paymentReturnError, retryPaymentReturn } = useApp()
 
   if (authResolving) return <Loader />
   if (isAuthenticated && viewer?.accessStatus === 'suspended') return <AccessNotice suspended />
@@ -141,7 +141,7 @@ export default function App() {
     }
   }
 
-  const unread = conversations.reduce((n, c) => n + c.unread, 0)
+  const unread = conversations.reduce((n, c) => n + c.unread, 0) + (announcements?.unread || 0)
 
   const navConfig = {
     parent: [

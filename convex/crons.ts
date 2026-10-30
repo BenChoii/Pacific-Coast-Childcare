@@ -10,5 +10,6 @@ crons.monthly('generate tuition invoices', { day: 1, hourUTC: 16, minuteUTC: 0 }
 
 crons.interval('recover interrupted owner alerts', {minutes:5}, internal.notifications.recoverInterrupted, {})
 crons.interval('recover interrupted family plan emails', {minutes:5}, internal.familyNotifications.recoverInterrupted, {})
+crons.interval('recover interrupted announcement emails', {minutes:5}, internal.announcements.recoverInterrupted, {})
 
 export default crons

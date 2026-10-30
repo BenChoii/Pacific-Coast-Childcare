@@ -10,6 +10,7 @@ import { usePrivateDownload } from '../lib/files.js'
 import AvatarUpload from '../components/AvatarUpload.jsx'
 import { ParentContact } from '../components/ParentContact.jsx'
 import ParentScheduleSpotlight from '../components/ParentScheduleSpotlight.jsx'
+import { AnnouncementBanner } from '../components/Announcements.jsx'
 
 function useSelectedChild(){
   const {childrenList,activeChildId,setActiveChildId}=useApp()
@@ -53,6 +54,7 @@ export function FamilyToday(){
   return <div className="min-w-0 space-y-5">
     <SectionHeader eyebrow={`Family · ${today}`} title={`Hello, ${(viewer?.name||'there').split(' ')[0]}`} subtitle={`${child.first}’s day, from the classroom records`}/>
     <ChildPicker {...{kids,child,select}}/>
+    <AnnouncementBanner/>
     <ParentScheduleSpotlight child={child} plans={plans} events={events||[]} timeZone={facility?.timezone} onCalendar={()=>setView('calendar')}/>
     <ParentContact compact/>
     <Card className="border-brand-100 bg-brand-50/40"><div className="flex items-center gap-3"><Avatar emoji={child.emoji} gradient={child.color} src={child.imageUrl}/><div className="min-w-0"><h2 className="break-words text-2xl">{child.first} · {inRoom?(child.status==='napping'?'Napping':'Checked in'):'Not currently checked in'}</h2><p className="mt-1 text-sm text-slate-600">{inRoom&&child.checkInTime!=='—'?`Arrived at ${child.checkInTime} · `:''}{child.room||'Class assignment pending'}</p></div></div><p className="mt-4 text-sm text-slate-600">{next?`Next scheduled day: ${next}${next===today?' (today)':''}.`:Array.isArray(child.enrollmentDays)?'No upcoming regular attendance day is selected. Please check with your daycare.':'Your daycare will confirm your regular attendance days.'} Closure dates take priority.</p><button className="btn-ghost mt-3" onClick={()=>setView('calendar')}><CalendarDays size={16}/>View calendar & closures</button></Card>
