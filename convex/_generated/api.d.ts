@@ -30,6 +30,8 @@ import type * as financeUtils from "../financeUtils.js";
 import type * as http from "../http.js";
 import type * as incidents from "../incidents.js";
 import type * as inquiries from "../inquiries.js";
+import type * as inviteEmails from "../inviteEmails.js";
+import type * as inviteQueue from "../inviteQueue.js";
 import type * as invoices from "../invoices.js";
 import type * as lessons from "../lessons.js";
 import type * as lib from "../lib.js";
@@ -86,6 +88,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   incidents: typeof incidents;
   inquiries: typeof inquiries;
+  inviteEmails: typeof inviteEmails;
+  inviteQueue: typeof inviteQueue;
   invoices: typeof invoices;
   lessons: typeof lessons;
   lib: typeof lib;

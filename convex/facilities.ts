@@ -13,6 +13,7 @@ import {
   FREE_LIMIT,
 } from './lib'
 import { recordOwnerEvent } from './notifications'
+import { queueInviteEmail } from './inviteQueue'
 import { assertOwnedUpload } from './files'
 
 // ── Read the current facility (the workspace the user is looking at) ──────
@@ -246,7 +247,7 @@ export const generateInvite = mutation({
     const normalizedEmail = email?.trim().toLowerCase()
     if (normalizedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) throw new Error('Enter a valid invitation email.')
     const token = randomToken()
-    await ctx.db.insert('invites', {
+    const inviteId = await ctx.db.insert('invites', {
       facilityId,
       role,
       token,
@@ -255,7 +256,9 @@ export const generateInvite = mutation({
       used: false,
       createdAt: Date.now(),
     })
-    return { token }
+    // An addressed invitation is emailed to that person; the link still works if shared by hand.
+    const emailQueued = normalizedEmail && !facility.isDemo ? await queueInviteEmail(ctx, inviteId, normalizedEmail) : false
+    return { token, emailQueued }
   },
 })
 
@@ -271,7 +274,7 @@ export const listInvites = query({
       .query('invites')
       .withIndex('by_facility', (q) => q.eq('facilityId', fid))
       .collect()
-    return docs.filter((d) => !d.used && (d.role === 'parent' || !!d.expiresAt) && (!d.expiresAt || d.expiresAt > Date.now())).map((d) => ({ id: d._id, role: d.role, token: d.token, label: d.label ?? '', childId: d.childId, email: d.email, expiresAt: d.expiresAt }))
+    return docs.filter((d) => !d.used && (d.role === 'parent' || !!d.expiresAt) && (!d.expiresAt || d.expiresAt > Date.now())).map((d) => ({ id: d._id, role: d.role, token: d.token, label: d.label ?? '', childId: d.childId, email: d.email, expiresAt: d.expiresAt, emailStatus: d.emailStatus, emailedAt: d.emailedAt }))
   },
 })
 

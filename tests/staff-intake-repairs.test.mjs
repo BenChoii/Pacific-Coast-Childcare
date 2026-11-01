@@ -81,7 +81,7 @@ test('intake persists exact created child ID and care fields; retry never create
  await button(ui,'Enrol Same').props.onClick();ui.render();assert.match(text(ui.tree),/already created/);assert.equal(enrollments,1)
  await button(ui,'Finish care details').props.onClick();ui.render();assert.equal(enrollments,1)
  assert.equal(ui.calls[0].args.id,'new-child');assert.equal(ui.calls[0].args.dateOfBirth,'2022-04-01');assert.equal(ui.calls[0].args.emergencyContacts.length,2);assert.equal(ui.calls[0].args.careInstructions,'Comfort blanket at rest time')
- assert.deepEqual(invites[0],['parent','Parent','new-child','parent@example.com']);assert.match(text(ui.tree),/is enrolled/);assert.match(text(ui.tree),/No invitation email has been sent/)
+ assert.deepEqual(invites[0],['parent','Parent','new-child','parent@example.com']);assert.match(text(ui.tree),/is enrolled/);assert.match(text(ui.tree),/Mitten could not email this address/)
 })
 test('real staff intake clearly requires director review and offers no enrollment action',async()=>{
  const ui=harness(intake.IntakeDesk,{role:'staff'});assert.match(text(ui.tree),/director can enrol/);assert.equal(nodes(ui.tree).some(node=>node.type==='button'&&text(node).includes('Enrol')),false)

@@ -118,9 +118,16 @@ export default defineSchema({
     childId: v.optional(v.id('children')), // parent invite tied to one child → auto-claims on join
     used: v.boolean(),
     usedBy: v.optional(v.id('users')),
+    // Invitation email outbox: pending | sending | retrying | sent | failed | skipped
+    emailStatus: v.optional(v.string()),
+    emailAttempts: v.optional(v.number()),
+    emailSendingAt: v.optional(v.number()),
+    emailDeliveryToken: v.optional(v.string()),
+    emailedAt: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_token', ['token'])
+    .index('by_emailStatus', ['emailStatus'])
     .index('by_facility', ['facilityId']),
 
   children: defineTable({

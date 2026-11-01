@@ -86,8 +86,8 @@ export function IntakeDesk() {
       if (fields.parentPhone.trim()) emergencyContacts.push({ name: fields.parentName.trim(), relationship: 'Parent / guardian', phone: fields.parentPhone.trim() })
       if (fields.emergencyName.trim()) emergencyContacts.push({ name: fields.emergencyName.trim(), relationship: 'Emergency contact', phone: fields.emergencyPhone.trim() })
       await updateProfile({ id: childId, name: `${first} ${fields.childLast.trim()}`.trim(), age: fields.childAge.trim() || (fields.childDob ? `b. ${fields.childDob}` : 'Not provided'), room, allergies, dateOfBirth: fields.childDob || '', emergencyContacts, careInstructions: fields.notes.trim() })
-      const { token } = await generateInvite('parent', fields.parentName.trim() || `${first}'s family`, childId, email)
-      setResult({ childName: first, parentName: fields.parentName.trim(), email, linked: true, link: `${window.location.origin}/join?t=${token}` })
+      const { token, emailQueued } = await generateInvite('parent', fields.parentName.trim() || `${first}'s family`, childId, email)
+      setResult({ childName: first, parentName: fields.parentName.trim(), email, emailQueued: !!emailQueued, linked: true, link: `${window.location.origin}/join?t=${token}` })
       setStep('done')
     } catch (error) {
       setSaveError(childId ? 'The child record is already created. The remaining care details or invitation could not be saved. Keep this form open and retry to finish the same child.' : error?.message || 'Could not finish intake. Keep this form open and retry.')
@@ -223,7 +223,7 @@ export function IntakeDesk() {
             <input readOnly value={result?.link || ''} aria-label="Family invitation link" onFocus={event => event.target.select()} className="min-w-0 flex-1 bg-transparent text-sm font-bold text-brand-700" />
             <button onClick={copy} className="btn-ghost ml-auto shrink-0 !py-1.5 text-xs">{copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}</button>
           </div>
-          <p className="mt-3 text-xs font-semibold text-slate-400">Share this link with {result?.email}. It expires in 7 days and can be accepted once. No invitation email has been sent automatically.</p>
+          <p className="mt-3 text-xs font-semibold text-slate-400">{result?.emailQueued ? `We are emailing this invitation to ${result?.email}. You can also share the link yourself.` : `Share this link with ${result?.email}; Mitten could not email this address.`} It expires in 7 days and can be accepted once.</p>
           {saveError && <p role="alert" className="mt-3 text-sm font-semibold text-coral-700">{saveError}</p>}
           <div className="mt-6 flex justify-center gap-2.5">
             <button onClick={() => { setFields(BLANK); setResult(null); setScanError(''); setSaveError(''); setCreatedChildId(null); setStep('capture') }} className="btn-primary"><ScanLine size={16} /> Scan another form</button>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useQuery, useMutation } from 'convex/react'
 import {
   CreditCard, Baby, Share2, Plus, Trash2, Copy, Check, Link2, ExternalLink,
-  Sparkles, ShieldCheck, Users, Loader2, MapPin,
+  Sparkles, ShieldCheck, Users, Loader2, MapPin, Mail, RotateCw,
 } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import { useApp } from '../context/AppContext.jsx'
@@ -496,23 +496,52 @@ function FamilyPanel() {
   const [busy, setBusy] = useState('')
   const [copied, setCopied] = useState('')
   const [inviteChildId, setInviteChildId] = useState('')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [created, setCreated] = useState(null)
+  const [error, setError] = useState('')
+  const resendEmail = useMutation(api.inviteEmails.resend)
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share
 
-  const copy = (text, key) => {
-    navigator.clipboard?.writeText(text)
-    setCopied(key)
-    pushToast('Link copied 📋', { emoji: '📋', tone: 'mint' })
-    setTimeout(() => setCopied(''), 1600)
+  // Copy only from a direct tap: iPhone Safari blocks clipboard writes that
+  // happen after a network wait, so links are shown first and copied on tap.
+  const copy = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setError('')
+      setCopied(key)
+      pushToast('Link copied 📋', { emoji: '📋', tone: 'mint' })
+      setTimeout(() => setCopied(''), 1600)
+    } catch { setError(canShare ? 'Copy was blocked. Use Share, or press and hold the link to copy it.' : 'Copy was blocked. Select the link and copy it manually.') }
+  }
+  const share = async (url, role) => {
+    try { await navigator.share({ title: `Join ${facility?.name || 'our daycare'} on Mitten`, text: role === 'parent' ? 'Here is your Mitten invitation:' : 'Here is your Mitten team invitation:', url }) }
+    catch (e) { if (e?.name !== 'AbortError') setError('Sharing was blocked. Copy the link instead.') }
   }
   const make = async (role) => {
+    setError('')
+    const child = childrenList.find(c => c.id === inviteChildId)
+    if (role === 'parent' && !child) { setError('Choose the child this parent should be linked to.'); return }
+    const email = inviteEmail.trim().toLowerCase()
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Check the email address, or leave it empty to share the link yourself.'); return }
     setBusy(role)
     try {
-      const child = childrenList.find(c => c.id === inviteChildId)
-      if (role === 'parent' && !child) { pushToast('Choose the child this parent should be linked to.', { tone: 'coral' }); return }
-      const r = await generateInvite(role, child?.name, role === 'parent' ? child.id : undefined)
-      const url = `${origin()}/join?t=${r.token}`
-      copy(url, r.token)
-    } finally { setBusy('') }
+      const r = await generateInvite(role, child?.name, role === 'parent' ? child.id : undefined, email || undefined)
+      setCreated({ role, url: `${origin()}/join?t=${r.token}`, token: r.token, email, emailQueued: !!r.emailQueued, childName: child?.name })
+      setInviteEmail('')
+      if (r.emailQueued) pushToast(`Invitation emailed to ${email}`, { emoji: '✉️', tone: 'mint' })
+    } catch (e) { setError(e?.data || e?.message?.replace(/^.*Uncaught Error: /, '').split('\n')[0] || 'The invitation could not be created. Please try again.') }
+    finally { setBusy('') }
   }
+  const resend = async (id, email) => {
+    setError('')
+    try { const r = await resendEmail({ id }); pushToast(r?.queued ? `Invitation emailed to ${email}` : 'This address cannot receive email.', { emoji: '✉️', tone: r?.queued ? 'mint' : 'coral' }) }
+    catch (e) { setError(e?.data || 'The email could not be resent. Create a new invitation.') }
+  }
+  const emailLabel = (inv) => !inv.email ? null
+    : inv.emailStatus === 'sent' ? `Emailed to ${inv.email}`
+    : inv.emailStatus === 'failed' ? `Email to ${inv.email} failed`
+    : inv.emailStatus === 'skipped' ? `For ${inv.email} (not emailed)`
+    : inv.emailStatus ? `Sending to ${inv.email}…` : `For ${inv.email}`
 
   const slugLink = facility ? `${origin()}/${facility.slug}` : ''
 
@@ -528,18 +557,35 @@ function FamilyPanel() {
         </div>
       </Card>
 
-      <p className="text-sm text-slate-600">Create a separate invite link for each person. Each link can be accepted once.</p>
+      <p className="text-sm text-slate-600">Create a separate invite link for each person. Each link can be accepted once and expires after 7 days.</p>
       <label className="block text-sm font-bold text-slate-600">Child for parent invitation<select className="input mt-2" value={inviteChildId} onChange={e => setInviteChildId(e.target.value)}><option value="">Choose child…</option>{childrenList.filter(c => !c.archivedAt).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+      <label className="block text-sm font-bold text-slate-600">Their email (optional)
+        <input className="input mt-2" type="email" inputMode="email" autoComplete="off" placeholder="parent@email.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
+        <span className="mt-1 block text-xs font-semibold text-slate-400">We email them the invitation, and they sign up with this address. Leave empty to send the link yourself.</span>
+      </label>
+      {error && <p role="alert" className="rounded-xl bg-coral-400/15 px-3 py-2 text-sm font-semibold text-coral-600">{error}</p>}
       <div className="grid gap-3 sm:grid-cols-2">
         <button onClick={() => make('parent')} disabled={busy === 'parent'} className="card flex items-center gap-3 p-4 text-left transition hover:shadow-playful">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blush-300 to-blush-500 text-white">{busy === 'parent' ? <Loader2 size={18} className="animate-spin" /> : <Users size={18} />}</span>
-          <div><div className="font-extrabold text-slate-800">Invite a parent</div><div className="text-xs font-bold text-slate-400">Creates + copies a join link</div></div>
+          <div><div className="font-extrabold text-slate-800">Invite a parent</div><div className="text-xs font-bold text-slate-400">{inviteEmail.trim() ? 'Creates + emails a join link' : 'Creates a join link to share'}</div></div>
         </button>
         <button onClick={() => make('staff')} disabled={busy === 'staff'} className="card flex items-center gap-3 p-4 text-left transition hover:shadow-playful">
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 text-white">{busy === 'staff' ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}</span>
-          <div><div className="font-extrabold text-slate-800">Invite an educator</div><div className="text-xs font-bold text-slate-400">Creates + copies a join link</div></div>
+          <div><div className="font-extrabold text-slate-800">Invite an educator</div><div className="text-xs font-bold text-slate-400">{inviteEmail.trim() ? 'Creates + emails a join link' : 'Creates a join link to share'}</div></div>
         </button>
       </div>
+
+      {created && (
+        <Card>
+          <div className="font-extrabold text-slate-800">{created.role === 'parent' ? `Invitation for ${created.childName || 'this family'}` : 'Educator invitation'} is ready</div>
+          <p className="mt-1 text-xs font-bold text-slate-400">{created.emailQueued ? `We are emailing it to ${created.email}. You can also share the link below.` : created.email ? `${created.email} cannot receive email from Mitten, so share the link below.` : 'Send this link to them by text or email.'}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-slate-50 p-2 pl-4">
+            <input readOnly aria-label="Invitation link" value={created.url} onFocus={e => e.target.select()} className="min-w-0 flex-1 basis-40 bg-transparent font-mono text-sm font-semibold text-slate-600" />
+            <button onClick={() => copy(created.url, created.token)} className="btn-primary !py-2 text-sm">{copied === created.token ? <Check size={15} /> : <Copy size={15} />} Copy</button>
+            {canShare && <button onClick={() => share(created.url, created.role)} className="btn-ghost !py-2 text-sm"><Share2 size={15} /> Share</button>}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-0">
         <div className="border-b border-slate-100 p-4 font-extrabold text-slate-800">Active invite links</div>
@@ -553,9 +599,15 @@ function FamilyPanel() {
                 <Pill className={inv.role === 'parent' ? 'bg-blush-300/20 text-blush-600' : inv.role === 'staff' ? 'bg-brand-50 text-brand-700' : 'bg-grape-400/15 text-grape-600'}>
                   {inv.role === 'staff' ? 'educator' : inv.role}
                 </Pill>
-                <span className="min-w-0 flex-1 truncate font-mono text-xs font-semibold text-slate-500">{url}</span>
-                <button onClick={() => copy(url, inv.token)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100">{copied === inv.token ? <Check size={15} /> : <Copy size={15} />}</button>
-                <button onClick={() => revokeInvite(inv.id)} className="rounded-xl p-2 text-slate-300 hover:bg-coral-50 hover:text-coral-500"><Trash2 size={15} /></button>
+                <div className="min-w-0 flex-1">
+                  {inv.label && <div className="truncate text-sm font-bold text-slate-700">{inv.label}</div>}
+                  {inv.email ? <div className={`flex items-center gap-1 truncate text-xs font-semibold ${inv.emailStatus === 'failed' ? 'text-coral-600' : 'text-slate-400'}`}><Mail size={12} className="shrink-0" />{emailLabel(inv)}</div>
+                    : <div className="truncate font-mono text-xs font-semibold text-slate-400">{url}</div>}
+                </div>
+                {inv.email && <button onClick={() => resend(inv.id, inv.email)} aria-label={`Email again to ${inv.email}`} title="Email again" className="rounded-xl p-2 text-slate-400 hover:bg-slate-100"><RotateCw size={15} /></button>}
+                {canShare && <button onClick={() => share(url, inv.role)} aria-label="Share link" title="Share" className="rounded-xl p-2 text-slate-400 hover:bg-slate-100"><Share2 size={15} /></button>}
+                <button onClick={() => copy(url, inv.token)} aria-label="Copy link" title="Copy" className="rounded-xl p-2 text-slate-400 hover:bg-slate-100">{copied === inv.token ? <Check size={15} /> : <Copy size={15} />}</button>
+                <button onClick={() => { revokeInvite(inv.id); if (created?.token === inv.token) setCreated(null) }} aria-label="Delete link" title="Delete" className="rounded-xl p-2 text-slate-300 hover:bg-coral-50 hover:text-coral-500"><Trash2 size={15} /></button>
               </div>
             )
           })
