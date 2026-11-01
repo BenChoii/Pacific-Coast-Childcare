@@ -18,8 +18,13 @@ const TIERS = [
 const origin = () => window.location.origin
 
 export function Account() {
-  const { claimArea } = useApp()
-  const [tab, setTab] = useState(claimArea ? 'listing' : 'plan')
+  const { claimArea, accountTab, setAccountTab } = useApp()
+  const [tab, setTab] = useState(claimArea ? 'listing' : accountTab?.split(':')[0] || 'plan')
+  const [addChildOpen, setAddChildOpen] = useState(accountTab === 'children:add')
+  useEffect(() => {
+    if (!accountTab) return
+    setTab(accountTab.split(':')[0]); setAddChildOpen(accountTab === 'children:add'); setAccountTab(null)
+  }, [accountTab, setAccountTab])
   const tabs = [
     { id: 'plan', label: 'Plan & billing', icon: CreditCard },
     { id: 'children', label: 'Children', icon: Baby },
@@ -34,14 +39,14 @@ export function Account() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition ${tab === t.id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'}`}
+            className={`flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-bold leading-tight transition sm:flex-row sm:gap-2 sm:py-2.5 sm:text-sm ${tab === t.id ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500'}`}
           >
-            <t.icon size={16} /> <span className="hidden sm:inline">{t.label}</span>
+            <t.icon size={16} /> <span>{t.label}</span>
           </button>
         ))}
       </div>
       {tab === 'plan' && <PlanPanel />}
-      {tab === 'children' && <ChildrenPanel />}
+      {tab === 'children' && <ChildrenPanel initialOpen={addChildOpen} />}
       {tab === 'family' && <><ParentContactSettings /><FamilyPanel /></>}
       {tab === 'listing' && <ListingPanel />}
     </div>
@@ -395,9 +400,9 @@ const ROOMS = ['Infants', 'Toddlers', 'Preschool', 'Pre-K', 'Main Room']
 const COLORS = ['from-brand-400 to-brand-600', 'from-blush-300 to-blush-500', 'from-mint-400 to-mint-500', 'from-grape-400 to-grape-600', 'from-sky-400 to-brand-500']
 const EMOJIS = ['🐬', '🦋', '🦁', '🐢', '🐝', '🌸', '🚀', '🐙', '🦊', '🐼']
 
-function ChildrenPanel() {
+function ChildrenPanel({ initialOpen = false }) {
   const { childrenList, enrollChild, removeChild, facility, pushToast } = useApp()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(initialOpen)
   const [busy, setBusy] = useState(false)
   const [form, setForm] = useState({ first: '', last: '', age: '3 yrs', room: 'Preschool', parent: '', allergies: '', tuition: '' })
   const remaining = facility ? facility.remainingFree : 0
@@ -424,6 +429,8 @@ function ChildrenPanel() {
         setForm({ first: '', last: '', age: '3 yrs', room: 'Preschool', parent: '', allergies: '', tuition: '' })
         setOpen(false)
       }
+    } catch (e) {
+      pushToast(e?.data || 'The child could not be enrolled. Check your connection and try again.', { tone: 'coral', duration: 6000 })
     } finally {
       setBusy(false)
     }

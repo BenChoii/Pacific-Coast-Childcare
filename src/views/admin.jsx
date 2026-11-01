@@ -137,13 +137,13 @@ export function AdminHome() {
 
 /* ---------------- Real facility dashboard ---------------- */
 function RealAdminHome() {
-  const { setView, facility, childrenList, educators } = useApp()
+  const { setView, openAccount, facility, childrenList, educators } = useApp()
   const kids = childrenList.length
   const present = (childrenList || []).filter((c) => c.status === 'checked-in' || c.status === 'napping').length
 
   const quick = [
-    { label: 'Add a child', desc: 'Enroll a new little one', icon: Baby, tone: 'from-brand-400 to-brand-600', go: 'account' },
-    { label: 'Invite families', desc: 'Share your parent link', icon: Share2, tone: 'from-blush-300 to-blush-500', go: 'account' },
+    { label: 'Add a child', desc: 'Enroll a new little one', icon: Baby, tone: 'from-brand-400 to-brand-600', go: 'account', tab: 'children:add' },
+    { label: 'Invite families', desc: 'Share your parent link', icon: Share2, tone: 'from-blush-300 to-blush-500', go: 'account', tab: 'family' },
     { label: 'Share a photo', desc: 'Post a moment to the feed', icon: ImageIcon, tone: 'from-coral-400 to-blush-500', go: 'photos' },
     { label: 'Message families', desc: 'Two-way chat', icon: MessageCircle, tone: 'from-grape-400 to-grape-600', go: 'messages' },
     { label: 'Build a lesson plan', desc: 'Plan the week & training', icon: BookOpen, tone: 'from-mint-400 to-brand-400', go: 'curriculum' },
@@ -183,7 +183,7 @@ function RealAdminHome() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              onClick={() => setView(q.go)}
+              onClick={() => q.tab ? openAccount(q.tab) : setView(q.go)}
               className="card flex items-center gap-3 p-4 text-left transition hover:-translate-y-1 hover:shadow-playful"
             >
               <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${q.tone} text-white shadow-md`}>

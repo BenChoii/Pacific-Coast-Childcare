@@ -212,7 +212,7 @@ export function Families() {
 }
 
 function RealFamilies() {
-  const { childrenList, roster } = useApp()
+  const { childrenList, roster, role, openAccount } = useApp()
   const [sel, setSel] = useState(null)
   if (sel) {
     const child = childrenList.find((c) => c.id === sel)
@@ -220,9 +220,13 @@ function RealFamilies() {
   }
   return (
     <div className="space-y-5">
-      <SectionHeader eyebrow="Records" title="Families & children" subtitle="Everyone enrolled at your facility" />
+      <SectionHeader eyebrow="Records" title="Families & children" subtitle="Everyone enrolled at your facility"
+        action={role === 'admin' && <div className="flex flex-wrap gap-2">
+          <button onClick={() => openAccount('children:add')} className="btn-primary !py-2.5"><UserPlus size={16} /> Add child</button>
+          <button onClick={() => openAccount('family')} className="btn-ghost !py-2.5"><Link2 size={16} /> Invite parents</button>
+        </div>} />
       {childrenList.length === 0 ? (
-        <Card className="text-center"><p className="text-sm font-semibold text-slate-400">No children yet. Add them in Account → Children.</p></Card>
+        <Card className="text-center"><p className="text-sm font-semibold text-slate-400">No children yet.{role === 'admin' ? ' Tap Add child to enrol your first one.' : ''}</p></Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {childrenList.map((c, i) => (

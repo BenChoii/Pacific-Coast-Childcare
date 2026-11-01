@@ -26,6 +26,9 @@ export function AppProvider({ children }) {
   const launchViewRef = useRef({ calendar: 'calendar', messages: 'messages' }[new URLSearchParams(window.location.search).get('open')] || 'home')
   const launchViewHandledRef = useRef(false)
   const [view, setView] = useState(() => launchViewRef.current)
+  // Lets other screens open Account on a specific tab (e.g. Families → Add child).
+  const [accountTab, setAccountTab] = useState(null)
+  const openAccount = useCallback((tab) => { setAccountTab(tab); setView('account') }, [])
   const entryRef = useRef(getEntry())
   try {if(['join','slug'].includes(entryRef.current.kind)&&entryRef.current.token)sessionStorage.setItem('cubby_pending_join',entryRef.current.token)} catch {}
   const paymentReturnRef = useRef(new URLSearchParams(window.location.search))
@@ -390,6 +393,9 @@ export function AppProvider({ children }) {
     viewer,
     view,
     setView,
+    accountTab,
+    setAccountTab,
+    openAccount,
     claimArea,
     claimName,
     clearClaimArea,
